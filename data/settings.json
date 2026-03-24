@@ -1,0 +1,11 @@
+{
+  "title": "My Awesome Site",
+  "tagline": "Just another great website",
+  "description": "Describe your site…",
+  "siteUrl": "https://example.com",
+  "logoUrl": "https://example.com/logo.png",
+  "disabledBlocks": [],
+  "paletteColors": [],
+  "typography": {},
+  "layout": {}
+}

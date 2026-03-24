@@ -1,0 +1,7 @@
+.block-columns {
+  width: 100%;
+}
+
+.block-columns__col {
+  min-width: 0;
+}

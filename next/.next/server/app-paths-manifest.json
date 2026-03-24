@@ -1,0 +1,19 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/_global-error/page": "app/_global-error/page.js",
+  "/api/pages/[id]/route": "app/api/pages/[id]/route.js",
+  "/api/pages/route": "app/api/pages/route.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/api/settings/route": "app/api/settings/route.js",
+  "/page": "app/page.js",
+  "/[slug]/page": "app/[slug]/page.js",
+  "/admin/settings/blocks/page": "app/admin/settings/blocks/page.js",
+  "/admin/settings/site/page": "app/admin/settings/site/page.js",
+  "/admin/settings/theme/page": "app/admin/settings/theme/page.js",
+  "/admin/editor/[id]/page": "app/admin/editor/[id]/page.js",
+  "/admin/editor/new/page": "app/admin/editor/new/page.js",
+  "/admin/page": "app/admin/page.js",
+  "/admin/settings/navigation/page": "app/admin/settings/navigation/page.js",
+  "/admin/settings/plugins/page": "app/admin/settings/plugins/page.js",
+  "/admin/settings/users/page": "app/admin/settings/users/page.js"
+}

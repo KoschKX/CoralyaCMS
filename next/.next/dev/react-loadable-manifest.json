@@ -1,0 +1,69 @@
+{
+  "app/admin/editor/EditorPage.tsx -> @/components/CodeEditor": {
+    "id": "app/admin/editor/EditorPage.tsx -> @/components/CodeEditor",
+    "files": [
+      "static/css/_app-pages-browser_components_CodeEditor_tsx.css",
+      "static/chunks/_app-pages-browser_components_CodeEditor_tsx.js"
+    ]
+  },
+  "app/admin/editor/EditorPage.tsx -> @/components/VisualEditor": {
+    "id": "app/admin/editor/EditorPage.tsx -> @/components/VisualEditor",
+    "files": [
+      "static/chunks/_app-pages-browser_components_VisualEditor_tsx.js"
+    ]
+  },
+  "blocks/code/config.tsx -> @editorjs/code": {
+    "id": "blocks/code/config.tsx -> @editorjs/code",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_editorjs_code_dist_code_mjs.js"
+    ]
+  },
+  "blocks/columns/config.tsx -> @calumk/editorjs-columns": {
+    "id": "blocks/columns/config.tsx -> @calumk/editorjs-columns",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_calumk_editorjs-columns_dist_editorjs-columns_bundle_js.js"
+    ]
+  },
+  "blocks/delimiter/config.tsx -> @editorjs/delimiter": {
+    "id": "blocks/delimiter/config.tsx -> @editorjs/delimiter",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_editorjs_delimiter_dist_delimiter_mjs.js"
+    ]
+  },
+  "blocks/embed/config.tsx -> @editorjs/embed": {
+    "id": "blocks/embed/config.tsx -> @editorjs/embed",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_editorjs_embed_dist_embed_mjs.js"
+    ]
+  },
+  "blocks/header/config.tsx -> @editorjs/header": {
+    "id": "blocks/header/config.tsx -> @editorjs/header",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_editorjs_header_dist_header_mjs.js"
+    ]
+  },
+  "blocks/html/config.tsx -> ./editor-tool": {
+    "id": "blocks/html/config.tsx -> ./editor-tool",
+    "files": [
+      "static/chunks/_app-pages-browser_blocks_html_editor-tool_ts.js"
+    ]
+  },
+  "blocks/list/config.tsx -> @editorjs/list": {
+    "id": "blocks/list/config.tsx -> @editorjs/list",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_editorjs_list_dist_editorjs-list_mjs.js"
+    ]
+  },
+  "blocks/quote/config.tsx -> @editorjs/quote": {
+    "id": "blocks/quote/config.tsx -> @editorjs/quote",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_editorjs_quote_dist_quote_mjs.js"
+    ]
+  },
+  "blocks/table/config.tsx -> @editorjs/table": {
+    "id": "blocks/table/config.tsx -> @editorjs/table",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_editorjs_table_dist_table_mjs.js"
+    ]
+  }
+}

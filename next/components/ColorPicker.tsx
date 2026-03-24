@@ -1,0 +1,70 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import type { BlockData } from "@/lib/block-types";
+import { COLOR_PALETTE, type PaletteColor } from "@/lib/color-palette";
+import { PanelSection } from "@/components/block-shared";
+
+export function ColorPicker({
+  data,
+  onChange,
+}: {
+  data: BlockData;
+  onChange: (d: BlockData) => void;
+}) {
+  const [palette, setPalette] = useState<PaletteColor[]>(COLOR_PALETTE);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((s) => { if (s.paletteColors?.length) setPalette(s.paletteColors); })
+      .catch(() => {});
+  }, []);
+
+  const current = (data.color as string) ?? "";
+  const isCustom = current !== "" && !palette.some((c) => c.value === current);
+
+  return (
+    <PanelSection title="Text colour" fields={["color"]}>
+      <div className="flex flex-wrap gap-1.5">
+        {palette.map(({ label, value }) => (
+          <button
+            key={label}
+            title={label}
+            onClick={() => onChange({ ...data, color: value })}
+            className={`h-6 w-6 rounded-full transition ${
+              current === value
+                ? "border-2 border-zinc-900 scale-110"
+                : "hover:opacity-80"
+            }`}
+            style={{
+              background:
+                value === "" ? "linear-gradient(135deg,#e5e7eb 50%,#fff 50%)" : value,
+              outline: value === "#ffffff" ? "1px solid #e5e7eb" : undefined,
+            }}
+          />
+        ))}
+
+        {/* Custom colour */}
+        <label
+          title="Custom colour"
+          className={`relative flex h-6 w-6 cursor-pointer items-center justify-center rounded-full overflow-hidden transition ${
+            isCustom ? "border-2 border-zinc-900 scale-110" : "hover:opacity-80"
+          }`}
+          style={{
+            background: isCustom
+              ? current
+              : "conic-gradient(red,yellow,lime,cyan,blue,magenta,red)",
+          }}
+        >
+          <input
+            type="color"
+            value={isCustom ? current : "#000000"}
+            onChange={(e) => onChange({ ...data, color: e.target.value })}
+            className="absolute inset-0 cursor-pointer opacity-0 w-full h-full"
+          />
+        </label>
+      </div>
+    </PanelSection>
+  );
+}
