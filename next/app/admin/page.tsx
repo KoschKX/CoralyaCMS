@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listPages } from "@/lib/pages-db";
 import DeleteButton from "./DeleteButton";
+import CloneButton from "./CloneButton";
 
 export const dynamic = "force-dynamic";
 
@@ -87,6 +88,7 @@ export default function AdminPage() {
                       >
                         Edit
                       </Link>
+                      <CloneButton page={page} />
                       <DeleteButton id={page.id} />
                     </div>
                   </td>

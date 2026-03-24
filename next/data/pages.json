@@ -187,5 +187,194 @@
     "updatedAt": "2026-03-23T17:55:33.206Z",
     "html": "[columns]\n  [column width=\"50%\"]\n    [paragraph text=\"New paragraph\" align=\"center\"]\n  [/column]\n  [column width=\"50%\"]\n    [header text=\"New heading\" level=\"2\" align=\"center\"]\n  [/column]\n[/columns]\n\n[columns]\n  [column width=\"33.333%\"]\n    [paragraph text=\"sadadgs\" align=\"center\"]\n    [columns]\n      [column width=\"50%\"]\n        [paragraph text=\"New paragraph\"]\n      [/column]\n      [column width=\"50%\"]\n        [paragraph text=\"New paragraph\"]\n      [/column]\n    [/columns]\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"asdgasdg\" align=\"center\"]\n    [header text=\"asgdasdg\" level=\"2\" color=\"#dc2626\" align=\"center\" responsive='{\"tablet\":{\"color\":\"#dc2626\"},\"mobile\":{\"color\":\"#ca8a04\"}}']\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\"]\n  [/column]\n[/columns]\n\n[html]\n<div> test test </div>\n[/html]\n\n[code code=\"asdgasdgadssssg\"]\n\n[paragraph text=\"sdgasdgasdg\" color=\"#ca8a04\" align=\"center\" fontsize=\"xl\" responsive='{\"tablet\":{\"color\":\"#1c1c69\",\"fontSize\":\"lg\",\"align\":\"right\"},\"mobile\":{\"fontSize\":\"sm\",\"color\":\"#dc2626\"}}']\n\n[header text=\"fasdadsgags\" level=\"3\" color=\"#ea580c\" align=\"center\"]",
     "pageBgColor": "#ffffff"
+  },
+  {
+    "id": "2b7393d4-d24b-4af3-9379-9e188217c6f0",
+    "title": "Test (Copy)",
+    "slug": "test-copy",
+    "status": "draft",
+    "blocks": [
+      {
+        "id": "sc-2",
+        "type": "columns",
+        "data": {
+          "cols": [
+            {
+              "width": "50%",
+              "blocks": [
+                {
+                  "id": "sc-0",
+                  "type": "paragraph",
+                  "data": {
+                    "text": "New paragraph",
+                    "align": "center"
+                  }
+                }
+              ]
+            },
+            {
+              "width": "50%",
+              "blocks": [
+                {
+                  "id": "sc-1",
+                  "type": "header",
+                  "data": {
+                    "text": "New heading",
+                    "level": 2,
+                    "align": "center"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "sc-10",
+        "type": "columns",
+        "data": {
+          "cols": [
+            {
+              "width": "33.333%",
+              "blocks": [
+                {
+                  "id": "sc-3",
+                  "type": "paragraph",
+                  "data": {
+                    "text": "sadadgs",
+                    "align": "center"
+                  }
+                },
+                {
+                  "id": "sc-6",
+                  "type": "columns",
+                  "data": {
+                    "cols": [
+                      {
+                        "width": "50%",
+                        "blocks": [
+                          {
+                            "id": "sc-4",
+                            "type": "paragraph",
+                            "data": {
+                              "text": "New paragraph"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "width": "50%",
+                        "blocks": [
+                          {
+                            "id": "sc-5",
+                            "type": "paragraph",
+                            "data": {
+                              "text": "New paragraph"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "width": "33.333%",
+              "blocks": [
+                {
+                  "id": "sc-7",
+                  "type": "paragraph",
+                  "data": {
+                    "text": "asdgasdg",
+                    "align": "center"
+                  }
+                },
+                {
+                  "id": "sc-8",
+                  "type": "header",
+                  "data": {
+                    "text": "asgdasdg",
+                    "level": 2,
+                    "color": "#dc2626",
+                    "align": "center",
+                    "responsive": {
+                      "tablet": {
+                        "color": "#dc2626"
+                      },
+                      "mobile": {
+                        "color": "#ca8a04"
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "width": "33.333%",
+              "blocks": [
+                {
+                  "id": "sc-9",
+                  "type": "paragraph",
+                  "data": {
+                    "text": "New paragraph",
+                    "align": "center"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "sc-11",
+        "type": "html",
+        "data": {
+          "content": "<div> test test </div>"
+        }
+      },
+      {
+        "id": "sc-12",
+        "type": "code",
+        "data": {
+          "code": "asdgasdgadssssg"
+        }
+      },
+      {
+        "id": "sc-13",
+        "type": "paragraph",
+        "data": {
+          "text": "sdgasdgasdg",
+          "color": "#ca8a04",
+          "align": "center",
+          "fontsize": "xl",
+          "responsive": {
+            "tablet": {
+              "color": "#1c1c69",
+              "fontSize": "lg",
+              "align": "right"
+            },
+            "mobile": {
+              "fontSize": "sm",
+              "color": "#dc2626"
+            }
+          }
+        }
+      },
+      {
+        "id": "sc-14",
+        "type": "header",
+        "data": {
+          "text": "fasdadsgags",
+          "level": 3,
+          "color": "#ea580c",
+          "align": "center"
+        }
+      }
+    ],
+    "html": "[columns]\n  [column width=\"50%\"]\n    [paragraph text=\"New paragraph\" align=\"center\"]\n  [/column]\n  [column width=\"50%\"]\n    [header text=\"New heading\" level=\"2\" align=\"center\"]\n  [/column]\n[/columns]\n\n[columns]\n  [column width=\"33.333%\"]\n    [paragraph text=\"sadadgs\" align=\"center\"]\n    [columns]\n      [column width=\"50%\"]\n        [paragraph text=\"New paragraph\"]\n      [/column]\n      [column width=\"50%\"]\n        [paragraph text=\"New paragraph\"]\n      [/column]\n    [/columns]\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"asdgasdg\" align=\"center\"]\n    [header text=\"asgdasdg\" level=\"2\" color=\"#dc2626\" align=\"center\" responsive='{\"tablet\":{\"color\":\"#dc2626\"},\"mobile\":{\"color\":\"#ca8a04\"}}']\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\"]\n  [/column]\n[/columns]\n\n[html]\n<div> test test </div>\n[/html]\n\n[code code=\"asdgasdgadssssg\"]\n\n[paragraph text=\"sdgasdgasdg\" color=\"#ca8a04\" align=\"center\" fontsize=\"xl\" responsive='{\"tablet\":{\"color\":\"#1c1c69\",\"fontSize\":\"lg\",\"align\":\"right\"},\"mobile\":{\"fontSize\":\"sm\",\"color\":\"#dc2626\"}}']\n\n[header text=\"fasdadsgags\" level=\"3\" color=\"#ea580c\" align=\"center\"]",
+    "pageBgColor": "#ffffff",
+    "createdAt": "2026-03-24T20:41:51.693Z",
+    "updatedAt": "2026-03-24T20:41:51.693Z"
   }
 ]
