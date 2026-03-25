@@ -9,6 +9,11 @@ if lsof -ti:3000 >/dev/null 2>&1; then
 fi
 
 echo "▶ Starting Next.js on http://localhost:3000 ..."
+if [ ! -d "$ROOT/next/node_modules" ]; then
+  echo "[>] node_modules not found in next/. Running npm install ..."
+  (cd "$ROOT/next" && npm install)
+fi
+
 cd "$ROOT/next"
 npm run dev -- --webpack &
 NEXT_PID=$!

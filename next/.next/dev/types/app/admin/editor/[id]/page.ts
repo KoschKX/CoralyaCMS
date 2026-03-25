@@ -1,4 +1,4 @@
-// File: /Volumes/Workspace/Programming/- GIT -/- INACTIVE -/CoralyaCMS/next/app/admin/editor/[id]/page.tsx
+// File: W:\Programming\- GIT -\CoralyaCMS\next\app\admin\editor\[id]\page.tsx
 import * as entry from '../../../../../../../app/admin/editor/[id]/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

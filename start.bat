@@ -1,10 +1,18 @@
 @echo off
 rem start.bat — start the Next.js dev server
 
-setlocal enabledelayedexpansion
 
+setlocal enabledelayedexpansion
 set "ROOT=%~dp0"
 set "ROOT=%ROOT:~0,-1%"
+
+rem Check if node_modules exists in next, if not, run npm install
+if not exist "%ROOT%\next\node_modules" (
+  echo [>] node_modules not found in next/. Running npm install ...
+  pushd "%ROOT%\next"
+  call npm install
+  popd
+)
 
 rem Free port 3000 if something else is holding it
 for /f "tokens=5" %%p in ('netstat -ano ^| findstr ":3000 " ^| findstr LISTENING 2^>nul') do (
