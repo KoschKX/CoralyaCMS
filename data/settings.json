@@ -7,5 +7,11 @@
   "disabledBlocks": [],
   "paletteColors": [],
   "typography": {},
-  "layout": {}
+  "layout": {
+    "breakpoints": {
+      "mobile": "640px",
+      "tablet": "1023px",
+      "desktop": "1280px"
+    }
+  }
 }

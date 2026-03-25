@@ -1,0 +1,1 @@
+globalThis.__RSC_MANIFEST=(globalThis.__RSC_MANIFEST||{});globalThis.__RSC_MANIFEST["/api/pages/[id]/route"]={"moduleLoading":{"prefix":"/_next/"},"ssrModuleMapping":{},"edgeSSRModuleMapping":{},"clientModules":{},"entryCSSFiles":{"/Volumes/Workspace/Programming/- GIT -/- INACTIVE -/CoralyaCMS/next/app/api/pages/[id]/route":[]},"rscModuleMapping":{},"edgeRscModuleMapping":{}};

@@ -1,7 +1,18 @@
+
 .block-columns {
   width: 100%;
+  box-sizing: border-box;
+  max-width: 100%;
 }
+
 
 .block-columns__col {
   min-width: 0;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.block-columns__col-wrapper {
+  /* Horizontal padding for spacing between columns, replaces grid gap */
+  box-sizing: border-box;
 }

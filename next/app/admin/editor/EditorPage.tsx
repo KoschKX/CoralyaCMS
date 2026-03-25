@@ -406,6 +406,7 @@ export default function EditorPage({
                     className="sr-only"
                   />
                   <>
+                    {/* Always pass original (unmerged) blocks to ResponsiveStyleInjector for correct responsive CSS */}
                     <ResponsiveStyleInjector blocks={liveBlocks} tabletBp={tabletBp} mobileBp={mobileBp} />
                     <VisualEditor
                       key={editorKey}

@@ -47,9 +47,10 @@ function RenderBlocks({
         }
         if (block.type === "columns") {
           return (
-            <div key={block.id}>
+            <div key={block.id} data-block-id={block.id}>
               <def.Layout
                 data={block.data as Record<string, unknown>}
+                blockId={block.id}
                 renderBlocks={(children) => (
                   <RenderBlocks blocks={children} disabledBlocks={disabledBlocks} />
                 )}
@@ -58,8 +59,8 @@ function RenderBlocks({
           );
         }
         return (
-          <div key={block.id}>
-            <def.Layout data={block.data as Record<string, unknown>} />
+          <div key={block.id} data-block-id={block.id}>
+            <def.Layout data={block.data as Record<string, unknown>} blockId={block.id} />
           </div>
         );
       })}
