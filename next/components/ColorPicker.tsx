@@ -31,7 +31,7 @@ export function ColorPicker({
           <button
             key={label}
             title={label}
-            onClick={() => onChange({ ...data, color: value })}
+            onClick={() => onChange({ color: value })}
             className={`h-6 w-6 rounded-full transition ${
               current === value
                 ? "border-2 border-zinc-900 scale-110"
@@ -60,7 +60,7 @@ export function ColorPicker({
           <input
             type="color"
             value={isCustom ? current : "#000000"}
-            onChange={(e) => onChange({ ...data, color: e.target.value })}
+            onChange={(e) => onChange({ color: e.target.value })}
             className="absolute inset-0 cursor-pointer opacity-0 w-full h-full"
           />
         </label>

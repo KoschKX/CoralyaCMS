@@ -18,7 +18,19 @@
                   "type": "paragraph",
                   "data": {
                     "text": "New paragraph",
-                    "align": "center"
+                    "align": "center",
+                    "responsive": {
+                      "tablet": {
+                        "fontSize": "sm",
+                        "align": "left",
+                        "color": "#2563eb"
+                      },
+                      "mobile": {
+                        "fontSize": "sm",
+                        "align": "center",
+                        "color": "#16a34a"
+                      }
+                    }
                   }
                 }
               ]
@@ -192,7 +204,7 @@
     "id": "2b7393d4-d24b-4af3-9379-9e188217c6f0",
     "title": "Test (Copy)",
     "slug": "test-copy",
-    "status": "draft",
+    "status": "published",
     "blocks": [
       {
         "id": "sc-2",
@@ -200,7 +212,7 @@
         "data": {
           "cols": [
             {
-              "width": "50%",
+              "width": "25%",
               "blocks": [
                 {
                   "id": "sc-0",
@@ -300,7 +312,10 @@
                     "align": "center",
                     "responsive": {
                       "tablet": {
-                        "color": "#dc2626"
+                        "color": "#16a34a",
+                        "text": "asgdasdg",
+                        "level": 2,
+                        "align": "center"
                       },
                       "mobile": {
                         "color": "#ca8a04"
@@ -372,9 +387,9 @@
         }
       }
     ],
-    "html": "[columns]\n  [column width=\"50%\"]\n    [paragraph text=\"New paragraph\" align=\"center\"]\n  [/column]\n  [column width=\"50%\"]\n    [header text=\"New heading\" level=\"2\" align=\"center\"]\n  [/column]\n[/columns]\n\n[columns]\n  [column width=\"33.333%\"]\n    [paragraph text=\"sadadgs\" align=\"center\"]\n    [columns]\n      [column width=\"50%\"]\n        [paragraph text=\"New paragraph\"]\n      [/column]\n      [column width=\"50%\"]\n        [paragraph text=\"New paragraph\"]\n      [/column]\n    [/columns]\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"asdgasdg\" align=\"center\"]\n    [header text=\"asgdasdg\" level=\"2\" color=\"#dc2626\" align=\"center\" responsive='{\"tablet\":{\"color\":\"#dc2626\"},\"mobile\":{\"color\":\"#ca8a04\"}}']\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\"]\n  [/column]\n[/columns]\n\n[html]\n<div> test test </div>\n[/html]\n\n[code code=\"asdgasdgadssssg\"]\n\n[paragraph text=\"sdgasdgasdg\" color=\"#ca8a04\" align=\"center\" fontsize=\"xl\" responsive='{\"tablet\":{\"color\":\"#1c1c69\",\"fontSize\":\"lg\",\"align\":\"right\"},\"mobile\":{\"fontSize\":\"sm\",\"color\":\"#dc2626\"}}']\n\n[header text=\"fasdadsgags\" level=\"3\" color=\"#ea580c\" align=\"center\"]",
+    "html": "[columns]\n  [column width=\"25%\"]\n    [paragraph text=\"New paragraph\" align=\"center\"]\n  [/column]\n  [column width=\"50%\"]\n    [header text=\"New heading\" level=\"2\" align=\"center\"]\n  [/column]\n[/columns]\n\n[columns]\n  [column width=\"33.333%\"]\n    [paragraph text=\"sadadgs\" align=\"center\"]\n    [columns]\n      [column width=\"50%\"]\n        [paragraph text=\"New paragraph\"]\n      [/column]\n      [column width=\"50%\"]\n        [paragraph text=\"New paragraph\"]\n      [/column]\n    [/columns]\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"asdgasdg\" align=\"center\"]\n    [header text=\"asgdasdg\" level=\"2\" color=\"#dc2626\" align=\"center\" responsive='{\"tablet\":{\"color\":\"#16a34a\",\"text\":\"asgdasdg\",\"level\":2,\"align\":\"center\"},\"mobile\":{\"color\":\"#ca8a04\"}}']\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\"]\n  [/column]\n[/columns]\n\n[html]\n<div> test test </div>\n[/html]\n\n[code code=\"asdgasdgadssssg\"]\n\n[paragraph text=\"sdgasdgasdg\" color=\"#ca8a04\" align=\"center\" fontsize=\"xl\" responsive='{\"tablet\":{\"color\":\"#1c1c69\",\"fontSize\":\"lg\",\"align\":\"right\"},\"mobile\":{\"fontSize\":\"sm\",\"color\":\"#dc2626\"}}']\n\n[header text=\"fasdadsgags\" level=\"3\" color=\"#ea580c\" align=\"center\"]",
     "pageBgColor": "#ffffff",
     "createdAt": "2026-03-24T20:41:51.693Z",
-    "updatedAt": "2026-03-24T20:41:51.693Z"
+    "updatedAt": "2026-03-24T22:48:22.404Z"
   }
 ]

@@ -15,7 +15,7 @@ const list: BlockDefinition = {
           {(["unordered", "ordered"] as const).map((style) => (
             <button
               key={style}
-              onClick={() => onChange({ ...data, style })}
+              onClick={() => onChange({ style })}
               className={`flex-1 rounded-md border py-1.5 text-xs font-medium transition ${
                 (data.style ?? "unordered") === style
                   ? "border-zinc-900 bg-zinc-900 text-white"

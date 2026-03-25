@@ -82,7 +82,7 @@ export function AlignButtons({
           <button
             key={value}
             title={value}
-            onClick={() => onChange({ ...data, align: value })}
+            onClick={() => onChange({ align: value })}
             className={`flex h-8 flex-1 items-center justify-center rounded border text-xs font-medium transition ${
               (data.align ?? "left") === value
                 ? "border-zinc-900 bg-zinc-900 text-white"
@@ -116,7 +116,7 @@ export function FontSizeButtons({
         {sizes.map(({ value, label }) => (
           <button
             key={value}
-            onClick={() => onChange({ ...data, fontSize: value })}
+            onClick={() => onChange({ fontSize: value })}
             className={`flex-1 rounded border py-1.5 text-xs font-medium transition ${
               (data.fontSize ?? "base") === value
                 ? "border-zinc-900 bg-zinc-900 text-white"

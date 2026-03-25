@@ -1,7 +1,37 @@
-// ...existing code...
+
 "use client";
 
+// Recursively merge responsive overrides for all blocks for the current viewport
+function mergeBlocksForViewport(blocks: EditorBlock[], viewport: string): EditorBlock[] {
+  return blocks.map((block) => {
+    let data = block.data as Record<string, unknown>;
+    if (viewport !== "desktop" && data.responsive) {
+      const responsive = data.responsive as Record<string, Record<string, unknown>>;
+      const overrides = responsive[viewport] ?? {};
+      // Remove responsive key from merged data
+      data = { ...data, ...overrides };
+      delete data.responsive;
+    }
+    // Recursively merge for columns
+    if (block.type === "columns" && Array.isArray(data.cols)) {
+      data = {
+        ...data,
+        cols: data.cols.map((col: any) => ({
+          ...col,
+          blocks: mergeBlocksForViewport(col.blocks ?? [], viewport),
+        })),
+      };
+    }
+    return { ...block, data };
+  });
+}
+
+
+// ...existing code...
+
 import { useRef, useState, useCallback, useEffect } from "react";
+import { ResponsiveStyleInjector } from "@/components/ResponsiveStyleInjector";
+import { getEditorBreakpoints } from "@/lib/editor-breakpoints";
 import { useRouter } from "next/navigation";
 import type { EditorBlock } from "@/lib/pages-db";
 import { blockMap } from "@/blocks/index";
@@ -68,13 +98,16 @@ export default function EditorPage({
   // ...existing code...
   const router = useRouter();
   const initialParsedBlocks = initialHtml ? shortcodesToBlocks(initialHtml) : initialBlocks;
+  // Parse blocks from codeText for live preview (unmerged, for CSS)
+  const [codeText, setCodeText] = useState(initialHtml || blocksToShortcodes(initialParsedBlocks));
+  const liveBlocks = shortcodesToBlocks(codeText);
+  const { tablet: tabletBp, mobile: mobileBp } = getEditorBreakpoints();
 
   const [title, setTitle] = useState(initialTitle);
   const [slug, setSlug] = useState(initialSlug);
   const [status, setStatus] = useState<"draft" | "published">(initialStatus);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [codeText, setCodeText] = useState(initialHtml || blocksToShortcodes(initialParsedBlocks));
   const [editorKey, setEditorKey] = useState(0);
   const [panelTab, setPanelTab] = useState<PanelTab>("page");
   // Always select 'page' tab in code/inject mode
@@ -85,6 +118,15 @@ export default function EditorPage({
   }, [mainMode, panelTab]);
   const [panelOpen, setPanelOpen] = useState(true);
   const [viewport, setViewport] = useState<Viewport>("desktop");
+
+  // Notify ColumnsLayout (and any other layout) when the editor viewport changes
+  function setViewportAndNotify(vp: Viewport) {
+    setViewport(vp);
+    if (typeof window !== "undefined") {
+      window.__EDITOR_VIEWPORT__ = vp;
+      window.dispatchEvent(new CustomEvent("editor-viewport-change", { detail: vp }));
+    }
+  }
   const [pageBgColor, setPageBgColor] = useState("#ffffff");
 
   function handleTitleChange(value: string) {
@@ -363,14 +405,17 @@ export default function EditorPage({
                     wrap="off"
                     className="sr-only"
                   />
-                  <VisualEditor
-                    key={editorKey}
-                    initialBlocks={shortcodesToBlocks(codeText)}
-                    onChange={(newCode) => setCodeText(newCode)}
-                    onSelectBlock={handleSelectBlock}
-                    selectedBlockId={selectedBlock?.id ?? null}
-                    registerUpdateHandler={registerUpdateHandler}
-                  />
+                  <>
+                    <ResponsiveStyleInjector blocks={liveBlocks} tabletBp={tabletBp} mobileBp={mobileBp} />
+                    <VisualEditor
+                      key={editorKey}
+                      initialBlocks={mergeBlocksForViewport(liveBlocks, viewport)}
+                      onChange={(newCode) => setCodeText(newCode)}
+                      onSelectBlock={handleSelectBlock}
+                      selectedBlockId={selectedBlock?.id ?? null}
+                      registerUpdateHandler={registerUpdateHandler}
+                    />
+                  </>
                 </>
               )}
             </div>{/* end page card */}
@@ -461,7 +506,7 @@ export default function EditorPage({
                               { vp: "tablet" as Viewport, title: "Tablet", icon: (<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/></svg>) },
                               { vp: "mobile" as Viewport, title: "Mobile", icon: (<svg width="12" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/></svg>) },
                             ]).map(({ vp, title, icon }) => (
-                              <button key={vp} title={title} onClick={() => setViewport(vp)}
+                              <button key={vp} title={title} onClick={() => setViewportAndNotify(vp)}
                                 className={`flex h-6 w-6 items-center justify-center rounded transition ${viewport === vp ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-zinc-700"}`}>
                                 {icon}
                               </button>

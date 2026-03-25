@@ -1,11 +1,11 @@
 import "./styles.css";
 import type { BlockLayoutProps } from "@/lib/block-types";
 
-export default function TableLayout({ data }: BlockLayoutProps) {
+export default function TableLayout({ data, blockId }: BlockLayoutProps & { blockId: string }) {
   const rows = (data.content as string[][]) ?? [];
   const withHeadings = data.withHeadings as boolean;
   return (
-    <div className="block-table overflow-x-auto">
+    <div data-block-id={blockId} className={`block-table overflow-x-auto block-${blockId}`}>
       <table className="w-full border-collapse text-sm">
         <tbody>
           {rows.map((row, ri) => (

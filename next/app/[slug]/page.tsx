@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { listPages } from "@/lib/pages-db";
 import { getSettings } from "@/lib/settings-db";
+import { ResponsiveStyleInjector } from "@/components/ResponsiveStyleInjector";
 import { buildResponsiveCSS } from "@/lib/responsive-css";
 import BlockRenderer from "@/components/BlockRenderer";
 import HTMLRenderer from "@/components/HTMLRenderer";
@@ -36,8 +37,10 @@ export default async function SlugPage({ params }: Props) {
   if (!page) notFound();
   const { disabledBlocks, layout } = getSettings();
   const { tablet: tabletBp, mobile: mobileBp } = layout.breakpoints;
-  const responsiveCSS = buildResponsiveCSS(page.blocks, tabletBp, mobileBp);
 
+
+  // SSR fallback: inject initial responsive CSS for SEO/first paint
+  const responsiveCSS = buildResponsiveCSS(page.blocks, tabletBp, mobileBp);
   return (
     <main
       className="py-16"
@@ -51,7 +54,8 @@ export default async function SlugPage({ params }: Props) {
         background: page.pageBgColor || "#fff",
       }}
     >
-      {responsiveCSS && <style dangerouslySetInnerHTML={{ __html: responsiveCSS }} />}
+      {responsiveCSS && <style id="editor-responsive-css" dangerouslySetInnerHTML={{ __html: responsiveCSS }} />}
+      <ResponsiveStyleInjector blocks={page.blocks} tabletBp={tabletBp} mobileBp={mobileBp} />
       <h1 className="mb-10 text-4xl font-bold text-zinc-900">{page.title}</h1>
       {page.html
         ? <HTMLRenderer html={page.html} disabledBlocks={disabledBlocks} />

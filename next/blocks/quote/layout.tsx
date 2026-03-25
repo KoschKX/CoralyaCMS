@@ -1,13 +1,18 @@
+"use client";
+import React from "react";
 import "./styles.css";
 import type { CSSProperties } from "react";
 import type { BlockLayoutProps } from "@/lib/block-types";
 
-export default function QuoteLayout({ data }: BlockLayoutProps) {
+
+
+export default function QuoteLayout({ data, blockId }: BlockLayoutProps & { blockId: string }) {
   return (
     <blockquote
-      className="block-quote border-l-4 border-zinc-300 pl-5 italic text-zinc-600"
+      data-block-id={blockId}
+      className={`block-quote border-l-4 border-zinc-300 pl-5 italic text-zinc-600 block-${blockId}`}
       style={{
-        textAlign: ((data.align as string) || "left") as CSSProperties["textAlign"],
+        textAlign: ((data.align as string) || "left") as React.CSSProperties["textAlign"],
       }}
     >
       <p dangerouslySetInnerHTML={{ __html: (data.text as string) ?? "" }} />

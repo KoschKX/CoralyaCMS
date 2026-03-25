@@ -8,3 +8,8 @@ declare module "@calumk/editorjs-columns" {
   const Columns: unknown;
   export default Columns;
 }
+
+// Global used to sync the active editor breakpoint into layout components
+interface Window {
+  __EDITOR_VIEWPORT__?: string;
+}

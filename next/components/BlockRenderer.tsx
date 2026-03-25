@@ -30,14 +30,22 @@ export default function BlockRenderer({ blocks, disabledBlocks = [] }: Props) {
 
           const def = blockMap[resolvedType];
           if (!def) return null;
+          // If the block is columns, call renderBlocks and pass as children
+          if (resolvedType === "columns") {
+            return (
+              <div key={block.id} data-block-id={block.id}>
+                <def.Layout
+                  data={resolvedData}
+                  blockId={block.id}
+                  renderBlocks={(children) => <BlockRenderer blocks={children} disabledBlocks={disabledBlocks} />}
+                />
+              </div>
+            );
+          }
+          // For all other blocks, just render the layout
           return (
             <div key={block.id} data-block-id={block.id}>
-              <def.Layout
-                data={resolvedData}
-                renderBlocks={(children) => (
-                  <BlockRenderer blocks={children} disabledBlocks={disabledBlocks} />
-                )}
-              />
+              <def.Layout data={resolvedData} blockId={block.id} />
             </div>
           );
         })}

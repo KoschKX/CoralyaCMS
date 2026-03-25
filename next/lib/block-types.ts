@@ -1,12 +1,13 @@
 import type { ReactNode } from "react";
 import type { EditorBlock } from "@/lib/pages-db";
 
-export type BlockData = Record<string, unknown>;
 
 export interface BlockLayoutProps {
   data: BlockData;
   /** Passed for blocks that need recursive rendering (e.g. columns) */
   renderBlocks?: (blocks: EditorBlock[]) => ReactNode;
+  /** Unique block id for responsive and targeting */
+  blockId: string;
 }
 
 export interface PanelControlProps {

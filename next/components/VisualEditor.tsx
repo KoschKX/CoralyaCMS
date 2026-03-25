@@ -940,6 +940,7 @@ export default function VisualEditor({
       return (
         <div
           key={block.id}
+          data-block-id={block.id}
           className={`relative transition ${
             isSelected
               ? "ring-2 ring-blue-500"

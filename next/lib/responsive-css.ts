@@ -1,5 +1,6 @@
 import type { EditorBlock } from "@/lib/pages-db";
 
+
 function rulesFor(overrides: Record<string, unknown>): string {
   const color    = (overrides.color    as string | undefined) || "";
   const align    = (overrides.align    as string | undefined) || "";
@@ -9,6 +10,27 @@ function rulesFor(overrides: Record<string, unknown>): string {
     align    && `text-align: ${align} !important;`,
     fontSize && `font-size: var(--font-size-${fontSize}) !important;`,
   ].filter(Boolean).join(" ");
+}
+
+function gridTemplateColumnsCSS(cols: any[], responsive: Record<string, any> | undefined, breakpoint: string): string | null {
+  if (!Array.isArray(cols)) return null;
+  // For each col, get width for this breakpoint (or fallback)
+  const widths = cols.map((col, i) => {
+    let w = col.width;
+    if (responsive && responsive[breakpoint]) {
+      const key = `col-${i}-width`;
+      if (responsive[breakpoint][key]) w = responsive[breakpoint][key];
+    }
+    return w || "1fr";
+  });
+  if (widths.every(w => w === "1fr")) return null;
+  // Use percent as-is, only use fr for fr units
+  const grid = widths.map(w => {
+    if (!w) return "1fr";
+    if (w.endsWith("%")) return w;
+    return w;
+  }).join(" ");
+  return `grid-template-columns: ${grid} !important;`;
 }
 
 /** Recursively build @media override CSS for blocks that have data.responsive set.
@@ -23,8 +45,22 @@ export function buildResponsiveCSS(
     const data = block.data as Record<string, unknown>;
     const responsive = data?.responsive as Record<string, Record<string, unknown>> | undefined;
 
+
+    if (block.type === "columns" && Array.isArray(data.cols)) {
+      const sel = `[data-block-id=\"${block.id}\"] > .block-columns`;
+      // Desktop (default): handled by inline style, but add for SSR fallback
+      const desktopGrid = gridTemplateColumnsCSS(data.cols, responsive, "desktop");
+      if (desktopGrid) css += `${sel} { ${desktopGrid} }\n`;
+      // Tablet
+      const tabletGrid = gridTemplateColumnsCSS(data.cols, responsive, "tablet");
+      if (tabletGrid) css += `@media (max-width: ${tabletBp}) { ${sel} { ${tabletGrid} } }\n`;
+      // Mobile
+      const mobileGrid = gridTemplateColumnsCSS(data.cols, responsive, "mobile");
+      if (mobileGrid) css += `@media (max-width: ${mobileBp}) { ${sel} { ${mobileGrid} } }\n`;
+    }
+
     if (responsive) {
-      const sel = `[data-block-id="${block.id}"], [data-block-id="${block.id}"] *`;
+      const sel = `[data-block-id=\"${block.id}\"], [data-block-id=\"${block.id}\"] *`;
       const tabletRules = responsive.tablet ? rulesFor(responsive.tablet) : "";
       const mobileRules = responsive.mobile ? rulesFor(responsive.mobile) : "";
       if (tabletRules) css += `@media (max-width: ${tabletBp}) { ${sel} { ${tabletRules} } }\n`;
