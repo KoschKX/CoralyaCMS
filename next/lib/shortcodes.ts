@@ -183,20 +183,40 @@ function buildBlocks(
     if (tok.type === "open" && tok.name === "columns") {
       pos++;
       const cols: Array<{ blocks: EditorBlock[]; width?: string }> = [];
+      let responsive: Record<string, Record<string, unknown>> | undefined = undefined;
+
+      // Read responsive attribute from columns block
+      if (tok.attrs.responsive) {
+        try {
+          responsive = typeof tok.attrs.responsive === "string"
+            ? JSON.parse(tok.attrs.responsive as string)
+            : (tok.attrs.responsive as Record<string, Record<string, unknown>>);
+        } catch {}
+      }
 
       while (pos < tokens.length) {
         const t = tokens[pos];
         if (t.type === "close" && t.name === "columns") { pos++; break; }
         if (t.type === "open" && t.name === "column") {
           const width = t.attrs.width as string | undefined;
+          // Responsive width overrides for this column
+          let colResponsive: Record<string, string> = {};
+          Object.keys(t.attrs).forEach((k) => {
+            if (/^width_(desktop|tablet|mobile)$/.test(k)) {
+              const bp = k.split("_")[1];
+              colResponsive[bp] = t.attrs[k] as string;
+            }
+          });
           pos++;
           const inner = buildBlocks(tokens, pos, "column", counter);
-          cols.push({ ...(width ? { width } : {}), blocks: inner.blocks });
+          cols.push({ ...(width ? { width } : {}), ...(Object.keys(colResponsive).length ? { responsive: colResponsive } : {}), blocks: inner.blocks });
           pos = inner.pos;
         } else { pos++; }
       }
 
-      blocks.push({ id: `sc-${counter.n++}`, type: "columns", data: { cols } });
+      const data: any = { cols };
+      if (responsive) data.responsive = responsive;
+      blocks.push({ id: `sc-${counter.n++}`, type: "columns", data });
       continue;
     }
 
@@ -234,15 +254,24 @@ function blockToShortcode(type: string, data: Record<string, unknown>, depth = 0
   }
 
   if (type === "columns") {
-    const cols = (data.cols as Array<{ blocks: EditorBlock[]; width?: string }>) ?? [];
-    const inner = cols.map((col) => {
-      const widthAttr = col.width ? ` ${serializeAttr("width", col.width)}` : "";
+    const cols = (data.cols as Array<{ blocks: EditorBlock[]; width?: string; responsive?: Record<string, string> }>) ?? [];
+    // Serialize responsive attribute if present
+    const responsive = data.responsive ? ` ${serializeAttr("responsive", data.responsive)}` : "";
+    const inner = cols.map((col, i) => {
+      let widthAttr = col.width ? ` ${serializeAttr("width", col.width)}` : "";
+      // Serialize per-column responsive widths as width_desktop, width_tablet, width_mobile
+      let responsiveAttrs = "";
+      if (col.responsive) {
+        Object.entries(col.responsive).forEach(([bp, val]) => {
+          if (val) responsiveAttrs += ` width_${bp}='${val}'`;
+        });
+      }
       const colInner = blocksToShortcodes(col.blocks ?? [], depth + 2);
       return colInner
-        ? `${childPad}[column${widthAttr}]\n${colInner}\n${childPad}[/column]`
-        : `${childPad}[column${widthAttr}][/column]`;
+        ? `${childPad}[column${widthAttr}${responsiveAttrs}]\n${colInner}\n${childPad}[/column]`
+        : `${childPad}[column${widthAttr}${responsiveAttrs}][/column]`;
     }).join("\n");
-    return `${pad}[columns]\n${inner}\n${pad}[/columns]`;
+    return `${pad}[columns${responsive}]\n${inner}\n${pad}[/columns]`;
   }
 
   // All properties — scalar and complex — are serialised

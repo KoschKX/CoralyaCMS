@@ -147,13 +147,18 @@
                 }
               ]
             }
-          ]
+          ],
+          "responsive": {
+            "tablet": {
+              "col-1-width": "16.667%"
+            }
+          }
         }
       }
     ],
-    "html": "[columns]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"}}']\n  [/column]\n  [column width=\"33.333%\"]\n    [header text=\"New heading\" level=\"2\" align=\"center\" color=\"#dc2626\" responsive='{\"tablet\":{\"color\":\"#16a34a\",\"align\":\"right\"}}']\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"}}']\n  [/column]\n[/columns]",
+    "html": "[columns responsive='{\"tablet\":{\"col-1-width\":\"16.667%\"}}']\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"}}']\n  [/column]\n  [column width=\"33.333%\"]\n    [header text=\"New heading\" level=\"2\" align=\"center\" color=\"#dc2626\" responsive='{\"tablet\":{\"color\":\"#16a34a\",\"align\":\"right\"}}']\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"}}']\n  [/column]\n[/columns]",
     "pageBgColor": "#ffffff",
     "createdAt": "2026-03-25T19:58:40.950Z",
-    "updatedAt": "2026-03-25T22:16:53.520Z"
+    "updatedAt": "2026-03-27T14:06:13.338Z"
   }
 ]
