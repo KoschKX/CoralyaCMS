@@ -597,52 +597,53 @@ function EditableBlock({
   // The fallback (no renderChildBlocks) is a read-only render used outside the editor.
   if (type === "columns") {
     const cols = (data.cols as Array<{ blocks: EditorBlock[]; width?: string }>) ?? [];
-    // Convert percentage widths to fr units to avoid overflow with gap-6.
-    const gridTemplateColumns = cols.every((c) => !c.width)
-      ? `repeat(${cols.length || 2}, minmax(0, 1fr))`
-      : cols.map((c) => {
-          if (!c.width) return "1fr";
-          const n = parseFloat(c.width);
-          return isNaN(n) ? c.width : `${n}fr`;
-        }).join(" ");
-
-    // Shared per-column ops — called with index from the single shared toolbar
-
+    // Use the same inline-block structure as the live page
     return (
-      <div className="block-columns grid gap-6" style={{ gridTemplateColumns }}>
-        {cols.map((col, colIdx) => (
-          <div
-            key={colIdx}
-            className={`block-columns__col relative min-w-0 rounded transition cursor-pointer ${
-              isSelected && (activeColIdx ?? null) === colIdx
-                ? "ring-2 ring-blue-400"
-                : "ring-1 ring-transparent hover:ring-blue-300"
-              }`}
+      <div className="block-columns-wrapper">
+        <div className="block-columns-inline-row" style={{ width: '100%', whiteSpace: 'normal', fontSize: 0 }}>
+          {cols.map((col, colIdx) => (
+            <div
+              key={colIdx}
+              style={{
+                display: 'inline-block',
+                verticalAlign: 'top',
+                width: col.width || (100 / (cols.length || 1)) + '%',
+                minHeight: 1,
+                minWidth: 0,
+                paddingLeft: colIdx === 0 ? 0 : '0.75rem',
+                paddingRight: colIdx === cols.length - 1 ? 0 : '0.75rem',
+                boxSizing: 'border-box',
+                fontSize: 'initial',
+              }}
+              className="block-columns__col-wrapper"
               onClick={(e) => { e.stopPropagation(); onActiveColChange?.(colIdx); onSelect?.(); }}
             >
-              {renderChildBlocks
-                ? renderChildBlocks(
-                    col.blocks ?? [],
-                    (newBlocks) => {
-                      onUpdate({ ...data, cols: cols.map((c, ci) => ci === colIdx ? { ...c, blocks: newBlocks } : c) });
-                    },
-                  )
-                : (col.blocks ?? []).map((childBlock) => (
-                    <EditableBlock
-                      key={childBlock.id}
-                      block={childBlock}
-                      onUpdate={(newData) => {
-                        onUpdate({ ...data, cols: cols.map((c, ci) =>
-                          ci === colIdx
-                            ? { ...c, blocks: c.blocks.map((b) => b.id === childBlock.id ? { ...b, data: newData } : b) }
-                            : c
-                        )});
-                      }}
-                    />
-                  ))}
+              <div className={`block-columns__col min-w-0${isSelected && (activeColIdx ?? null) === colIdx ? ' ring-2 ring-blue-400' : ' ring-1 ring-transparent hover:ring-blue-300'} relative rounded transition cursor-pointer`}>
+                {renderChildBlocks
+                  ? renderChildBlocks(
+                      col.blocks ?? [],
+                      (newBlocks) => {
+                        onUpdate({ ...data, cols: cols.map((c, ci) => ci === colIdx ? { ...c, blocks: newBlocks } : c) });
+                      },
+                    )
+                  : (col.blocks ?? []).map((childBlock) => (
+                      <EditableBlock
+                        key={childBlock.id}
+                        block={childBlock}
+                        onUpdate={(newData) => {
+                          onUpdate({ ...data, cols: cols.map((c, ci) =>
+                            ci === colIdx
+                              ? { ...c, blocks: c.blocks.map((b) => b.id === childBlock.id ? { ...b, data: newData } : b) }
+                              : c
+                          )});
+                        }}
+                      />
+                    ))}
+              </div>
             </div>
           ))}
         </div>
+      </div>
     );
   }
 
