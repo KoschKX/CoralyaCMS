@@ -922,6 +922,7 @@ export default function VisualEditor({
       if (!def) return null;
 
       const isSelected = block.id === selectedBlockId;
+      const isColBlock = block.type === "columns";
       const descendantSelected =
         !isSelected && !!selectedBlockId && isDescendant(block, selectedBlockId);
       const showOverlay = !isSelected && !descendantSelected;
@@ -946,17 +947,20 @@ export default function VisualEditor({
       };
 
       const isLast = idx === list.length - 1;
+      // Apply .ring-blue-200 to columns blocks when selected
+      let ringClass = "ring-1 ring-transparent";
+      if (isSelected && isColBlock) {
+        ringClass = "ring-2 ring-blue-200";
+      } else if (isSelected && !isColBlock) {
+        ringClass = "ring-2 ring-blue-500";
+      } else if (descendantSelected) {
+        ringClass = "ring-2 ring-blue-200";
+      }
       return (
         <div
           key={block.id}
           data-block-id={block.id}
-          className={`relative transition ${
-            isSelected
-              ? "ring-2 ring-blue-500"
-              : descendantSelected
-                ? "ring-2 ring-blue-200"
-                : "ring-1 ring-transparent"
-          }`}
+          className={`relative transition ${ringClass}`}
           style={{ marginBottom: isInColumn && isLast ? 0 : "var(--block-spacing, 1.5rem)", paddingBottom: isInColumn && isLast ? "var(--block-spacing, 1.5rem)" : undefined }}
         >
           <div className="group/block relative">
