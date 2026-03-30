@@ -597,51 +597,59 @@ function EditableBlock({
   // The fallback (no renderChildBlocks) is a read-only render used outside the editor.
   if (type === "columns") {
     const cols = (data.cols as Array<{ blocks: EditorBlock[]; width?: string }>) ?? [];
-    // Use the same inline-block structure as the live page
+    // Only the currently selected col gets is-selected, and child columns do not get activeColIdx
     return (
       <div className="block-columns-wrapper">
         <div className="block-columns-inline-row" style={{ width: '100%', whiteSpace: 'normal', fontSize: 0 }}>
-          {cols.map((col, colIdx) => (
-            <div
-              key={colIdx}
-              style={{
-                display: 'inline-block',
-                verticalAlign: 'top',
-                width: col.width || (100 / (cols.length || 1)) + '%',
-                minHeight: 1,
-                minWidth: 0,
-                paddingLeft: colIdx === 0 ? 0 : '0.75rem',
-                paddingRight: colIdx === cols.length - 1 ? 0 : '0.75rem',
-                boxSizing: 'border-box',
-                fontSize: 'initial',
-              }}
-              className="block-columns__col-wrapper"
-              onClick={(e) => { e.stopPropagation(); onActiveColChange?.(colIdx); onSelect?.(); }}
-            >
-              <div className={`block-columns__col min-w-0${isSelected && (activeColIdx ?? null) === colIdx ? ' ring-2 ring-blue-400' : ' ring-1 ring-transparent hover:ring-blue-300'} relative rounded transition cursor-pointer`}>
-                {renderChildBlocks
-                  ? renderChildBlocks(
-                      col.blocks ?? [],
-                      (newBlocks) => {
-                        onUpdate({ ...data, cols: cols.map((c, ci) => ci === colIdx ? { ...c, blocks: newBlocks } : c) });
-                      },
-                    )
-                  : (col.blocks ?? []).map((childBlock) => (
-                      <EditableBlock
-                        key={childBlock.id}
-                        block={childBlock}
-                        onUpdate={(newData) => {
-                          onUpdate({ ...data, cols: cols.map((c, ci) =>
-                            ci === colIdx
-                              ? { ...c, blocks: c.blocks.map((b) => b.id === childBlock.id ? { ...b, data: newData } : b) }
-                              : c
-                          )});
-                        }}
-                      />
-                    ))}
+          {cols.map((col, colIdx) => {
+            const isColSelected = (activeColIdx ?? null) === colIdx;
+            const colClass = `block-columns__col-wrapper${isColSelected ? ' is-selected' : ''}`;
+            return (
+              <div
+                key={colIdx}
+                style={{
+                  display: 'inline-block',
+                  verticalAlign: 'top',
+                  width: col.width || (100 / (cols.length || 1)) + '%',
+                  minHeight: 1,
+                  minWidth: 0,
+                  paddingLeft: colIdx === 0 ? 0 : '0.75rem',
+                  paddingRight: colIdx === cols.length - 1 ? 0 : '0.75rem',
+                  boxSizing: 'border-box',
+                  fontSize: 'initial',
+                }}
+                className={colClass}
+                onClick={(e) => { e.stopPropagation(); onActiveColChange?.(colIdx); onSelect?.(); }}
+              >
+                <div className="block-columns__col min-w-0 relative rounded transition cursor-pointer">
+                  {renderChildBlocks
+                    ? renderChildBlocks(
+                        col.blocks ?? [],
+                        (newBlocks) => {
+                          onUpdate({ ...data, cols: cols.map((c, ci) => ci === colIdx ? { ...c, blocks: newBlocks } : c) });
+                        },
+                        // Only pass activeColIdx to children if this col is NOT selected
+                        isColSelected ? null : undefined
+                      )
+                    : (col.blocks ?? []).map((childBlock) => (
+                        <EditableBlock
+                          key={childBlock.id}
+                          block={childBlock}
+                          onUpdate={(newData) => {
+                            onUpdate({ ...data, cols: cols.map((c, ci) =>
+                              ci === colIdx
+                                ? { ...c, blocks: c.blocks.map((b) => b.id === childBlock.id ? { ...b, data: newData } : b) }
+                                : c
+                            )});
+                          }}
+                          // Only pass activeColIdx to children if this col is NOT selected
+                          activeColIdx={isColSelected ? null : undefined}
+                        />
+                      ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     );
@@ -956,7 +964,11 @@ export default function VisualEditor({
               block={block}
               onUpdate={(newData) => ops.update(block.id, newData)}
               isSelected={isSelected}
-              onSelect={() => { if (block.type !== "columns") setActiveColInfo(null); onSelectBlock(block.id, block.data as Record<string, unknown>, block.type); }}
+              onSelect={() => {
+                // Only clear column selection if this is not a columns block
+                if (block.type !== "columns") setActiveColInfo(null);
+                onSelectBlock(block.id, block.data as Record<string, unknown>, block.type);
+              }}
               activeColIdx={activeColInfo?.blockId === block.id ? activeColInfo.colIdx : null}
               onActiveColChange={(ci) => ci !== null ? setActiveColInfo({ blockId: block.id, colIdx: ci }) : setActiveColInfo(null)}
               renderChildBlocks={block.type === "columns" ? renderChildBlocks : undefined}
@@ -967,6 +979,7 @@ export default function VisualEditor({
                 className="absolute inset-0 z-10 cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
+                  if (block.type !== "columns") setActiveColInfo(null);
                   onSelectBlock(
                     block.id,
                     block.data as Record<string, unknown>,

@@ -26,13 +26,23 @@
 
 /* Force inline-block layout for columns in editor/admin */
 .block-columns-inline-row {
-  display: block !important;
+  display: flex;
   white-space: normal !important;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: stretch;
 }
 .block-columns__col-wrapper {
   display: inline-block !important;
   vertical-align: top !important;
   float: none !important;
+  /* Horizontal padding for spacing between columns, replaces grid gap */
+  box-sizing: border-box;
+}
+
+.block-columns__col-wrapper.is-selected {
+  outline: 2px solid #2563eb !important;
+  outline-offset: -2px;
 }
 
 .block-columns {
@@ -46,6 +56,7 @@
   min-width: 0;
   word-break: break-word;
   overflow-wrap: anywhere;
+  height: 100% !important;
 }
 
 .block-columns__col-wrapper {

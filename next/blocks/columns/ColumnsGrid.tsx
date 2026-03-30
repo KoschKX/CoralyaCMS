@@ -20,9 +20,10 @@ interface ColumnsGridProps {
   colWidths: string[];
   responsive: Record<string, Record<string, string>>;
   children: ReactNode;
+  selectedColIdx?: number;
 }
 
-export default function ColumnsGrid({ colWidths, responsive, children }: ColumnsGridProps) {
+export default function ColumnsGrid({ colWidths, responsive, children, selectedColIdx }: ColumnsGridProps) {
 
   // Detect if we're in the editor by checking for window.__EDITOR_VIEWPORT__
   const [editorViewport, setEditorViewport] = useState<string>(
@@ -59,7 +60,10 @@ export default function ColumnsGrid({ colWidths, responsive, children }: Columns
               boxSizing: 'border-box',
               fontSize: 'initial',
             }}
-            className="block-columns__col-wrapper"
+            className={
+              'block-columns__col-wrapper' +
+              (selectedColIdx === i ? ' is-selected' : '')
+            }
           >
             {child}
           </div>
