@@ -604,6 +604,10 @@ function EditableBlock({
           {cols.map((col, colIdx) => {
             const isColSelected = (activeColIdx ?? null) === colIdx;
             const colClass = `block-columns__col-wrapper${isColSelected ? ' is-selected' : ''}`;
+            // Always apply left and right padding for all columns
+            let paddingLeft = '0.75rem';
+            let paddingRight = '0.75rem';
+            if (cols.length > 1 && colIdx === 0) paddingLeft = 0;
             return (
               <div
                 key={colIdx}
@@ -613,8 +617,8 @@ function EditableBlock({
                   width: col.width || (100 / (cols.length || 1)) + '%',
                   minHeight: 1,
                   minWidth: 0,
-                  paddingLeft: colIdx === 0 ? 0 : '0.75rem',
-                  paddingRight: colIdx === cols.length - 1 ? 0 : '0.75rem',
+                  paddingLeft,
+                  paddingRight,
                   boxSizing: 'border-box',
                   fontSize: 'initial',
                 }}
