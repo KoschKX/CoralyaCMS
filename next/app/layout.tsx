@@ -16,11 +16,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const settings = getSettings();
-
-
 export async function generateMetadata(): Promise<Metadata> {
-  const { getSettings } = await import("@/lib/settings-db");
   const settings = getSettings();
   return {
     title: settings.title || "Site Title",
@@ -45,6 +41,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const settings = getSettings();
   const { typography, layout } = settings;
   const { fontSizes, headings } = typography;
 

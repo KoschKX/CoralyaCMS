@@ -9,13 +9,12 @@ const paragraph: BlockDefinition = {
   icon: "¶",
   supportsBreakpoints: true,
   Layout: ParagraphLayout,
-  PanelControls({ data, onChange, controlsDisplayData }) {
-    const displayData = controlsDisplayData ? controlsDisplayData(data) : data;
+  PanelControls({ data, onChange }) {
     return (
       <div className="space-y-5">
-        <FontSizeButtons data={displayData} onChange={onChange} />
-        <AlignButtons data={displayData} onChange={onChange} />
-        <ColorPicker data={displayData} onChange={onChange} />
+        <FontSizeButtons data={data} onChange={onChange} />
+        <AlignButtons data={data} onChange={onChange} />
+        <ColorPicker data={data} onChange={onChange} />
       </div>
     );
   },

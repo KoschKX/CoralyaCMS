@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { EditorBlock } from "@/lib/pages-db";
 
+export type BlockData = Record<string, unknown>;
 
 export interface BlockLayoutProps {
   data: BlockData;

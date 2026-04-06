@@ -1,0 +1,74 @@
+You are an expert senior software engineer specializing in Next.js, React architecture, and CMS/editor systems (similar to WordPress Gutenberg).
+
+Your task is to analyze this entire Next.js codebase and refactor it for performance, maintainability, scalability, and clean architecture.
+
+Context:
+- This project is a CMS-like system inspired by the Gutenberg editor (block-based content editing).
+- It uses Next.js (App Router if present), React, and modern JavaScript/TypeScript.
+- The goal is to improve structure, optimize performance, and enforce best practices.
+
+Please do the following:
+
+1. 📁 Project Structure
+- Reorganize the folder structure using best practices for scalable Next.js apps.
+- Clearly separate:
+  - UI components
+  - Block/editor components
+  - Hooks
+  - Utilities
+  - API/data layer
+  - State management
+- Suggest a clean, modular architecture for a block-based editor system.
+
+2. ⚛️ Component Architecture
+- Refactor components to be reusable, composable, and readable.
+- Split large components into smaller ones.
+- Ensure proper separation between presentational and logic components.
+- Optimize props usage and avoid unnecessary re-renders.
+
+3. 🚀 Performance Optimization
+- Identify and fix performance bottlenecks.
+- Use:
+  - React.memo
+  - useCallback / useMemo where appropriate
+  - Dynamic imports for heavy components (especially editor blocks)
+- Optimize rendering for large block trees (like Gutenberg).
+
+4. 🧠 State Management
+- Evaluate current state management.
+- Suggest improvements (Context API, Zustand, Redux, or other).
+- Ensure editor state (blocks, selection, history/undo) is well-structured and efficient.
+
+5. 🧩 Block System Design
+- Improve the architecture for block-based editing:
+  - Block registration system
+  - Block schema/types
+  - Serialization/deserialization (JSON structure)
+- Ensure it is extensible (plugins or custom blocks).
+
+6. 📡 Data Layer & API
+- Improve how data is fetched and stored.
+- Use Next.js best practices:
+  - Server Components vs Client Components
+  - Route handlers / API routes
+- Add caching and data validation where needed.
+
+7. 🧹 Code Quality
+- Remove dead code and duplication.
+- Improve naming conventions.
+- Enforce consistent formatting and patterns.
+- Suggest ESLint/Prettier improvements if needed.
+
+8. 🔐 Best Practices
+- Ensure accessibility (ARIA, keyboard navigation for editor).
+- Improve error handling.
+- Add type safety (TypeScript improvements if applicable).
+
+9. 📚 Documentation
+- Add comments where necessary.
+- Provide a short explanation of the new architecture.
+
+Output format:
+- Show improved folder structure
+- Provide refactored code examples for key parts (editor, blocks, state)
+- Explain major changes and why they improve the project

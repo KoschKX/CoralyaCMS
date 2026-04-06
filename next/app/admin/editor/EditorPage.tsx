@@ -1,42 +1,14 @@
 
 "use client";
 
-// Recursively merge responsive overrides for all blocks for the current viewport
-function mergeBlocksForViewport(blocks: EditorBlock[], viewport: string): EditorBlock[] {
-  return blocks.map((block) => {
-    let data = block.data as Record<string, unknown>;
-    if (viewport !== "desktop" && data.responsive) {
-      const responsive = data.responsive as Record<string, Record<string, unknown>>;
-      const overrides = responsive[viewport] ?? {};
-      // Remove responsive key from merged data
-      data = { ...data, ...overrides };
-      delete data.responsive;
-    }
-    // Recursively merge for columns
-    if (block.type === "columns" && Array.isArray(data.cols)) {
-      data = {
-        ...data,
-        cols: data.cols.map((col: any) => ({
-          ...col,
-          blocks: mergeBlocksForViewport(col.blocks ?? [], viewport),
-        })),
-      };
-    }
-    return { ...block, data };
-  });
-}
-
-
-// ...existing code...
-
 import { useRef, useState, useCallback, useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 import type { EditorBlock } from "@/lib/pages-db";
 import { blockMap } from "@/blocks/index";
 import { PanelSection, ViewportContext, type Viewport } from "@/components/block-shared";
-// import dynamic from "next/dynamic"; // (removed duplicate)
 import { blocksToShortcodes, shortcodesToBlocks } from "@/lib/shortcodes";
+import { COLOR_PALETTE } from "@/lib/color-palette";
 import dynamic from "next/dynamic";
 const CodeEditor = dynamic(() => import("@/components/CodeEditor"), { ssr: false });
 import type { VisualEditorProps } from "@/components/VisualEditor";
@@ -132,20 +104,6 @@ export default function EditorPage({
     if (!id || slug === autoSlug(title)) setSlug(autoSlug(value));
   }
 
-  // --- View page icon button ---
-  const viewPageButton = slug && status === "published" && (
-    <a
-      href={`/${slug}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      title="View page"
-      className="ml-2 inline-flex items-center rounded-md border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-600 hover:bg-zinc-50 hover:text-blue-600 transition"
-      style={{ position: "absolute", right: 24, top: 18, zIndex: 10 }}
-    >
-      <img src="/icons/external-link.svg" alt="View" className="w-4 h-4" />
-    </a>
-  );
-
   const updateBlockHandlerRef = useRef<((id: string, newData: Record<string, unknown>) => void) | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -183,8 +141,7 @@ export default function EditorPage({
   );
 
   const [activeColIdx, setActiveColIdx] = useState<number | null>(null);
-  const handleColSelect = useCallback((blockId: string, colIdx: number | null) => {
-    void blockId;
+  const handleColSelect = useCallback((_blockId: string, colIdx: number | null) => {
     setActiveColIdx(colIdx);
   }, []);
 
@@ -477,7 +434,7 @@ export default function EditorPage({
                   <PanelSection title="Background Color">
                     <div className="flex flex-col gap-2">
                       <div className="flex flex-wrap gap-1.5 mb-2">
-                        {require("@/lib/color-palette").COLOR_PALETTE.map(({ label, value }: { label: string, value: string }) => (
+                        {COLOR_PALETTE.map(({ label, value }) => (
                           <button
                             key={label}
                             title={label}
@@ -492,9 +449,9 @@ export default function EditorPage({
                         {/* Custom color */}
                         <label
                           title="Custom color"
-                          className={`relative flex h-6 w-6 cursor-pointer items-center justify-center rounded-full overflow-hidden transition ${!require("@/lib/color-palette").COLOR_PALETTE.some((c: { value: string }) => c.value === pageBgColor) ? "border-2 border-zinc-900 scale-110" : "hover:opacity-80"}`}
+                          className={`relative flex h-6 w-6 cursor-pointer items-center justify-center rounded-full overflow-hidden transition ${!COLOR_PALETTE.some((c) => c.value === pageBgColor) ? "border-2 border-zinc-900 scale-110" : "hover:opacity-80"}`}
                           style={{
-                            background: !require("@/lib/color-palette").COLOR_PALETTE.some((c: { value: string }) => c.value === pageBgColor)
+                            background: !COLOR_PALETTE.some((c) => c.value === pageBgColor)
                               ? pageBgColor
                               : "conic-gradient(red,yellow,lime,cyan,blue,magenta,red)",
                           }}

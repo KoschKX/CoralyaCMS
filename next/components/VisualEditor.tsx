@@ -155,12 +155,13 @@ function CE<T extends keyof React.JSX.IntrinsicElements = "div">({
   );
 }
 
-// ── CodeEditor ────────────────────────────────────────────────────────────────
+// ── InlineCodeEditor ──────────────────────────────────────────────────────────
 // A contentEditable <code> element that mirrors <pre><code> from the live site
 // exactly, so the block height in the editor matches the front end.
 // Uses textContent (not innerHTML) to preserve raw newlines without escaping.
+// Named "Inline" to distinguish from the Monaco-based CodeEditor component.
 
-function CodeEditor({ code, onSave }: { code: string; onSave: (val: string) => void }) {
+function InlineCodeEditor({ code, onSave }: { code: string; onSave: (val: string) => void }) {
   const ref = useRef<HTMLElement>(null);
   const refCallback = useCallback(
     (el: HTMLElement | null) => {
@@ -541,7 +542,7 @@ function EditableBlock({
     const code = (data.code as string) ?? "";
     return (
       <pre className="block-code overflow-x-auto rounded-lg bg-zinc-900 px-5 py-4 text-sm text-zinc-100">
-        <CodeEditor code={code} onSave={(val) => onUpdate({ ...data, code: val })} />
+        <InlineCodeEditor code={code} onSave={(val) => onUpdate({ ...data, code: val })} />
       </pre>
     );
   }

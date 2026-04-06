@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { EditorBlock } from "@/lib/pages-db";
 import { blockMap } from "@/blocks/index";
 import { parseShortcode } from "@/lib/shortcodes";
@@ -7,7 +8,7 @@ interface Props {
   disabledBlocks?: string[];
 }
 
-export default function BlockRenderer({ blocks, disabledBlocks = [] }: Props) {
+function BlockRenderer({ blocks, disabledBlocks = [] }: Props) {
   return (
     <div className="text-zinc-800" style={{ display: "flex", flexDirection: "column", gap: "var(--block-spacing, 1.5rem)" }}>
       {blocks
@@ -53,4 +54,5 @@ export default function BlockRenderer({ blocks, disabledBlocks = [] }: Props) {
   );
 }
 
+export default memo(BlockRenderer);
 
