@@ -13,6 +13,7 @@ function getColWidth(colIdx: number, vp: string, colWidths: string[], responsive
 
 
 import { useState, useEffect } from "react";
+import { getEditorBreakpoints } from "@/lib/editor-breakpoints";
 
 import type { ReactNode } from "react";
 
@@ -26,19 +27,31 @@ interface ColumnsGridProps {
 
 export default function ColumnsGrid({ colWidths, responsive, children, selectedColIdx, stack }: ColumnsGridProps) {
 
-  // Detect if we're in the editor by checking for window.__EDITOR_VIEWPORT__
-  const [editorViewport, setEditorViewport] = useState<string>(
-    typeof window !== "undefined" && window.__EDITOR_VIEWPORT__
-      ? window.__EDITOR_VIEWPORT__
-      : "desktop"
-  );
+  // Use the editor canvas width (not window width) so breakpoints fire at the
+  // correct point when the right panel is open and the canvas is narrower.
+  const [editorViewport, setEditorViewport] = useState<string>("desktop");
 
   useEffect(() => {
-    function onViewportChange(e: Event) {
-      setEditorViewport((e as CustomEvent<string>).detail ?? "desktop");
+    const { tablet: tabletBp, mobile: mobileBp } = getEditorBreakpoints();
+    function parsePx(val: string) { return parseInt(val, 10) || 0; }
+    function getWidth() {
+      return (typeof window !== "undefined" && window.__EDITOR_CANVAS_WIDTH__)
+        ? window.__EDITOR_CANVAS_WIDTH__
+        : (typeof window !== "undefined" ? window.innerWidth : 1280);
     }
-    window.addEventListener("editor-viewport-change", onViewportChange);
-    return () => window.removeEventListener("editor-viewport-change", onViewportChange);
+    function update() {
+      const w = getWidth();
+      if (w <= parsePx(mobileBp)) setEditorViewport("mobile");
+      else if (w <= parsePx(tabletBp)) setEditorViewport("tablet");
+      else setEditorViewport("desktop");
+    }
+    update();
+    window.addEventListener("editor-canvas-resize", update);
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("editor-canvas-resize", update);
+      window.removeEventListener("resize", update);
+    };
   }, []);
 
   // Render all columns in a single inline-block container for natural wrapping

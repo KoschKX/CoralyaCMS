@@ -30,8 +30,7 @@ function mergeBlocksForViewport(blocks: EditorBlock[], viewport: string): Editor
 // ...existing code...
 
 import { useRef, useState, useCallback, useEffect } from "react";
-import { ResponsiveStyleInjector } from "@/components/ResponsiveStyleInjector";
-import { getEditorBreakpoints } from "@/lib/editor-breakpoints";
+
 import { useRouter } from "next/navigation";
 import type { EditorBlock } from "@/lib/pages-db";
 import { blockMap } from "@/blocks/index";
@@ -101,7 +100,6 @@ export default function EditorPage({
   // Parse blocks from codeText for live preview (unmerged, for CSS)
   const [codeText, setCodeText] = useState(initialHtml || blocksToShortcodes(initialParsedBlocks));
   const liveBlocks = shortcodesToBlocks(codeText);
-  const { tablet: tabletBp, mobile: mobileBp } = getEditorBreakpoints();
 
   const [title, setTitle] = useState(initialTitle);
   const [slug, setSlug] = useState(initialSlug);
@@ -149,6 +147,22 @@ export default function EditorPage({
   );
 
   const updateBlockHandlerRef = useRef<((id: string, newData: Record<string, unknown>) => void) | null>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
+
+  // Broadcast canvas width so breakpoint hooks can compare against the actual
+  // editor canvas width rather than the full window width (which is wider when
+  // the right panel is open).
+  useEffect(() => {
+    const el = canvasRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => {
+      const w = entry.contentRect.width;
+      window.__EDITOR_CANVAS_WIDTH__ = w;
+      window.dispatchEvent(new CustomEvent("editor-canvas-resize", { detail: w }));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const registerUpdateHandler = useCallback(
     (fn: ((id: string, newData: Record<string, unknown>) => void) | null) => {
@@ -329,7 +343,7 @@ export default function EditorPage({
 
       <div className="flex flex-1 overflow-hidden">
         {/* Editor canvas */}
-        <div className="flex-1 overflow-y-auto bg-zinc-100">
+        <div ref={canvasRef} className="flex-1 overflow-y-auto bg-zinc-100">
                     {/* Inject Code Fields (main content area) */}
           <div className="py-10">
             {/* Single page card: same maxWidth/padding as live site, white bg */}
@@ -412,8 +426,6 @@ export default function EditorPage({
                     className="sr-only"
                   />
                   <>
-                    {/* Always pass original (unmerged) blocks to ResponsiveStyleInjector for correct responsive CSS */}
-                    <ResponsiveStyleInjector blocks={liveBlocks} tabletBp={tabletBp} mobileBp={mobileBp} />
                     <ViewportContext.Provider value={{ viewport, isSectionEnabled, toggleSection }}>
                       <VisualEditor
                         key={editorKey}

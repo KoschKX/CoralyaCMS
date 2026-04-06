@@ -225,27 +225,33 @@ function useEditorViewport(): string {
 }
 
 // ── useMediaViewport ──────────────────────────────────────────────────────────
-// Returns the current viewport based on actual window.matchMedia — mirrors CSS
-// @media (max-width: …) behaviour so column widths only switch when the real
-// browser width crosses the breakpoint threshold (matching color/align/font-size).
+// Returns the current viewport based on the editor canvas width (not the full
+// window width). When the right panel is open the canvas is narrower, so
+// breakpoints should fire earlier relative to the window edge.
+
+function parsePx(val: string): number { return parseInt(val, 10) || 0; }
+
+function getCanvasWidth(): number {
+  if (typeof window === "undefined") return 1280;
+  return window.__EDITOR_CANVAS_WIDTH__ ?? window.innerWidth;
+}
 
 function useMediaViewport(): string {
   const { tablet: tabletBp, mobile: mobileBp } = getEditorBreakpoints();
   const [vp, setVp] = useState<string>("desktop");
   useEffect(() => {
-    const mqMobile = window.matchMedia(`(max-width: ${mobileBp})`);
-    const mqTablet = window.matchMedia(`(max-width: ${tabletBp})`);
     function update() {
-      if (mqMobile.matches) setVp("mobile");
-      else if (mqTablet.matches) setVp("tablet");
+      const w = getCanvasWidth();
+      if (w <= parsePx(mobileBp)) setVp("mobile");
+      else if (w <= parsePx(tabletBp)) setVp("tablet");
       else setVp("desktop");
     }
     update();
-    mqMobile.addEventListener("change", update);
-    mqTablet.addEventListener("change", update);
+    window.addEventListener("editor-canvas-resize", update);
+    window.addEventListener("resize", update);
     return () => {
-      mqMobile.removeEventListener("change", update);
-      mqTablet.removeEventListener("change", update);
+      window.removeEventListener("editor-canvas-resize", update);
+      window.removeEventListener("resize", update);
     };
   }, [tabletBp, mobileBp]);
   return vp;
@@ -393,14 +399,23 @@ function EditableBlock({
 }) {
   const data = block.data as Record<string, unknown>;
   const type = block.type;
-  // Use actual window width (matchMedia) so column widths only change when the
-  // real breakpoint is reached — consistent with CSS @media rules for other props.
+  // Use actual window width (matchMedia) — mirrors CSS @media rules so rendered
+  // styles match the live site. Panel buttons only control which breakpoint's
+  // settings are shown in the panel, not what is rendered here.
   const mediaViewport = useMediaViewport();
+
+  // Merge responsive overrides for the current viewport so ALL properties
+  // (color, align, fontSize, etc.) reflect the active breakpoint in the editor.
+  const responsive = (data.responsive as Record<string, Record<string, unknown>>) ?? {};
+  const resolvedData: Record<string, unknown> =
+    mediaViewport !== "desktop" && responsive[mediaViewport]
+      ? { ...data, ...responsive[mediaViewport] }
+      : data;
 
   // ── paragraph ──────────────────────────────────────────────────────────────
   // Mirrors: <p className="block-paragraph leading-relaxed" style={…}>
   if (type === "paragraph") {
-    const fontSize = (data.fontSize as string) || "base";
+    const fontSize = (resolvedData.fontSize as string) || "base";
     return (
       <CE
         as="p"
@@ -409,8 +424,8 @@ function EditableBlock({
         className="block-paragraph leading-relaxed focus:outline-none"
         style={{
           fontSize: `var(--font-size-${fontSize})`,
-          textAlign: ((data.align as string) || "left") as CSSProperties["textAlign"],
-          color: (data.color as string) || undefined,
+          textAlign: ((resolvedData.align as string) || "left") as CSSProperties["textAlign"],
+          color: (resolvedData.color as string) || undefined,
         }}
       />
     );
@@ -436,8 +451,8 @@ function EditableBlock({
           fontSize: `var(--h${level}-size)`,
           fontWeight: `var(--h${level}-weight)` as CSSProperties["fontWeight"],
           lineHeight: `var(--h${level}-line-height)`,
-          textAlign: ((data.align as string) || "left") as CSSProperties["textAlign"],
-          color: (data.color as string) || undefined,
+          textAlign: ((resolvedData.align as string) || "left") as CSSProperties["textAlign"],
+          color: (resolvedData.color as string) || undefined,
         }}
       />
     );
@@ -449,7 +464,7 @@ function EditableBlock({
     return (
       <blockquote
         className="block-quote border-l-4 border-zinc-300 pl-5 italic text-zinc-600"
-        style={{ textAlign: ((data.align as string) || "left") as CSSProperties["textAlign"] }}
+        style={{ textAlign: ((resolvedData.align as string) || "left") as CSSProperties["textAlign"] }}
       >
         <CE
           as="p"
