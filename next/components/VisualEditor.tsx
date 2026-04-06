@@ -361,6 +361,8 @@ export interface VisualEditorProps {
   onSelectBlock: (id: string | null, data: Record<string, unknown>, type: string) => void;
   selectedBlockId: string | null;
   registerUpdateHandler: (fn: ((id: string, newData: Record<string, unknown>) => void) | null) => void;
+  /** Called when a column within a columns block is focused or cleared. */
+  onColSelect?: (blockId: string, colIdx: number | null) => void;
 }
 
 // ── EditableBlock ─────────────────────────────────────────────────────────────
@@ -844,6 +846,7 @@ export default function VisualEditor({
   onSelectBlock,
   selectedBlockId,
   registerUpdateHandler,
+  onColSelect,
 }: VisualEditorProps) {
   const [blocks, setBlocks] = useState<EditorBlock[]>(initialBlocks);
   const [activeColInfo, setActiveColInfo] = useState<{ blockId: string; colIdx: number } | null>(null);
@@ -1010,12 +1013,14 @@ export default function VisualEditor({
       };
 
       const isLast = idx === list.length - 1;
-      // Apply .ring-blue-200 to columns blocks when selected
+      const colBlockParentSelected = isSelected && isColBlock && (activeColInfo?.blockId !== block.id);
       let ringClass = "ring-1 ring-transparent";
-      if (isSelected && isColBlock) {
-        ringClass = "ring-2 ring-blue-200";
-      } else if (isSelected && !isColBlock) {
+      if (isSelected && !isColBlock) {
         ringClass = "ring-2 ring-blue-500";
+      } else if (colBlockParentSelected) {
+        ringClass = "ring-2 ring-blue-500";
+      } else if (isSelected && isColBlock) {
+        ringClass = "ring-2 ring-blue-200";
       } else if (descendantSelected) {
         ringClass = "ring-2 ring-blue-200";
       }
@@ -1037,7 +1042,15 @@ export default function VisualEditor({
                 onSelectBlock(block.id, block.data as Record<string, unknown>, block.type);
               }}
               activeColIdx={activeColInfo?.blockId === block.id ? activeColInfo.colIdx : null}
-              onActiveColChange={(ci) => ci !== null ? setActiveColInfo({ blockId: block.id, colIdx: ci }) : setActiveColInfo(null)}
+              onActiveColChange={(ci) => {
+                if (ci !== null) {
+                  setActiveColInfo({ blockId: block.id, colIdx: ci });
+                  onColSelect?.(block.id, ci);
+                } else {
+                  setActiveColInfo(null);
+                  onColSelect?.(block.id, null);
+                }
+              }}
               renderChildBlocks={block.type === "columns" ? renderChildBlocks : undefined}
             />
 
@@ -1068,9 +1081,10 @@ export default function VisualEditor({
                   className="flex items-stretch overflow-hidden rounded-md border border-zinc-200 bg-white shadow-md"
                   style={{ minHeight: 36 }}
                 >
-                {/* Block type */}
+                {/* Block type — for columns blocks, clicking clears column selection */}
                 <button
                   title={def.label}
+                  onClick={block.type === "columns" ? () => { setActiveColInfo(null); onColSelect?.(block.id, null); } : undefined}
                   className="flex items-center justify-center w-9 text-lg text-zinc-700 hover:bg-zinc-100 rounded-l-md transition"
                 >
                   <BlockIcon name={block.type} label={def.label} size={20} />

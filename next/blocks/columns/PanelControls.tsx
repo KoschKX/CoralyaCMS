@@ -41,6 +41,7 @@ interface Props {
 export default function ColumnsPanelControls({ data, onChange }: Props) {
   const { viewport } = useContext(ViewportContext);
   const cols = (data.cols as Col[]) ?? [];
+  const selectedColIdx = typeof data.__selectedColIdx === "number" ? data.__selectedColIdx : null;
   const [customWidths, setCustomWidths] = useState<string[]>(
     cols.map((_, i) => getColWidth(data, i, viewport))
   );
@@ -75,92 +76,99 @@ export default function ColumnsPanelControls({ data, onChange }: Props) {
 
   return (
     <div className="space-y-5">
-      <PanelSection title="Columns">
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-zinc-500">
-            {cols.length} column{cols.length !== 1 ? "s" : ""}
-          </span>
-          <button
-            onClick={addCol}
-            className="rounded border border-zinc-200 px-2 py-0.5 text-xs text-zinc-600 hover:bg-zinc-50"
-          >
-            + Add column
-          </button>
-        </div>
-      </PanelSection>
-      <PanelSection title="Stack columns" fields={["stack"]}>
-        <div className="flex items-center">
-          <label className="text-xs text-zinc-500 mr-2">Stack columns</label>
-          <input
-            type="checkbox"
-            checked={!!data.stack}
-            onChange={e => onChange({ ...data, stack: e.target.checked })}
-            className="h-4 w-4"
-          />
-        </div>
-      </PanelSection>
+      {selectedColIdx === null && (
+        <>
+          <PanelSection title="Columns">
+            <span className="text-xs text-zinc-500">
+              {cols.length} column{cols.length !== 1 ? "s" : ""}
+            </span>
+          </PanelSection>
+          <PanelSection title="Stack columns" fields={["stack"]}>
+            <div className="flex items-center">
+              <label className="text-xs text-zinc-500 mr-2">Stack columns</label>
+              <input
+                type="checkbox"
+                checked={!!data.stack}
+                onChange={e => onChange({ ...data, stack: e.target.checked })}
+                className="h-4 w-4"
+              />
+            </div>
+          </PanelSection>
+        </>
+      )}
 
-      {cols.map((col, colIdx) => (
-        <PanelSection
-          key={colIdx}
-          title={`Column ${colIdx + 1}`}
-          fields={[`col-${colIdx}-width`]}
-        >
-          <div className="space-y-2">
-            <div className="flex flex-wrap gap-1">
-              {FRACTION_PRESETS.map((p) => (
-                <button
-                  key={p.label}
-                  onClick={() => {
-                    setWidth(colIdx, p.value);
+      {selectedColIdx !== null && (() => {
+        const colIdx = selectedColIdx;
+        return (
+          <PanelSection
+            key={colIdx}
+            title={`Column ${colIdx + 1}`}
+            fields={[`col-${colIdx}-width`]}
+          >
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-1">
+                {FRACTION_PRESETS.map((p) => (
+                  <button
+                    key={p.label}
+                    onClick={() => {
+                      setWidth(colIdx, p.value);
+                      setCustomWidths((prev) => {
+                        const next = [...prev];
+                        next[colIdx] = p.value;
+                        return next;
+                      });
+                    }}
+                    className={`rounded border px-2 py-0.5 text-xs transition ${
+                      getColWidth(data, colIdx, viewport) === p.value
+                        ? "border-zinc-900 bg-zinc-900 text-white"
+                        : "border-zinc-200 text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50"
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-1">
+                <input
+                  type="text"
+                  value={customWidths[colIdx] ?? getColWidth(data, colIdx, viewport) ?? ""}
+                  onChange={(e) =>
                     setCustomWidths((prev) => {
                       const next = [...prev];
-                      next[colIdx] = p.value;
+                      next[colIdx] = e.target.value;
                       return next;
-                    });
-                  }}
-                  className={`rounded border px-2 py-0.5 text-xs transition ${
-                    getColWidth(data, colIdx, viewport) === p.value
-                      ? "border-zinc-900 bg-zinc-900 text-white"
-                      : "border-zinc-200 text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50"
-                  }`}
+                    })
+                  }
+                  placeholder="e.g. 40% or 2fr"
+                  className="flex-1 rounded border border-zinc-200 px-2 py-1 text-xs focus:outline-none focus:border-zinc-400"
+                />
+                <button
+                  onClick={() => setWidth(colIdx, customWidths[colIdx] ?? "")}
+                  className="rounded border border-zinc-200 px-2 py-1 text-xs text-zinc-600 hover:bg-zinc-50"
                 >
-                  {p.label}
+                  OK
                 </button>
-              ))}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={addCol}
+                  className="rounded border border-zinc-200 px-2 py-0.5 text-xs text-zinc-600 hover:bg-zinc-50"
+                >
+                  + Add column
+                </button>
+                {cols.length > 1 && (
+                  <button
+                    onClick={() => removeCol(colIdx)}
+                    className="rounded border border-zinc-200 px-2 py-0.5 text-xs text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50 transition"
+                  >
+                    Remove column
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="flex gap-1">
-              <input
-                type="text"
-                value={customWidths[colIdx] ?? getColWidth(data, colIdx, viewport) ?? ""}
-                onChange={(e) =>
-                  setCustomWidths((prev) => {
-                    const next = [...prev];
-                    next[colIdx] = e.target.value;
-                    return next;
-                  })
-                }
-                placeholder="e.g. 40% or 2fr"
-                className="flex-1 rounded border border-zinc-200 px-2 py-1 text-xs focus:outline-none focus:border-zinc-400"
-              />
-              <button
-                onClick={() => setWidth(colIdx, customWidths[colIdx] ?? "")}
-                className="rounded border border-zinc-200 px-2 py-1 text-xs text-zinc-600 hover:bg-zinc-50"
-              >
-                OK
-              </button>
-            </div>
-            {cols.length > 1 && (
-              <button
-                onClick={() => removeCol(colIdx)}
-                className="rounded border border-zinc-200 px-2 py-0.5 text-xs text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50 transition"
-              >
-                Remove column
-              </button>
-            )}
-          </div>
-        </PanelSection>
-      ))}
+          </PanelSection>
+        );
+      })()}
     </div>
   );
 }

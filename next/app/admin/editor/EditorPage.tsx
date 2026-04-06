@@ -168,6 +168,12 @@ export default function EditorPage({
     [],
   );
 
+  const [activeColIdx, setActiveColIdx] = useState<number | null>(null);
+  const handleColSelect = useCallback((blockId: string, colIdx: number | null) => {
+    void blockId;
+    setActiveColIdx(colIdx);
+  }, []);
+
   function isSectionEnabled(fields: string[]): boolean {
     if (viewport === "desktop" || !selectedBlock) return true;
     const responsive = (selectedBlock.data.responsive as Record<string, Record<string, unknown>>) ?? {};
@@ -416,6 +422,7 @@ export default function EditorPage({
                         onSelectBlock={handleSelectBlock}
                         selectedBlockId={selectedBlock?.id ?? null}
                         registerUpdateHandler={registerUpdateHandler}
+                        onColSelect={handleColSelect}
                       />
                     </ViewportContext.Provider>
                   </>
@@ -527,7 +534,12 @@ export default function EditorPage({
                               Toggle switches to override at this breakpoint.
                             </p>
                             <Controls
-                              data={controlsDisplayData(selectedBlock.data)}
+                              data={{
+                                ...controlsDisplayData(selectedBlock.data),
+                                ...(selectedBlock.name === "columns" && activeColIdx !== null
+                                  ? { __selectedColIdx: activeColIdx }
+                                  : {}),
+                              }}
                               onChange={handleControlsChange}
                             />
                           </ViewportContext.Provider>
