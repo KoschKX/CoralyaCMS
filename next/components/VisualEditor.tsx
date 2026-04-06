@@ -388,6 +388,7 @@ function EditableBlock({
   renderChildBlocks?: (
     colBlocks: EditorBlock[],
     onUpdateAll: (newBlocks: EditorBlock[]) => void,
+    colIdx?: number,
   ) => ReactNode;
 }) {
   const data = block.data as Record<string, unknown>;
@@ -692,7 +693,8 @@ function EditableBlock({
                         col.blocks ?? [],
                         (newBlocks) => {
                           onUpdate({ ...data, cols: cols.map((c, ci) => ci === colIdx ? { ...c, blocks: newBlocks } : c) });
-                        }
+                        },
+                        colIdx
                       )
                     : (col.blocks ?? []).map((childBlock) => (
                         <EditableBlock
@@ -938,7 +940,7 @@ export default function VisualEditor({
     addAfter: (afterId: string | "TOP", type: string) => void;
   };
 
-  function renderBlockList(list: EditorBlock[], ops: BlockOps, isInColumn = false): ReactNode {
+  function renderBlockList(list: EditorBlock[], ops: BlockOps, isInColumn = false, parentInfo?: { type: string; label: string; onSelect: () => void }): ReactNode {
     // Build per-column ops — called inside the loop for columns blocks.
     function makeColOps(
       colBlocks: EditorBlock[],
@@ -996,6 +998,7 @@ export default function VisualEditor({
       const renderChildBlocks = (
         colBlocks: EditorBlock[],
         onUpdateAll: (newBlocks: EditorBlock[]) => void,
+        colIdx?: number,
       ): ReactNode => {
         const colOps = makeColOps(colBlocks, onUpdateAll);
         return (
@@ -1005,7 +1008,20 @@ export default function VisualEditor({
             ) : (
               <>
                 <AddZone onAdd={(type) => colOps.addAfter("TOP", type)} />
-                {renderBlockList(colBlocks, colOps, true)}
+                {renderBlockList(colBlocks, colOps, true, {
+                  type: block.type,
+                  label: def.label,
+                  onSelect: () => {
+                    if (colIdx !== undefined) {
+                      setActiveColInfo({ blockId: block.id, colIdx });
+                      onColSelect?.(block.id, colIdx);
+                    } else {
+                      setActiveColInfo(null);
+                      onColSelect?.(block.id, null);
+                    }
+                    onSelectBlock(block.id, block.data as Record<string, unknown>, block.type);
+                  },
+                })}
               </>
             )}
           </>
@@ -1077,15 +1093,26 @@ export default function VisualEditor({
                 className="absolute bottom-full left-0 z-20 mb-1.5 flex items-end gap-1.5"
                 onClick={(e) => e.stopPropagation()}
               >
+                {/* Parent selector button — only shown for blocks inside a column */}
+                {parentInfo && (
+                  <button
+                    title={`Select parent (${parentInfo.label})`}
+                    onClick={parentInfo.onSelect}
+                    className="flex items-center justify-center w-9 rounded-md border border-zinc-200 bg-white shadow-md text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 transition"
+                    style={{ minHeight: 36 }}
+                  >
+                    <BlockIcon name={parentInfo.type} label={parentInfo.label} size={18} />
+                  </button>
+                )}
                 <div
                   className="flex items-stretch overflow-hidden rounded-md border border-zinc-200 bg-white shadow-md"
                   style={{ minHeight: 36 }}
                 >
-                {/* Block type — for columns blocks, clicking clears column selection */}
+                {/* Block type icon */}
                 <button
                   title={def.label}
-                  onClick={block.type === "columns" ? () => { setActiveColInfo(null); onColSelect?.(block.id, null); } : undefined}
-                  className="flex items-center justify-center w-9 text-lg text-zinc-700 hover:bg-zinc-100 rounded-l-md transition"
+                  onClick={isColBlock ? () => { setActiveColInfo(null); onColSelect?.(block.id, null); } : undefined}
+                  className={`flex items-center justify-center w-9 text-lg text-zinc-700 rounded-l-md transition ${isColBlock ? "hover:bg-zinc-100 cursor-pointer" : "cursor-default"}`}
                 >
                   <BlockIcon name={block.type} label={def.label} size={20} />
                 </button>
