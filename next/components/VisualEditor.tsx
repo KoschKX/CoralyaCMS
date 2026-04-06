@@ -1009,8 +1009,8 @@ export default function VisualEditor({
               <>
                 <AddZone onAdd={(type) => colOps.addAfter("TOP", type)} />
                 {renderBlockList(colBlocks, colOps, true, {
-                  type: block.type,
-                  label: def.label,
+                  type: "column",
+                  label: `Column ${colIdx !== undefined ? colIdx + 1 : ""}`,
                   onSelect: () => {
                     if (colIdx !== undefined) {
                       setActiveColInfo({ blockId: block.id, colIdx });
@@ -1093,28 +1093,35 @@ export default function VisualEditor({
                 className="absolute bottom-full left-0 z-20 mb-1.5 flex items-end gap-1.5"
                 onClick={(e) => e.stopPropagation()}
               >
-                {/* Parent selector button — only shown for blocks inside a column */}
-                {parentInfo && (
+                {/* Parent selector button — shown for blocks inside a column, OR when a column is active within a columns block */}
+                {(parentInfo || (isColBlock && activeColInfo?.blockId === block.id)) && (
                   <button
-                    title={`Select parent (${parentInfo.label})`}
-                    onClick={parentInfo.onSelect}
+                    title={parentInfo ? `Select parent (${parentInfo.label})` : "Select columns block"}
+                    onClick={parentInfo ? parentInfo.onSelect : () => { setActiveColInfo(null); onColSelect?.(block.id, null); }}
                     className="flex items-center justify-center w-9 rounded-md border border-zinc-200 bg-white shadow-md text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 transition"
                     style={{ minHeight: 36 }}
                   >
-                    <BlockIcon name={parentInfo.type} label={parentInfo.label} size={18} />
+                    <BlockIcon
+                      name={parentInfo ? parentInfo.type : "columns"}
+                      label={parentInfo ? parentInfo.label : "Columns"}
+                      size={18}
+                    />
                   </button>
                 )}
                 <div
                   className="flex items-stretch overflow-hidden rounded-md border border-zinc-200 bg-white shadow-md"
                   style={{ minHeight: 36 }}
                 >
-                {/* Block type icon */}
+                {/* Block type icon — shows 'column' when a column is active, otherwise the block's own icon */}
                 <button
-                  title={def.label}
-                  onClick={isColBlock ? () => { setActiveColInfo(null); onColSelect?.(block.id, null); } : undefined}
-                  className={`flex items-center justify-center w-9 text-lg text-zinc-700 rounded-l-md transition ${isColBlock ? "hover:bg-zinc-100 cursor-pointer" : "cursor-default"}`}
+                  title={isColBlock && activeColInfo?.blockId === block.id ? "Column" : def.label}
+                  className="flex items-center justify-center w-9 text-lg text-zinc-700 rounded-l-md transition cursor-default"
                 >
-                  <BlockIcon name={block.type} label={def.label} size={20} />
+                  <BlockIcon
+                    name={isColBlock && activeColInfo?.blockId === block.id ? "column" : block.type}
+                    label={isColBlock && activeColInfo?.blockId === block.id ? "Column" : def.label}
+                    size={20}
+                  />
                 </button>
 
                 <div className="w-px self-stretch bg-zinc-200" />

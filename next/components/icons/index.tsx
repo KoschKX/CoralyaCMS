@@ -9,6 +9,7 @@ import QuoteIcon from '../../public/icons/quote.svg';
 import SeparatorIcon from '../../public/icons/separator.svg';
 import TableIcon from '../../public/icons/table.svg';
 import ColumnsIcon from '../../public/icons/columns.svg';
+import ColumnIcon from '../../public/icons/column.svg';
 import MediaIcon from '../../public/icons/media.svg';
 import HtmlIcon from '../../public/icons/html.svg';
 
@@ -21,6 +22,7 @@ export const ICON_COMPONENTS: Record<string, React.FC<React.SVGProps<SVGSVGEleme
   delimiter: SeparatorIcon,
   table: TableIcon,
   columns: ColumnsIcon,
+  column: ColumnIcon,
   embed: MediaIcon,
   html: HtmlIcon,
 };
