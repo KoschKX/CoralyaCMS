@@ -30,7 +30,7 @@ body {
    Zone is absolute at bottom: -(spacing/2), centred in the gap. */
 .insert-zone {
   position: absolute;
-  bottom: calc(var(--block-spacing, 1.5rem) / 2);
+  bottom: 0;
   left: 0;
   right: 0;
   height: 0;
@@ -78,8 +78,10 @@ body {
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   cursor: pointer;
 }
-.insert-zone:hover .insert-zone__line,
-.insert-zone:hover .insert-zone__btn {
+.insert-zone--selected:hover .insert-zone__line,
+.insert-zone--selected:hover .insert-zone__btn,
+.insert-zone--selected:has(:hover) .insert-zone__line,
+.insert-zone--selected:has(:hover) .insert-zone__btn {
   opacity: 1;
 }
 .insert-zone__btn:hover {

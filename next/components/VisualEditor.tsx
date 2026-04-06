@@ -804,15 +804,21 @@ function BlockPicker({
 
 // ── Add block zone (shown between blocks and at top/bottom) ──────────────────
 
-function AddZone({ onAdd, variant = "inline" }: { onAdd: (type: string) => void; variant?: "inline" | "footer" | "col-empty" | "col-last" }) {
+function AddZone({ onAdd, variant = "inline", isSelected = false, onOpenChange }: { onAdd: (type: string) => void; variant?: "inline" | "footer" | "col-empty" | "col-last"; isSelected?: boolean; onOpenChange?: (open: boolean) => void }) {
   const [open, setOpen] = useState(false);
-  const close = useCallback(() => setOpen(false), []);
+  useEffect(() => { onOpenChange?.(open); }, [open, onOpenChange]);
+  const close = useCallback(() => { setOpen(false); }, []);
+  const select = useCallback((t: string) => { setOpen(false); onAdd(t); }, [onAdd]);
+  const toggle = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setOpen((o) => !o);
+  }, []);
 
   if (variant === "col-empty") {
     return (
       <div className="group relative flex h-full min-h-[60px] items-center justify-center">
         <button
-          onClick={() => setOpen((o) => !o)}
+          onClick={toggle}
           className="flex h-6 w-6 items-center justify-center rounded-full border border-zinc-400 bg-white text-zinc-500 text-sm leading-none opacity-0 group-hover:opacity-100 hover:border-blue-500 hover:text-blue-500 transition-all"
           title="Add block"
         >
@@ -820,7 +826,7 @@ function AddZone({ onAdd, variant = "inline" }: { onAdd: (type: string) => void;
         </button>
         {open && (
           <div className="absolute top-full left-1/2 -translate-x-1/2 z-30 mt-1">
-            <BlockPicker onSelect={(t) => { setOpen(false); onAdd(t); }} onClose={close} />
+            <BlockPicker onSelect={select} onClose={close} />
           </div>
         )}
       </div>
@@ -831,7 +837,7 @@ function AddZone({ onAdd, variant = "inline" }: { onAdd: (type: string) => void;
     return (
       <div className="relative">
         <button
-          onClick={() => setOpen((o) => !o)}
+          onClick={toggle}
           className="flex w-full items-center gap-2 px-1 py-2 text-sm text-zinc-400 hover:text-zinc-600 transition"
         >
           <span className="flex h-6 w-6 items-center justify-center rounded border border-zinc-300 bg-white text-zinc-400 text-sm leading-none hover:border-zinc-500 hover:text-zinc-600">+</span>
@@ -839,7 +845,7 @@ function AddZone({ onAdd, variant = "inline" }: { onAdd: (type: string) => void;
         </button>
         {open && (
           <div className="absolute top-full left-0 z-30">
-            <BlockPicker onSelect={(t) => { setOpen(false); onAdd(t); }} onClose={close} />
+            <BlockPicker onSelect={select} onClose={close} />
           </div>
         )}
       </div>
@@ -847,10 +853,10 @@ function AddZone({ onAdd, variant = "inline" }: { onAdd: (type: string) => void;
   }
 
   return (
-    <div className={`insert-zone${variant === "col-last" ? " insert-zone--col-last" : ""}`}>
+    <div className={`insert-zone${variant === "col-last" ? " insert-zone--col-last" : ""}${isSelected ? " insert-zone--selected" : ""}`}>
       <div className="insert-zone__line" />
       <button
-        onClick={() => setOpen((o) => !o)}
+        onClick={toggle}
         className="insert-zone__btn"
         title="Add block"
       >
@@ -858,7 +864,7 @@ function AddZone({ onAdd, variant = "inline" }: { onAdd: (type: string) => void;
       </button>
       {open && (
         <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30">
-          <BlockPicker onSelect={(t) => { setOpen(false); onAdd(t); }} onClose={close} />
+          <BlockPicker onSelect={select} onClose={close} />
         </div>
       )}
     </div>
@@ -877,6 +883,7 @@ export default function VisualEditor({
 }: VisualEditorProps) {
   const [blocks, setBlocks] = useState<EditorBlock[]>(initialBlocks);
   const [activeColInfo, setActiveColInfo] = useState<{ blockId: string; colIdx: number } | null>(null);
+  const [anyPickerOpen, setAnyPickerOpen] = useState(false);
   const editorViewport = useEditorViewport();
 
   // Keep refs to avoid stale closures inside callbacks
@@ -1018,7 +1025,7 @@ export default function VisualEditor({
       const isColBlock = block.type === "columns";
       const descendantSelected =
         !isSelected && !!selectedBlockId && isDescendant(block, selectedBlockId);
-      const showOverlay = !isSelected && !descendantSelected;
+      const showOverlay = !isSelected && !descendantSelected && !isColBlock;
 
       const renderChildBlocks = (
         colBlocks: EditorBlock[],
@@ -1029,10 +1036,10 @@ export default function VisualEditor({
         return (
           <>
             {colBlocks.length === 0 ? (
-              <AddZone onAdd={(type) => colOps.addAfter("TOP", type)} variant="col-empty" />
+              <AddZone onAdd={(type) => colOps.addAfter("TOP", type)} variant="col-empty" onOpenChange={setAnyPickerOpen} />
             ) : (
               <>
-                <AddZone onAdd={(type) => colOps.addAfter("TOP", type)} />
+                <AddZone onAdd={(type) => colOps.addAfter("TOP", type)} onOpenChange={setAnyPickerOpen} />
                 {renderBlockList(colBlocks, colOps, true, {
                   type: "column",
                   label: `Column ${colIdx !== undefined ? colIdx + 1 : ""}`,
@@ -1071,6 +1078,7 @@ export default function VisualEditor({
           data-block-id={block.id}
           className={`relative transition ${ringClass}`}
           style={{ paddingBottom: "var(--block-spacing, 1.5rem)" }}
+          onClick={isColBlock && !isSelected ? (e) => { e.stopPropagation(); onSelectBlock(block.id, block.data as Record<string, unknown>, block.type); } : undefined}
         >
           <div className="group/block relative">
             <EditableBlock
@@ -1243,7 +1251,7 @@ export default function VisualEditor({
             )}
           </div>
 
-          {(!isLast || isInColumn) && <AddZone onAdd={(type) => ops.addAfter(block.id, type)} variant={isInColumn && isLast ? "col-last" : "inline"} />}
+          {(!isLast || isInColumn || isSelected) && <AddZone onAdd={(type) => ops.addAfter(block.id, type)} variant={isInColumn && isLast ? "col-last" : "inline"} isSelected={isSelected} onOpenChange={setAnyPickerOpen} />}
         </div>
       );
     });
@@ -1257,8 +1265,9 @@ export default function VisualEditor({
   };
 
   return (
-    <div className="text-zinc-800" style={{ display: "flex", flexDirection: "column" }}>
-        <AddZone onAdd={(type) => addBlockAfter("TOP", type)} />
+    <div className="relative text-zinc-800" style={{ display: "flex", flexDirection: "column" }}>
+        {anyPickerOpen && <div className="absolute inset-0 cursor-default" style={{ zIndex: 15 }} />}
+        <AddZone onAdd={(type) => addBlockAfter("TOP", type)} onOpenChange={setAnyPickerOpen} />
 
         {blocks.length === 0 && (
           <div className="my-4 flex min-h-[160px] items-center justify-center rounded-xl border-2 border-dashed border-zinc-200 text-sm text-zinc-400">
@@ -1268,7 +1277,7 @@ export default function VisualEditor({
 
         {renderBlockList(blocks, topOps)}
 
-        <AddZone onAdd={(type) => addBlockAfter(blocks[blocks.length - 1]?.id ?? "TOP", type)} variant="footer" />
+        <AddZone onAdd={(type) => addBlockAfter(blocks[blocks.length - 1]?.id ?? "TOP", type)} variant="footer" onOpenChange={setAnyPickerOpen} />
     </div>
   );
 }
