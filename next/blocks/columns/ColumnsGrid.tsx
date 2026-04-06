@@ -21,9 +21,10 @@ interface ColumnsGridProps {
   responsive: Record<string, Record<string, string>>;
   children: ReactNode;
   selectedColIdx?: number;
+  stack?: boolean;
 }
 
-export default function ColumnsGrid({ colWidths, responsive, children, selectedColIdx }: ColumnsGridProps) {
+export default function ColumnsGrid({ colWidths, responsive, children, selectedColIdx, stack }: ColumnsGridProps) {
 
   // Detect if we're in the editor by checking for window.__EDITOR_VIEWPORT__
   const [editorViewport, setEditorViewport] = useState<string>(
@@ -42,7 +43,17 @@ export default function ColumnsGrid({ colWidths, responsive, children, selectedC
 
   // Render all columns in a single inline-block container for natural wrapping
   const childArray = Array.isArray(children) ? children : [children];
-  const widths = colWidths.map((_, i) => getColWidth(i, editorViewport, colWidths, responsive));
+  // Check if stack is enabled: desktop uses top-level stack prop; other viewports check responsive overrides first
+  const stackActive = (() => {
+    if (editorViewport !== "desktop") {
+      const vpOverrides = responsive[editorViewport];
+      if (vpOverrides && "stack" in vpOverrides) return !!vpOverrides["stack"];
+    }
+    return !!stack;
+  })();
+  const widths = stackActive
+    ? childArray.map(() => "100%")
+    : colWidths.map((_, i) => getColWidth(i, editorViewport, colWidths, responsive));
   return (
     <div className="block-columns-wrapper">
       <div className="block-columns-inline-row" style={{ width: '100%', whiteSpace: 'normal', fontSize: 0 }}>

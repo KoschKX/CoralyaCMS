@@ -57,6 +57,14 @@ export function buildResponsiveCSS(
       // Mobile
       const mobileGrid = gridTemplateColumnsCSS(data.cols, responsive, "mobile");
       if (mobileGrid) css += `@media (max-width: ${mobileBp}) { ${sel} { ${mobileGrid} } }\n`;
+
+      // Stack columns: force 100% width on col wrappers
+      const stackSel = `[data-block-id=\"${block.id}\"] .block-columns__col-wrapper`;
+      if (data.stack) css += `${stackSel} { width: 100% !important; }\n`;
+      const tabletStack = responsive?.tablet && "stack" in responsive.tablet ? responsive.tablet.stack : undefined;
+      const mobileStack = responsive?.mobile && "stack" in responsive.mobile ? responsive.mobile.stack : undefined;
+      if (tabletStack) css += `@media (max-width: ${tabletBp}) { ${stackSel} { width: 100% !important; } }\n`;
+      if (mobileStack) css += `@media (max-width: ${mobileBp}) { ${stackSel} { width: 100% !important; } }\n`;
     }
 
     if (responsive) {

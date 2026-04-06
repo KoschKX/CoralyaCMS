@@ -78,18 +78,25 @@ export default function ColumnsPanelControls({ data, onChange }: Props) {
     <div className="space-y-5">
       {selectedColIdx === null && (
         <>
-          <PanelSection title="Columns">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 mb-2">Columns</p>
             <span className="text-xs text-zinc-500">
               {cols.length} column{cols.length !== 1 ? "s" : ""}
             </span>
-          </PanelSection>
+          </div>
           <PanelSection title="Stack columns" fields={["stack"]}>
             <div className="flex items-center">
               <label className="text-xs text-zinc-500 mr-2">Stack columns</label>
               <input
                 type="checkbox"
                 checked={!!data.stack}
-                onChange={e => onChange({ ...data, stack: e.target.checked })}
+                onChange={e => {
+                  if (viewport === "desktop") {
+                    onChange({ ...data, stack: e.target.checked || undefined });
+                  } else {
+                    onChange({ stack: e.target.checked || null });
+                  }
+                }}
                 className="h-4 w-4"
               />
             </div>

@@ -652,6 +652,15 @@ function EditableBlock({
     const cols = (data.cols as Array<{ blocks: EditorBlock[]; width?: string }>) ?? [];
     const responsive = (data.responsive as Record<string, Record<string, unknown>>) ?? {};
     function effectiveColWidth(col: { width?: string }, colIdx: number): string {
+      // Check if stacked for the current media viewport
+      const isStacked = (() => {
+        if (mediaViewport !== "desktop") {
+          const vpOverrides = responsive[mediaViewport];
+          if (vpOverrides && "stack" in vpOverrides) return !!vpOverrides["stack"];
+        }
+        return !!(data.stack);
+      })();
+      if (isStacked) return "100%";
       if (mediaViewport !== "desktop") {
         const key = `col-${colIdx}-width`;
         const vpOverrides = responsive[mediaViewport];
