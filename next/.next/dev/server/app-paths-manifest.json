@@ -1,5 +1,4 @@
 {
-  "/api/settings/route": "app/api/settings/route.js",
   "/page": "app/page.js",
   "/[slug]/page": "app/[slug]/page.js",
   "/admin/page": "app/admin/page.js",

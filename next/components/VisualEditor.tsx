@@ -607,14 +607,14 @@ function EditableBlock({
             // Always apply left and right padding for all columns
             let paddingLeft = '0.75rem';
             let paddingRight = '0.75rem';
-            if (cols.length > 1 && colIdx === 0) paddingLeft = 0;
+            if (cols.length > 1 && colIdx === 0) paddingLeft = '0';
             return (
               <div
                 key={colIdx}
                 style={{
                   display: 'inline-block',
                   verticalAlign: 'top',
-                  width: col.width || (100 / (cols.length || 1)) + '%',
+                  width: col.width || `${100 / (cols.length || 1)}%`,
                   minHeight: 1,
                   minWidth: 0,
                   paddingLeft,
@@ -631,9 +631,7 @@ function EditableBlock({
                         col.blocks ?? [],
                         (newBlocks) => {
                           onUpdate({ ...data, cols: cols.map((c, ci) => ci === colIdx ? { ...c, blocks: newBlocks } : c) });
-                        },
-                        // Only pass activeColIdx to children if this col is NOT selected
-                        isColSelected ? null : undefined
+                        }
                       )
                     : (col.blocks ?? []).map((childBlock) => (
                         <EditableBlock
@@ -668,6 +666,7 @@ function EditableBlock({
       <def.Layout
         data={data}
         renderBlocks={(children) => <BlockRenderer blocks={children} />}
+        blockId={block.id}
       />
     </div>
   );

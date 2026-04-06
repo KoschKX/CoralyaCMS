@@ -408,14 +408,16 @@ export default function EditorPage({
                   <>
                     {/* Always pass original (unmerged) blocks to ResponsiveStyleInjector for correct responsive CSS */}
                     <ResponsiveStyleInjector blocks={liveBlocks} tabletBp={tabletBp} mobileBp={mobileBp} />
-                    <VisualEditor
-                      key={editorKey}
-                      initialBlocks={mergeBlocksForViewport(liveBlocks, viewport)}
-                      onChange={(newCode) => setCodeText(newCode)}
-                      onSelectBlock={handleSelectBlock}
-                      selectedBlockId={selectedBlock?.id ?? null}
-                      registerUpdateHandler={registerUpdateHandler}
-                    />
+                    <ViewportContext.Provider value={{ viewport, isSectionEnabled, toggleSection }}>
+                      <VisualEditor
+                        key={editorKey}
+                        initialBlocks={liveBlocks}
+                        onChange={(newCode) => setCodeText(newCode)}
+                        onSelectBlock={handleSelectBlock}
+                        selectedBlockId={selectedBlock?.id ?? null}
+                        registerUpdateHandler={registerUpdateHandler}
+                      />
+                    </ViewportContext.Provider>
                   </>
                 </>
               )}
@@ -427,7 +429,7 @@ export default function EditorPage({
           <aside className="sticky top-0 h-[calc(100vh-3rem)] w-72 shrink-0 overflow-y-auto border-l border-zinc-200 bg-white">
             <div className="flex border-b border-zinc-200">
               {(mainMode === 'visual' ? ["page", "block"] : ["page"]).map((tab) => (
-                <button key={tab} onClick={() => setPanelTab(tab)}
+                <button key={tab} onClick={() => setPanelTab(tab as PanelTab)}
                   className={`flex-1 py-2.5 text-xs font-semibold capitalize tracking-wide transition ${panelTab === tab ? "border-b-2 border-zinc-900 text-zinc-900" : "text-zinc-400 hover:text-zinc-700"}`}>
                   {tab}
                 </button>
