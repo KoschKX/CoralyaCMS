@@ -25,6 +25,7 @@ import {
 import type { EditorBlock } from "@/lib/pages-db";
 import { blockRegistry, blockMap } from "@/blocks/index";
 import { blocksToShortcodes } from "@/lib/shortcodes";
+import { getEditorBreakpoints } from "@/lib/editor-breakpoints";
 import BlockRenderer from "@/components/BlockRenderer";
 import { closeUnclosedTags } from "@/lib/close-unclosed-tags";
 import { BlockIcon } from "@/components/BlockIcon";
@@ -204,6 +205,52 @@ const FRACTION_PRESETS = [
   { label: "Full", value: "100%" },
 ];
 
+// ── useEditorViewport ─────────────────────────────────────────────────────────
+// Subscribes to editor viewport toggle changes (used for the panel/toolbar).
+
+function useEditorViewport(): string {
+  const [vp, setVp] = useState<string>(
+    typeof window !== "undefined" && window.__EDITOR_VIEWPORT__
+      ? window.__EDITOR_VIEWPORT__
+      : "desktop"
+  );
+  useEffect(() => {
+    function handler(e: Event) {
+      setVp((e as CustomEvent<string>).detail ?? "desktop");
+    }
+    window.addEventListener("editor-viewport-change", handler);
+    return () => window.removeEventListener("editor-viewport-change", handler);
+  }, []);
+  return vp;
+}
+
+// ── useMediaViewport ──────────────────────────────────────────────────────────
+// Returns the current viewport based on actual window.matchMedia — mirrors CSS
+// @media (max-width: …) behaviour so column widths only switch when the real
+// browser width crosses the breakpoint threshold (matching color/align/font-size).
+
+function useMediaViewport(): string {
+  const { tablet: tabletBp, mobile: mobileBp } = getEditorBreakpoints();
+  const [vp, setVp] = useState<string>("desktop");
+  useEffect(() => {
+    const mqMobile = window.matchMedia(`(max-width: ${mobileBp})`);
+    const mqTablet = window.matchMedia(`(max-width: ${tabletBp})`);
+    function update() {
+      if (mqMobile.matches) setVp("mobile");
+      else if (mqTablet.matches) setVp("tablet");
+      else setVp("desktop");
+    }
+    update();
+    mqMobile.addEventListener("change", update);
+    mqTablet.addEventListener("change", update);
+    return () => {
+      mqMobile.removeEventListener("change", update);
+      mqTablet.removeEventListener("change", update);
+    };
+  }, [tabletBp, mobileBp]);
+  return vp;
+}
+
 // ── ColToolbar ────────────────────────────────────────────────────────────────
 // Floating toolbar shown on hover over a column cell inside a columns block.
 
@@ -343,6 +390,9 @@ function EditableBlock({
 }) {
   const data = block.data as Record<string, unknown>;
   const type = block.type;
+  // Use actual window width (matchMedia) so column widths only change when the
+  // real breakpoint is reached — consistent with CSS @media rules for other props.
+  const mediaViewport = useMediaViewport();
 
   // ── paragraph ──────────────────────────────────────────────────────────────
   // Mirrors: <p className="block-paragraph leading-relaxed" style={…}>
@@ -597,6 +647,15 @@ function EditableBlock({
   // The fallback (no renderChildBlocks) is a read-only render used outside the editor.
   if (type === "columns") {
     const cols = (data.cols as Array<{ blocks: EditorBlock[]; width?: string }>) ?? [];
+    const responsive = (data.responsive as Record<string, Record<string, unknown>>) ?? {};
+    function effectiveColWidth(col: { width?: string }, colIdx: number): string {
+      if (mediaViewport !== "desktop") {
+        const key = `col-${colIdx}-width`;
+        const vpOverrides = responsive[mediaViewport];
+        if (vpOverrides && key in vpOverrides) return (vpOverrides[key] as string) || `${100 / (cols.length || 1)}%`;
+      }
+      return col.width || `${100 / (cols.length || 1)}%`;
+    }
     // Only the currently selected col gets is-selected, and child columns do not get activeColIdx
     return (
       <div className="block-columns-wrapper">
@@ -614,7 +673,7 @@ function EditableBlock({
                 style={{
                   display: 'inline-block',
                   verticalAlign: 'top',
-                  width: col.width || `${100 / (cols.length || 1)}%`,
+                  width: effectiveColWidth(col, colIdx),
                   minHeight: 1,
                   minWidth: 0,
                   paddingLeft,
@@ -788,6 +847,7 @@ export default function VisualEditor({
 }: VisualEditorProps) {
   const [blocks, setBlocks] = useState<EditorBlock[]>(initialBlocks);
   const [activeColInfo, setActiveColInfo] = useState<{ blockId: string; colIdx: number } | null>(null);
+  const editorViewport = useEditorViewport();
 
   // Keep refs to avoid stale closures inside callbacks
   const blocksRef = useRef(blocks);
@@ -1057,6 +1117,12 @@ export default function VisualEditor({
                 const cols = ((block.data as Record<string, unknown>).cols as Array<{ blocks: EditorBlock[]; width?: string }>) ?? [];
                 const col = cols[ci];
                 const colData = block.data as Record<string, unknown>;
+                const colResp = (colData.responsive as Record<string, Record<string, unknown>>) ?? {};
+                const vpWidthKey = `col-${ci}-width`;
+                const effectiveColWidth =
+                  editorViewport !== "desktop" && colResp[editorViewport]?.[vpWidthKey] != null
+                    ? (colResp[editorViewport][vpWidthKey] as string) || undefined
+                    : col?.width;
                 return (
                   <div
                     key={`coltoolbar-${ci}`}
@@ -1070,7 +1136,7 @@ export default function VisualEditor({
                     <ColToolbar
                       colIdx={ci}
                       total={cols.length}
-                      width={col?.width}
+                      width={effectiveColWidth}
                       onMove={(dir) => {
                         const ni = ci + dir;
                         if (ni < 0 || ni >= cols.length) return;
@@ -1088,7 +1154,12 @@ export default function VisualEditor({
                         ops.update(block.id, { ...colData, cols: nc });
                       }}
                       onResize={(w) => {
-                        ops.update(block.id, { ...colData, cols: cols.map((c, i) => i === ci ? { ...c, width: w || undefined } : c) });
+                        if (editorViewport === "desktop") {
+                          ops.update(block.id, { ...colData, cols: cols.map((c, i) => i === ci ? { ...c, width: w || undefined } : c) });
+                        } else {
+                          const vpOverrides = { ...((colResp[editorViewport] as Record<string, unknown>) ?? {}), [vpWidthKey]: w || null };
+                          ops.update(block.id, { ...colData, responsive: { ...colResp, [editorViewport]: vpOverrides } });
+                        }
                       }}
                     />
                     </div>
