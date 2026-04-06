@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useRef, useEffect, type ReactNode } from "react";
 import type { BlockData } from "@/lib/block-types";
 
 // ── Responsive viewport context ─────────────────────────────────────────────
@@ -33,6 +33,12 @@ export function PanelSection({
   const isResponsiveMode = viewport !== "desktop";
   const isEnabled = isSectionEnabled(fields);
 
+  // Only animate the toggle when the user actually clicks it, not when the
+  // viewport selector changes (which would animate off→off or on→off spuriously).
+  const prevViewportRef = useRef(viewport);
+  const animate = prevViewportRef.current === viewport;
+  useEffect(() => { prevViewportRef.current = viewport; });
+
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
@@ -44,14 +50,16 @@ export function PanelSection({
           aria-checked={isEnabled}
           onClick={() => isResponsiveMode && toggleSection(title, fields)}
           title={isEnabled ? "Remove breakpoint override" : "Override at this breakpoint"}
-          className={`relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer items-center rounded-full transition-colors duration-150 focus:outline-none ${
-            isResponsiveMode ? "opacity-100" : "opacity-0 pointer-events-none"
-          } ${isEnabled ? "bg-zinc-800" : "bg-zinc-200"}`}
+          className={`relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer items-center rounded-full focus:outline-none ${
+            animate ? "transition-colors duration-150" : ""
+          } ${isResponsiveMode ? "opacity-100" : "opacity-0 pointer-events-none"} ${
+            isEnabled ? "bg-zinc-800" : "bg-zinc-200"
+          }`}
         >
           <span
-            className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-sm transition-transform duration-150 ${
-              isEnabled ? "translate-x-3.5" : "translate-x-0.5"
-            }`}
+            className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-sm ${
+              animate ? "transition-transform duration-150" : ""
+            } ${isEnabled ? "translate-x-3.5" : "translate-x-0.5"}`}
           />
         </button>
       </div>
