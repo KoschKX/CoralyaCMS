@@ -1,10 +1,6 @@
 /- ARCHIVE -
 .DS_Store
 /next/node_modules
-/next/.next/dev/cache
-/next/.next/cache
 /setup/cache
 /next/.next
-/next/.next
-/next/.next
-/next/.next
+/next/.next/dev
