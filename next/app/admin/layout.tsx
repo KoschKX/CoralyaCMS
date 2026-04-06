@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
       <aside className="flex w-56 shrink-0 flex-col border-r border-zinc-200 bg-zinc-950 text-zinc-100">
         <div className="px-5 py-5">
@@ -63,7 +63,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 bg-zinc-50">{children}</main>
+      <main className="flex-1 overflow-hidden bg-zinc-50">{children}</main>
     </div>
   );
 }

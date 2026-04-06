@@ -30,7 +30,7 @@ body {
    Zone is absolute at bottom: -(spacing/2), centred in the gap. */
 .insert-zone {
   position: absolute;
-  bottom: calc(var(--block-spacing, 1.5rem) / -2);
+  bottom: calc(var(--block-spacing, 1.5rem) / 2);
   left: 0;
   right: 0;
   height: 0;
@@ -86,7 +86,4 @@ body {
   border-color: #3b82f6;
   color: #3b82f6;
 }
-/* Last block inside a column — zone sits inside the bottom padding */
-.insert-zone--col-last {
-  bottom: calc(var(--block-spacing, 1.5rem) / 2);
-}
+

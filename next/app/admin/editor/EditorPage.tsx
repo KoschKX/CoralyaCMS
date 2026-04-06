@@ -236,7 +236,7 @@ export default function EditorPage({
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex h-full flex-col">
       {/* Top toolbar */}
       <div className="sticky top-0 z-20 flex h-12 items-center border-b border-zinc-200 bg-white px-4">
         <button onClick={() => router.push("/admin")} className="text-sm text-zinc-500 hover:text-zinc-800 mr-2">

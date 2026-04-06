@@ -1070,7 +1070,7 @@ export default function VisualEditor({
           key={block.id}
           data-block-id={block.id}
           className={`relative transition ${ringClass}`}
-          style={{ marginBottom: isInColumn && isLast ? 0 : "var(--block-spacing, 1.5rem)", paddingBottom: isInColumn && isLast ? "var(--block-spacing, 1.5rem)" : undefined }}
+          style={{ paddingBottom: "var(--block-spacing, 1.5rem)" }}
         >
           <div className="group/block relative">
             <EditableBlock
