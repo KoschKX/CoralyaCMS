@@ -31,7 +31,6 @@
   min-width: 0;
   word-break: break-word;
   overflow-wrap: anywhere;
-  height: 100% !important;
 }
 
 .block-columns__col-wrapper {

@@ -1078,7 +1078,10 @@ export default function VisualEditor({
           data-block-id={block.id}
           className={`relative transition ${ringClass}`}
           style={{ paddingBottom: "var(--block-spacing, 1.5rem)" }}
-          onClick={isColBlock && !isSelected ? (e) => { e.stopPropagation(); onSelectBlock(block.id, block.data as Record<string, unknown>, block.type); } : undefined}
+          onClick={(e) => {
+            if (isSelected) { e.stopPropagation(); return; }
+            if (isColBlock) { e.stopPropagation(); onSelectBlock(block.id, block.data as Record<string, unknown>, block.type); }
+          }}
         >
           <div className="group/block relative">
             <EditableBlock
