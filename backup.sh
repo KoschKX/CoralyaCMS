@@ -16,7 +16,8 @@ cd "$ROOT"
 
 zip -r "$OUT" next start.sh backup.sh \
   --exclude "*/node_modules/*" \
-  --exclude "*/.next/*" \
+  --exclude "next/.next/*" \
+  --exclude "*/package-lock.json" \
 
 SIZE=$(du -sh "$OUT" | cut -f1)
 echo "✅ Done — $OUT ($SIZE)"

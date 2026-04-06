@@ -2,8 +2,6 @@ import "./styles.css";
 import type { EditorBlock } from "@/lib/pages-db";
 import type { BlockLayoutProps } from "@/lib/block-types";
 import ColumnsGrid from "./ColumnsGrid";
-import { useContext } from "react";
-
 
 export default function ColumnsLayout({ data, renderBlocks, blockId }: BlockLayoutProps & { blockId: string }) {
   const cols = (data.cols as Array<{ blocks: EditorBlock[]; width?: string }>) ?? [];
