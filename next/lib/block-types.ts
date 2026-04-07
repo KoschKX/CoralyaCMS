@@ -16,20 +16,32 @@ export interface PanelControlProps {
   onChange: (newData: BlockData) => void;
 }
 
+/** Props passed to each block's Editable component. */
+export interface EditableProps {
+  data: BlockData;
+  onUpdate: (newData: BlockData) => void;
+  blockId: string;
+  isSelected?: boolean;
+  onSelect?: () => void;
+  activeColIdx?: number | null;
+  onActiveColChange?: (ci: number | null) => void;
+  renderChildBlocks?: (
+    colBlocks: EditorBlock[],
+    onUpdateAll: (newBlocks: EditorBlock[]) => void,
+    colIdx?: number,
+  ) => ReactNode;
+}
+
 export interface BlockDefinition {
   name: string;
   label: string;
   icon: string;
   /** When true the editor panel shows the desktop/tablet/mobile viewport picker. */
   supportsBreakpoints?: boolean;
+  /** Initial data used when inserting a new block of this type. */
+  defaultData?: BlockData;
   Layout: (props: BlockLayoutProps) => ReactNode;
   PanelControls?: (props: PanelControlProps) => ReactNode;
-  /**
-   * Returns the Editor.js tool config object.
-   * Receives optional `deps` (e.g. EditorJS constructor, baseTools) for blocks
-   * that need them (columns).
-   * Return null for built-in tools (paragraph).
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getEditorTool?: (deps?: Record<string, any>) => Promise<Record<string, any> | null>;
+  /** Editor-mode render. When omitted, EditableBlock falls back to the read-only Layout. */
+  Editable?: (props: EditableProps) => ReactNode;
 }

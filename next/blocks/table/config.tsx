@@ -1,13 +1,16 @@
 import { PanelSection } from "@/components/block-shared";
 import type { BlockDefinition } from "@/lib/block-types";
 import TableLayout from "./layout";
+import { TableEditable } from "./editable";
 
 const table: BlockDefinition = {
   name: "table",
   label: "Table",
   icon: "⊞",
   supportsBreakpoints: true,
+  defaultData: { content: [["Heading 1", "Heading 2"], ["Cell 1", "Cell 2"]], withHeadings: true },
   Layout: TableLayout,
+  Editable: TableEditable,
   PanelControls({ data, onChange }) {
     return (
       <PanelSection title="Table options" fields={["withHeadings"]}>
@@ -22,10 +25,6 @@ const table: BlockDefinition = {
         </label>
       </PanelSection>
     );
-  },
-  async getEditorTool() {
-    const { default: Table } = await import("@editorjs/table");
-    return { class: Table, inlineToolbar: true };
   },
 };
 

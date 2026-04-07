@@ -2,13 +2,16 @@ import { AlignButtons, PanelSection } from "@/components/block-shared";
 import { ColorPicker } from "@/components/ColorPicker";
 import type { BlockDefinition } from "@/lib/block-types";
 import HeaderLayout from "./layout";
+import { HeaderEditable } from "./editable";
 
 const header: BlockDefinition = {
   name: "header",
   label: "Heading",
   icon: "heading",
   supportsBreakpoints: true,
+  defaultData: { text: "New heading", level: 2 },
   Layout: HeaderLayout,
+  Editable: HeaderEditable,
   PanelControls({ data, onChange }) {
     return (
       <div className="space-y-5">
@@ -33,10 +36,6 @@ const header: BlockDefinition = {
         <ColorPicker data={data} onChange={onChange} />
       </div>
     );
-  },
-  async getEditorTool() {
-    const { default: Header } = await import("@editorjs/header");
-    return { class: Header, config: { levels: [1, 2, 3, 4], defaultLevel: 2 } };
   },
 };
 

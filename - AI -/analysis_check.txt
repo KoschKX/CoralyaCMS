@@ -1,0 +1,46 @@
+You are an expert senior software engineer specializing in Next.js, React architecture, and CMS/editor systems (similar to WordPress Gutenberg).
+
+Your task is to analyze this Next.js codebase thoroughly. DO NOT make any code changes yet. Only analyze and summarize the current state.
+
+Context:
+- Project is a CMS-like system inspired by Gutenberg (block-based content editing).
+- Built with Next.js (App Router if present), React, and modern JavaScript/TypeScript.
+- Goal is to later improve structure, performance, and maintainability.
+
+Analysis Instructions:
+1. 🔍 Project Structure
+   - Examine current folder/file organization.
+   - Identify UI components, block/editor components, hooks, utilities, API/data layer, and state management.
+   - Highlight areas that could benefit from reorganization.
+
+2. ⚛️ Component Architecture
+   - Identify large or tightly coupled components.
+   - Detect components that are not reusable or have prop inefficiencies.
+   - Note presentational vs logic component issues.
+
+3. 🚀 Performance Bottlenecks
+   - Identify potential re-renders, heavy components, or inefficient hooks usage.
+   - Highlight opportunities for memoization, dynamic imports, or code splitting.
+
+4. 🧠 State Management
+   - Evaluate current state management strategy.
+   - Identify potential improvements for editor state (blocks, selection, history/undo).
+
+5. 🧩 Block System Design
+   - Examine block registration, schema/types, and serialization/deserialization.
+   - Identify extensibility issues (plugins, custom blocks).
+
+6. 📡 Data Layer & API
+   - Check data fetching, storage, and Next.js best practices.
+   - Identify caching, validation, or server/client component misuse.
+
+7. 🧹 Code Quality
+   - Detect dead code, duplication, naming inconsistencies, or formatting issues.
+
+8. 🔐 Best Practices
+   - Check accessibility, error handling, and type safety.
+
+Output:
+- Summarize your analysis in clear sections corresponding to the above points.
+- Highlight specific areas of concern or improvement.
+- Ask me what I want to do next before taking any action.

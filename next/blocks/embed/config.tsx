@@ -1,16 +1,15 @@
 import type { BlockDefinition } from "@/lib/block-types";
 import EmbedLayout from "./layout";
+import { EmbedEditable } from "./editable";
 
 const embed: BlockDefinition = {
   name: "embed",
   label: "Embed",
   icon: "◫",
   supportsBreakpoints: true,
+  defaultData: { embed: "" },
   Layout: EmbedLayout,
-  async getEditorTool() {
-    const { default: Embed } = await import("@editorjs/embed");
-    return { class: Embed };
-  },
+  Editable: EmbedEditable,
 };
 
 export default embed;

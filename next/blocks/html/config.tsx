@@ -1,11 +1,14 @@
 import type { BlockDefinition } from "@/lib/block-types";
 import HtmlLayout from "./layout";
+import { HtmlEditable } from "./editable";
 
 const htmlBlock: BlockDefinition = {
   name: "html",
   label: "Raw HTML",
   icon: "</>",
+  defaultData: { content: "<p>HTML content</p>" },
   Layout: HtmlLayout,
+  Editable: HtmlEditable,
   PanelControls({ data, onChange }) {
     return (
       <div className="space-y-2">
@@ -20,10 +23,6 @@ const htmlBlock: BlockDefinition = {
         />
       </div>
     );
-  },
-  async getEditorTool() {
-    const { default: HtmlTool } = await import("./editor-tool");
-    return { class: HtmlTool, inlineToolbar: false };
   },
 };
 

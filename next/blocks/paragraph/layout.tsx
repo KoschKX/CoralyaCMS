@@ -6,7 +6,7 @@ import { BlockLayoutProps } from "@/lib/block-types";
 
 export default function ParagraphLayout({ data, blockId }: BlockLayoutProps & { blockId: string }) {
   const uniqueClass = `block-${blockId}`;
-  const fontSize = (data.fontsize as string) || "base";
+  const fontSize = (data.fontSize as string) || "base";
   return (
     <div data-block-id={blockId}>
       <p

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import type { BlockData } from "@/lib/block-types";
-import { COLOR_PALETTE, type PaletteColor } from "@/lib/color-palette";
+import type { PaletteColor } from "@/lib/color-palette";
+import { COLOR_PALETTE } from "@/lib/color-palette";
 import { PanelSection } from "@/components/block-shared";
+import { useSettings } from "@/hooks/useSettings";
 
 export function ColorPicker({
   data,
@@ -12,14 +13,10 @@ export function ColorPicker({
   data: BlockData;
   onChange: (d: BlockData) => void;
 }) {
-  const [palette, setPalette] = useState<PaletteColor[]>(COLOR_PALETTE);
-
-  useEffect(() => {
-    fetch("/api/settings")
-      .then((r) => r.json())
-      .then((s) => { if (s.paletteColors?.length) setPalette(s.paletteColors); })
-      .catch(() => {});
-  }, []);
+  const settings = useSettings();
+  const palette: PaletteColor[] = settings?.paletteColors?.length
+    ? settings.paletteColors
+    : COLOR_PALETTE;
 
   const current = (data.color as string) ?? "";
   const isCustom = current !== "" && !palette.some((c) => c.value === current);

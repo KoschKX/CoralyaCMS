@@ -1,17 +1,15 @@
 import type { BlockDefinition } from "@/lib/block-types";
 import CodeLayout from "./layout";
+import { CodeEditable } from "./editable";
 
 const code: BlockDefinition = {
   name: "code",
   label: "Code",
   icon: "</>",
   supportsBreakpoints: true,
+  defaultData: { code: "" },
   Layout: CodeLayout,
-  // No panel controls needed for code blocks
-  async getEditorTool() {
-    const { default: Code } = await import("@editorjs/code");
-    return { class: Code };
-  },
+  Editable: CodeEditable,
 };
 
 export default code;

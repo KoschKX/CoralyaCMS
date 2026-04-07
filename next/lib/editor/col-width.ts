@@ -1,0 +1,55 @@
+/**
+ * Column width resolution utilities.
+ *
+ * Three callsites previously duplicated the logic for resolving the effective
+ * width of a column: EditableBlock (inline style), VisualEditor (col-toolbar
+ * display), and responsive-css (CSS generation). This module is the single
+ * source of truth.
+ */
+
+type ResponsiveOverrides = Record<string, Record<string, unknown>>;
+
+/**
+ * Resolve the stored width for a single column at the given viewport.
+ * Returns `undefined` when no width is set — the caller supplies its own
+ * fallback (e.g. "1fr" for CSS generation, or a percentage for inline style).
+ */
+export function resolveColWidth(
+  col: { width?: string },
+  colIdx: number,
+  responsive: ResponsiveOverrides | undefined,
+  viewport: string,
+): string | undefined {
+  if (viewport !== "desktop" && responsive?.[viewport]) {
+    const key = `col-${colIdx}-width`;
+    const override = responsive[viewport][key];
+    if (override != null) return (override as string) || undefined;
+  }
+  return col.width || undefined;
+}
+
+/**
+ * Resolve the effective inline display width for a column, including:
+ *   - responsive stacking (returns "100%" when stacked at the given viewport)
+ *   - per-viewport width overrides
+ *   - fallback to equally-divided percentages
+ *
+ * Used by EditableBlock (columns branch) for inline `width` style.
+ */
+export function resolveColWidthForDisplay(
+  col: { width?: string },
+  colIdx: number,
+  responsive: ResponsiveOverrides | undefined,
+  viewport: string,
+  totalCols: number,
+  desktopStack: boolean,
+): string {
+  let isStacked: boolean;
+  if (viewport !== "desktop" && responsive?.[viewport] && "stack" in responsive[viewport]) {
+    isStacked = !!responsive[viewport]["stack"];
+  } else {
+    isStacked = desktopStack;
+  }
+  if (isStacked) return "100%";
+  return resolveColWidth(col, colIdx, responsive, viewport) ?? `${100 / (totalCols || 1)}%`;
+}

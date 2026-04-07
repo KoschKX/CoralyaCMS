@@ -1,5 +1,25 @@
 import type { EditorBlock } from "@/lib/pages-db";
+import { resolveColWidth } from "@/lib/editor/col-width";
 
+/**
+ * Merge responsive overrides for the given viewport onto data.
+ * - On desktop, returns data unchanged.
+ * - On tablet/mobile, spreads responsive[viewport] on top of data.
+ * - If stripResponsive is true, the `responsive` key is removed from the result
+ *   (useful when passing data to panel controls that shouldn't see it).
+ */
+export function mergeViewportOverrides(
+  data: Record<string, unknown>,
+  viewport: string,
+  stripResponsive = false,
+): Record<string, unknown> {
+  if (viewport === "desktop") return data;
+  const { responsive: _r, ...rest } = data as Record<string, unknown> & { responsive?: unknown };
+  const responsive = (_r as Record<string, Record<string, unknown>>) ?? {};
+  const overrides = responsive[viewport];
+  if (!overrides) return stripResponsive ? rest : data;
+  return { ...(stripResponsive ? rest : data), ...overrides };
+}
 
 function rulesFor(overrides: Record<string, unknown>): string {
   const color    = (overrides.color    as string | undefined) || "";
@@ -12,25 +32,15 @@ function rulesFor(overrides: Record<string, unknown>): string {
   ].filter(Boolean).join(" ");
 }
 
-function gridTemplateColumnsCSS(cols: any[], responsive: Record<string, any> | undefined, breakpoint: string): string | null {
+function gridTemplateColumnsCSS(
+  cols: Array<{ width?: string }>,
+  responsive: Record<string, Record<string, unknown>> | undefined,
+  breakpoint: string,
+): string | null {
   if (!Array.isArray(cols)) return null;
-  // For each col, get width for this breakpoint (or fallback)
-  const widths = cols.map((col, i) => {
-    let w = col.width;
-    if (responsive && responsive[breakpoint]) {
-      const key = `col-${i}-width`;
-      if (responsive[breakpoint][key]) w = responsive[breakpoint][key];
-    }
-    return w || "1fr";
-  });
-  if (widths.every(w => w === "1fr")) return null;
-  // Use percent as-is, only use fr for fr units
-  const grid = widths.map(w => {
-    if (!w) return "1fr";
-    if (w.endsWith("%")) return w;
-    return w;
-  }).join(" ");
-  return `grid-template-columns: ${grid} !important;`;
+  const widths = cols.map((col, i) => resolveColWidth(col, i, responsive, breakpoint) ?? "1fr");
+  if (widths.every((w) => w === "1fr")) return null;
+  return `grid-template-columns: ${widths.join(" ")} !important;`;
 }
 
 /** Recursively build @media override CSS for blocks that have data.responsive set.

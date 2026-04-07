@@ -34,22 +34,15 @@ export default function ColumnsGrid({ colWidths, responsive, children, selectedC
   useEffect(() => {
     const { tablet: tabletBp, mobile: mobileBp } = getEditorBreakpoints();
     function parsePx(val: string) { return parseInt(val, 10) || 0; }
-    function getWidth() {
-      return (typeof window !== "undefined" && window.__EDITOR_CANVAS_WIDTH__)
-        ? window.__EDITOR_CANVAS_WIDTH__
-        : (typeof window !== "undefined" ? window.innerWidth : 1280);
-    }
     function update() {
-      const w = getWidth();
+      const w = typeof window !== "undefined" ? window.innerWidth : 1280;
       if (w <= parsePx(mobileBp)) setEditorViewport("mobile");
       else if (w <= parsePx(tabletBp)) setEditorViewport("tablet");
       else setEditorViewport("desktop");
     }
     update();
-    window.addEventListener("editor-canvas-resize", update);
     window.addEventListener("resize", update);
     return () => {
-      window.removeEventListener("editor-canvas-resize", update);
       window.removeEventListener("resize", update);
     };
   }, []);

@@ -1,13 +1,16 @@
 import { PanelSection } from "@/components/block-shared";
 import type { BlockDefinition } from "@/lib/block-types";
 import ListLayout from "./layout";
+import { ListEditable } from "./editable";
 
 const list: BlockDefinition = {
   name: "list",
   label: "List",
   icon: "≡",
   supportsBreakpoints: true,
+  defaultData: { items: ["Item 1", "Item 2"], style: "unordered" },
   Layout: ListLayout,
+  Editable: ListEditable,
   PanelControls({ data, onChange }) {
     return (
       <PanelSection title="List style" fields={["style"]}>
@@ -28,11 +31,6 @@ const list: BlockDefinition = {
         </div>
       </PanelSection>
     );
-  },
-  async getEditorTool() {
-    const m = await import("@editorjs/list");
-    const List = (m as unknown as { default: unknown }).default ?? m;
-    return { class: List, inlineToolbar: true };
   },
 };
 

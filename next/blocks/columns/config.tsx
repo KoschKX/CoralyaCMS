@@ -1,30 +1,17 @@
 import type { BlockDefinition } from "@/lib/block-types";
 import ColumnsLayout from "./layout";
 import ColumnsPanelControls from "./PanelControls";
+import { ColumnsEditable } from "./editable";
 
 const columns: BlockDefinition = {
   name: "columns",
   label: "Columns",
   icon: "⊟",
   supportsBreakpoints: true,
+  defaultData: { cols: [{ blocks: [], width: "50%" }, { blocks: [], width: "50%" }] },
   Layout: ColumnsLayout,
-
+  Editable: ColumnsEditable,
   PanelControls: ColumnsPanelControls,
-
-  // Columns needs EditorJS + baseTools injected at runtime — handled in BlockEditor
-  async getEditorTool(deps) {
-    const Columns = await import("@calumk/editorjs-columns").then(
-      (m) => m.default ?? m,
-    );
-    return {
-      class: Columns,
-      config: {
-        EditorJsLibrary: deps?.EditorJS,
-        tools: deps?.baseTools ?? {},
-      },
-    };
-  },
 };
 
 export default columns;
-

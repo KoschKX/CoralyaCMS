@@ -1,4 +1,4 @@
-import { getSettings } from "@/lib/settings-db";
+import { getSettings, buildPageDescription } from "@/lib/settings-db";
 import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
   return {
     title,
-    description: settings.description || settings.tagline || "Website description",
+    description: buildPageDescription(settings),
   };
 }
 

@@ -45,3 +45,8 @@ export function saveSettings(settings: Partial<SiteSettings>): SiteSettings {
   fs.writeFileSync(SETTINGS_FILE, JSON.stringify(updated, null, 2));
   return updated;
 }
+
+/** Consistent page description across all metadata functions. */
+export function buildPageDescription(settings: SiteSettings): string {
+  return settings.description || settings.tagline || "Website description";
+}

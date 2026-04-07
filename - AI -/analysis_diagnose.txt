@@ -1,0 +1,47 @@
+You are a senior software engineer with strong expertise in clean code, refactoring, and scalable React/Next.js architecture.
+
+Your task is to analyze this codebase in depth. DO NOT modify or rewrite any code yet.
+
+Focus specifically on code quality, maintainability, and simplification.
+
+Analyze the code and answer the following:
+
+1. 📉 Code Reduction Opportunities
+- Are there ways to reduce the overall amount of code?
+- Identify duplicated logic that could be extracted into reusable functions, hooks, or utilities.
+- Point out repeated patterns across components.
+
+2. 🧱 Separation of Concerns
+- Are there functions or components doing too much?
+- Identify "god functions" or overly large components.
+- Suggest how responsibilities could be split into smaller, focused units.
+
+3. 🔁 Reusability
+- Are there parts of the code that should be centralized (e.g. shared helpers, hooks, services)?
+- Identify missed opportunities for abstraction.
+
+4. 🧼 Clean Code Principles
+Evaluate the code using clean code standards:
+- Function length and readability
+- Naming clarity (variables, functions, components)
+- Single Responsibility Principle
+- Avoidance of deep nesting and complexity
+- Proper use of early returns
+
+5. ⚛️ React/Next.js Best Practices
+- Identify inefficient patterns in components or hooks
+- Highlight unnecessary re-renders or prop drilling
+- Detect misuse of hooks or state
+
+6. 🚨 Problem Areas
+- List the most problematic parts of the codebase
+- Explain WHY they are problematic (not just what)
+
+Output Requirements:
+- Do NOT rewrite code yet
+- Provide a structured analysis with clear sections
+- Include specific examples (file names, functions, patterns)
+- For each issue, briefly suggest how it *could* be improved (high level only)
+
+At the end, ask:
+"What would you like me to refactor first?"

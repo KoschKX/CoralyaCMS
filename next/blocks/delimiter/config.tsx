@@ -6,11 +6,8 @@ const delimiter: BlockDefinition = {
   label: "Divider",
   icon: "—",
   supportsBreakpoints: true,
+  defaultData: {},
   Layout: DelimiterLayout,
-  async getEditorTool() {
-    const { default: Delimiter } = await import("@editorjs/delimiter");
-    return { class: Delimiter };
-  },
 };
 
 export default delimiter;

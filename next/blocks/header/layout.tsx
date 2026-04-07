@@ -5,7 +5,7 @@ import type { CSSProperties } from "react";
 import type { BlockLayoutProps } from "@/lib/block-types";
 
 
-const marginClass: Record<number, string> = {
+export const HEADING_MARGIN_CLASSES: Record<number, string> = {
   1: "block-heading block-heading--1 mt-8 mb-2",
   2: "block-heading block-heading--2 mt-7 mb-2",
   3: "block-heading block-heading--3 mt-6 mb-1",
@@ -19,7 +19,7 @@ export default function HeaderLayout({ data, blockId }: BlockLayoutProps & { blo
   return (
     <div data-block-id={blockId}>
       {React.createElement(Tag, {
-        className: `${marginClass[level] ?? "mt-5 mb-1"} block-${blockId}`,
+        className: `${HEADING_MARGIN_CLASSES[level] ?? "mt-5 mb-1"} block-${blockId}`,
         style: {
           fontSize: `var(--h${level}-size)`,
           fontWeight: `var(--h${level}-weight)` as CSSProperties["fontWeight"],

@@ -1,0 +1,122 @@
+next/
+│
+├── app/                              # Next.js App Router — routes ONLY, no logic
+│   ├── layout.tsx
+│   ├── page.tsx
+│   ├── [slug]/
+│   │   └── page.tsx
+│   ├── admin/
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   └── editor/
+│   │       ├── new/page.tsx
+│   │       └── [id]/page.tsx
+│   └── api/
+│       ├── pages/
+│       │   ├── route.ts
+│       │   └── [id]/route.ts
+│       └── settings/
+│           └── route.ts
+│
+├── blocks/                           # Block registry & per-block modules
+│   ├── index.ts                      # blockMap + blockRegistry exports
+│   ├── _types.ts                     # Re-export of BlockDefinition (single source)
+│   ├── code/
+│   │   ├── config.tsx                # BlockDefinition (label, icon, defaultData, PanelControls)
+│   │   ├── layout.tsx                # Public-facing render (Server Component-safe)
+│   │   ├── editable.tsx              # Editor-mode render (replaces EditableBlock branch)
+│   │   └── styles.css
+│   ├── columns/
+│   │   ├── config.tsx
+│   │   ├── layout.tsx
+│   │   ├── editable.tsx
+│   │   ├── ColumnsGrid.tsx
+│   │   ├── PanelControls.tsx
+│   │   ├── fraction-presets.ts
+│   │   └── styles.css
+│   ├── header/
+│   │   ├── config.tsx
+│   │   ├── layout.tsx
+│   │   ├── editable.tsx
+│   │   └── styles.css
+│   ├── paragraph/
+│   │   ├── config.tsx
+│   │   ├── layout.tsx
+│   │   ├── editable.tsx
+│   │   └── styles.css
+│   ├── quote/
+│   ├── list/
+│   ├── table/
+│   ├── embed/
+│   ├── html/
+│   └── delimiter/
+│
+├── features/                         # Self-contained feature modules
+│   │
+│   ├── editor/                       # Visual block editor feature
+│   │   ├── components/
+│   │   │   ├── VisualEditor.tsx      # Slim orchestrator; delegates to BlockList
+│   │   │   ├── BlockList.tsx         # Extracted from renderBlockList (now a component)
+│   │   │   ├── BlockItem.tsx         # Per-block wrapper: ring, overlay, toolbar, AddZone
+│   │   │   ├── BlockToolbar.tsx      # Move/delete/type pill toolbar (extracted)
+│   │   │   ├── ColToolbar.tsx        # Column resize/move toolbar
+│   │   │   ├── AddZone.tsx           # +insert zone (extracted from BlockPickerAndAddZone)
+│   │   │   ├── BlockPicker.tsx       # Block type popover
+│   │   │   ├── ContentEditable.tsx   # CE wrapper (unchanged)
+│   │   │   └── InlineCodeEditor.tsx
+│   │   ├── hooks/
+│   │   │   ├── useBlockOps.ts        # CRUD: update/remove/move/addAfter for a block list
+│   │   │   ├── useEditorViewport.ts  # Toolbar viewport toggle subscriber
+│   │   │   └── useMediaViewport.ts   # Canvas-width breakpoint subscriber
+│   │   ├── context/
+│   │   │   └── EditorContext.tsx     # Replaces window.__EDITOR_VIEWPORT__ globals
+│   │   └── types.ts                  # BlockOps, EditorState interfaces
+│   │
+│   └── admin/                        # Admin shell feature
+│       ├── components/
+│       │   ├── EditorPage.tsx        # Slimmed orchestrator (~150 lines)
+│       │   ├── EditorToolbar.tsx     # Top bar (mode toggle, save, panel toggle)
+│       │   ├── PagePanel.tsx         # Right panel — "Page" tab
+│       │   ├── BlockPanel.tsx        # Right panel — "Block" tab
+│       │   └── InjectCodePanel.tsx   # Inject code fields
+│       └── hooks/
+│           ├── useSavePage.ts        # handleSave logic extracted
+│           └── useResponsiveBlock.ts # isSectionEnabled + toggleSection + controlsDisplayData
+│
+├── components/                       # Shared, app-wide UI components
+│   ├── ui/                           # Primitive/generic UI (no block awareness)
+│   │   ├── PanelSection.tsx          # Extracted from block-shared.tsx
+│   │   ├── AlignButtons.tsx          # Extracted from block-shared.tsx
+│   │   ├── FontSizeButtons.tsx       # Extracted from block-shared.tsx
+│   │   └── ColorPicker.tsx
+│   ├── BlockRenderer.tsx             # Public page renderer (Server Component)
+│   ├── BlockIcon.tsx
+│   ├── HTMLRenderer.tsx
+│   ├── CodeEditor.tsx                # Monaco/Prism wrapper
+│   ├── ResponsiveStyleInjector.tsx
+│   └── prism-shortcode.*
+│
+├── hooks/                            # App-wide hooks
+│   └── useSettings.ts                # Cached /api/settings fetch (eliminates per-mount fetches)
+│
+├── lib/                              # Pure utilities & server-only data layer
+│   ├── data/                         # SERVER ONLY — file I/O
+│   │   ├── pages-db.ts
+│   │   └── settings-db.ts
+│   ├── serialization/                # Parse ↔ serialize (isomorphic)
+│   │   └── shortcodes.ts
+│   ├── editor/                       # Editor computation utilities (isomorphic)
+│   │   ├── block-tree.ts
+│   │   ├── blocks-to-html.ts
+│   │   ├── responsive-css.ts
+│   │   ├── editor-breakpoints.ts
+│   │   └── col-width.ts             # effectiveColWidth — extracted from three locations
+│   └── utils/                        # General-purpose pure functions
+│       ├── slug.ts                   # autoSlug (extracted from EditorPage)
+│       └── close-unclosed-tags.ts
+│
+└── types/                            # Global TypeScript types
+    ├── blocks.ts                     # EditorBlock, BlockDefinition, BlockLayoutProps
+    ├── pages.ts                      # Page, PageStatus
+    ├── settings.ts                   # Settings, PaletteColor
+    └── editor.d.ts                   # window.__EDITOR_VIEWPORT__ (kept until context migration)

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "./col-editor-overrides.css";
-import { getSettings } from "@/lib/settings-db";
+import { getSettings, buildPageDescription } from "@/lib/settings-db";
 
 export const dynamic = "force-dynamic";
 
@@ -18,20 +18,23 @@ const geistMono = Geist_Mono({
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = getSettings();
+  const title = settings.title || "Site Title";
+  const description = buildPageDescription(settings);
+  const images = settings.logoUrl ? { images: [settings.logoUrl] } : {};
   return {
-    title: settings.title || "Site Title",
-    description: settings.description || settings.tagline || "Website description",
+    title,
+    description,
     openGraph: {
-      title: settings.title || "Site Title",
-      description: settings.description || settings.tagline || "Website description",
+      title,
+      description,
       url: settings.siteUrl || undefined,
-      ...(settings.logoUrl ? { images: [settings.logoUrl] } : {}),
+      ...images,
     },
     twitter: {
       card: "summary_large_image",
-      title: settings.title || "Site Title",
-      description: settings.description || settings.tagline || "Website description",
-      ...(settings.logoUrl ? { images: [settings.logoUrl] } : {}),
+      title,
+      description,
+      ...images,
     },
   };
 }

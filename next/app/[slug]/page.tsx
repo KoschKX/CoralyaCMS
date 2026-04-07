@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { listPages } from "@/lib/pages-db";
-import { getSettings } from "@/lib/settings-db";
+import { getSettings, buildPageDescription } from "@/lib/settings-db";
 import { ResponsiveStyleInjector } from "@/components/ResponsiveStyleInjector";
 import { buildResponsiveCSS } from "@/lib/responsive-css";
 import BlockRenderer from "@/components/BlockRenderer";
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
   return {
     title,
-    description: settings.description || settings.tagline || "Website description",
+    description: buildPageDescription(settings),
   };
 }
 
