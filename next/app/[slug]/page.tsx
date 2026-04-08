@@ -7,8 +7,15 @@ import BlockRenderer from "@/components/BlockRenderer";
 import HTMLRenderer from "@/components/HTMLRenderer";
 import type { Metadata } from "next";
 
-// ISR: cache the rendered page, revalidated every 60 s and on-demand when a page is saved.
+// Pre-render all published pages at build time; revalidate every 60 s and on-demand.
 export const revalidate = 60;
+
+export async function generateStaticParams() {
+  return listPages()
+    .filter((p) => p.status === "published" && p.slug)
+    .map((p) => ({ slug: p.slug }));
+}
+
 interface Props {
   params: Promise<{ slug: string }>;
 }
