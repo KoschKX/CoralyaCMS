@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { listPages, createPage } from "@/lib/pages-db";
 
 export async function GET() {
@@ -23,5 +24,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "blocks must be an array" }, { status: 400 });
   }
   const page = createPage(data);
+  if (page.slug) revalidatePath(`/${page.slug}`);
   return NextResponse.json(page, { status: 201 });
 }

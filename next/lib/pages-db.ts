@@ -6,6 +6,9 @@ const DATA_FILE = path.join(process.cwd(), "data", "pages.json");
 
 export type PageStatus = "draft" | "published";
 
+/** Module-level cache — invalidated on every write so reads are always consistent. */
+let pagesCache: Page[] | null = null;
+
 export interface EditorBlock {
   id: string;
   type: string;
@@ -28,17 +31,20 @@ export interface Page {
 }
 
 function readAll(): Page[] {
-  if (!fs.existsSync(DATA_FILE)) return [];
+  if (pagesCache !== null) return pagesCache;
+  if (!fs.existsSync(DATA_FILE)) return (pagesCache = []);
   try {
-    return JSON.parse(fs.readFileSync(DATA_FILE, "utf-8")) as Page[];
+    pagesCache = JSON.parse(fs.readFileSync(DATA_FILE, "utf-8")) as Page[];
+    return pagesCache;
   } catch {
-    return [];
+    return (pagesCache = []);
   }
 }
 
 function writeAll(pages: Page[]): void {
   fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
   fs.writeFileSync(DATA_FILE, JSON.stringify(pages, null, 2));
+  pagesCache = pages;
 }
 
 export function listPages(): Page[] {

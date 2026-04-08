@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getSettings, saveSettings } from "@/lib/settings-db";
 import type { SiteSettings } from "@/lib/settings-types";
 
@@ -40,6 +41,8 @@ export async function PATCH(req: Request) {
   }
 
   const updated = saveSettings(sanitized);
+  // Bust the layout cache so the new CSS custom properties take effect site-wide.
+  revalidatePath("/", "layout");
   return NextResponse.json(updated);
 }
 

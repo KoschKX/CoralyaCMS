@@ -7,8 +7,8 @@ import BlockRenderer from "@/components/BlockRenderer";
 import HTMLRenderer from "@/components/HTMLRenderer";
 import type { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
-
+// ISR: cache the rendered page, revalidated every 60 s and on-demand when a page is saved.
+export const revalidate = 60;
 interface Props {
   params: Promise<{ slug: string }>;
 }

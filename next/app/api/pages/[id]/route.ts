@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getPage, updatePage, deletePage } from "@/lib/pages-db";
 
 export async function GET(
@@ -32,6 +33,9 @@ export async function PUT(
   const updated = updatePage(id, data);
   if (!updated)
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  // Bust the ISR cache for this page's public URL immediately.
+  if (updated.slug) revalidatePath(`/${updated.slug}`);
+  revalidatePath("/");
   return NextResponse.json(updated);
 }
 
@@ -42,5 +46,6 @@ export async function DELETE(
   const { id } = await params;
   const ok = deletePage(id);
   if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  revalidatePath("/", "layout");
   return new NextResponse(null, { status: 204 });
 }

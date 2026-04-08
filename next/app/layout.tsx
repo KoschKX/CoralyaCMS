@@ -4,7 +4,7 @@ import "./globals.css";
 import "./col-editor-overrides.css";
 import { getSettings, buildPageDescription } from "@/lib/settings-db";
 
-export const dynamic = "force-dynamic";
+// No force-dynamic — layout is served from cache and revalidated when settings change.
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

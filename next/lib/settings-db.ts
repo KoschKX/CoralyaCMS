@@ -13,11 +13,15 @@ const SETTINGS_FILE = path.join(process.cwd(), "data", "settings.json");
 
 const defaults: SiteSettings = DEFAULT_SETTINGS;
 
+/** Module-level cache — invalidated on every write so reads are always consistent. */
+let settingsCache: SiteSettings | null = null;
+
 export function getSettings(): SiteSettings {
-  if (!fs.existsSync(SETTINGS_FILE)) return structuredClone(defaults);
+  if (settingsCache !== null) return settingsCache;
+  if (!fs.existsSync(SETTINGS_FILE)) return (settingsCache = structuredClone(defaults));
   try {
     const saved = JSON.parse(fs.readFileSync(SETTINGS_FILE, "utf-8")) as Partial<SiteSettings>;
-    return {
+    settingsCache = {
       ...defaults,
       ...saved,
       // Deep-merge nested objects so new fields added to defaults are never missing
@@ -33,8 +37,9 @@ export function getSettings(): SiteSettings {
         breakpoints: { ...defaults.layout.breakpoints, ...saved.layout?.breakpoints },
       },
     };
+    return settingsCache;
   } catch {
-    return structuredClone(defaults);
+    return (settingsCache = structuredClone(defaults));
   }
 }
 
@@ -43,6 +48,7 @@ export function saveSettings(settings: Partial<SiteSettings>): SiteSettings {
   const updated: SiteSettings = { ...current, ...settings };
   fs.mkdirSync(path.dirname(SETTINGS_FILE), { recursive: true });
   fs.writeFileSync(SETTINGS_FILE, JSON.stringify(updated, null, 2));
+  settingsCache = updated;
   return updated;
 }
 
