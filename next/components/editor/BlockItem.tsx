@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, type ReactNode } from "react";
+import React, { memo, useCallback, type ReactNode } from "react";
 import type { EditorBlock } from "@/lib/pages-db";
 import { blockMap } from "@/blocks/index";
 import { isDescendant, insertBlockAfter } from "@/lib/block-tree";
@@ -83,7 +83,9 @@ function BlockItem({
     !isSelected && !!selectedBlockId && isDescendant(block, selectedBlockId);
   const showOverlay = !isSelected && !descendantSelected && !isColBlock;
 
-  const renderChildBlocks = (
+  // Stable callback — deps change when selection changes, which is unavoidable
+  // since the inner BlockItems need to reflect the current selectedBlockId.
+  const renderChildBlocks = useCallback((
     colBlocks: EditorBlock[],
     onUpdateAll: (newBlocks: EditorBlock[]) => void,
     colIdx?: number,
@@ -128,7 +130,8 @@ function BlockItem({
         )}
       </>
     );
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedBlockId, onSelectBlock, makeNewBlock, setAnyPickerOpen, setActiveColInfo, onColSelect, block.id, block.data, block.type]);
 
   const isLast = idx === listLength - 1;
   const colBlockParentSelected = isSelected && isColBlock && activeColInfo?.blockId !== block.id;

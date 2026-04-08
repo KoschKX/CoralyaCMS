@@ -1,5 +1,19 @@
 import type { EditorBlock } from "@/lib/pages-db";
 
+/**
+ * Returns the child-block arrays for any container block (e.g. columns),
+ * or null for non-container blocks.
+ *
+ * Add new container block types here when introduced; this is the single place
+ * that needs updating in this file.
+ */
+function getContainerChildren(block: EditorBlock): Array<{ blocks: EditorBlock[] }> | null {
+  if (block.type === "columns") {
+    return (block.data.cols as Array<{ blocks: EditorBlock[] }>) ?? [];
+  }
+  return null;
+}
+
 /** Recursively update a block anywhere in the tree by id. */
 export function deepUpdateBlock(
   blocks: EditorBlock[],
@@ -8,8 +22,8 @@ export function deepUpdateBlock(
 ): EditorBlock[] {
   return blocks.map((b) => {
     if (b.id === id) return { ...b, data: newData };
-    if (b.type === "columns") {
-      const cols = (b.data.cols as Array<{ blocks: EditorBlock[]; width?: string }>) ?? [];
+    const cols = getContainerChildren(b);
+    if (cols !== null) {
       return {
         ...b,
         data: {
@@ -29,8 +43,8 @@ export function deepUpdateBlock(
 export function findBlockById(blocks: EditorBlock[], id: string): EditorBlock | undefined {
   for (const b of blocks) {
     if (b.id === id) return b;
-    if (b.type === "columns") {
-      const cols = (b.data.cols as Array<{ blocks: EditorBlock[] }>) ?? [];
+    const cols = getContainerChildren(b);
+    if (cols !== null) {
       for (const col of cols) {
         const found = findBlockById(col.blocks ?? [], id);
         if (found) return found;
@@ -42,8 +56,8 @@ export function findBlockById(blocks: EditorBlock[], id: string): EditorBlock | 
 
 /** Returns true if targetId is a descendant of block (at any depth). */
 export function isDescendant(block: EditorBlock, targetId: string): boolean {
-  if (block.type === "columns") {
-    const cols = (block.data.cols as Array<{ blocks: EditorBlock[] }>) ?? [];
+  const cols = getContainerChildren(block);
+  if (cols !== null) {
     for (const col of cols) {
       for (const child of col.blocks ?? []) {
         if (child.id === targetId || isDescendant(child, targetId)) return true;
@@ -63,3 +77,4 @@ export function insertBlockAfter(
   const idx = blocks.findIndex((b) => b.id === afterId);
   return [...blocks.slice(0, idx + 1), newBlock, ...blocks.slice(idx + 1)];
 }
+

@@ -45,22 +45,19 @@ function RenderBlocks({
             </span>
           );
         }
-        if (block.type === "columns") {
-          return (
-            <div key={block.id} data-block-id={block.id}>
-              <def.Layout
-                data={block.data as Record<string, unknown>}
-                blockId={block.id}
-                renderBlocks={(children) => (
-                  <RenderBlocks blocks={children} disabledBlocks={disabledBlocks} />
-                )}
-              />
-            </div>
-          );
-        }
         return (
           <div key={block.id} data-block-id={block.id}>
-            <def.Layout data={block.data as Record<string, unknown>} blockId={block.id} />
+            <def.Layout
+              data={block.data as Record<string, unknown>}
+              blockId={block.id}
+              renderBlocks={
+                def.isContainer
+                  ? (children) => (
+                      <RenderBlocks blocks={children} disabledBlocks={disabledBlocks} />
+                    )
+                  : undefined
+              }
+            />
           </div>
         );
       })}

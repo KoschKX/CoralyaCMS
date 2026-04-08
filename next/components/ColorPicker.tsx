@@ -13,7 +13,7 @@ export function ColorPicker({
   data: BlockData;
   onChange: (d: BlockData) => void;
 }) {
-  const settings = useSettings();
+  const { data: settings } = useSettings();
   const palette: PaletteColor[] = settings?.paletteColors?.length
     ? settings.paletteColors
     : COLOR_PALETTE;

@@ -1,5 +1,6 @@
 import type { EditorBlock } from "@/lib/pages-db";
 import { resolveColWidth } from "@/lib/editor/col-width";
+import { blockMap } from "@/blocks/index";
 
 /**
  * Merge responsive overrides for the given viewport onto data.
@@ -85,10 +86,11 @@ export function buildResponsiveCSS(
       if (mobileRules) css += `@media (max-width: ${mobileBp}) { ${sel} { ${mobileRules} } }\n`;
     }
 
-    // Recurse into columns
-    if (block.type === "columns" && Array.isArray(data.cols)) {
-      for (const col of data.cols as Array<{ blocks?: EditorBlock[] }>) {
-        css += buildResponsiveCSS(col.blocks ?? [], tabletBp, mobileBp);
+    // Recurse into child blocks of container blocks (e.g. columns)
+    const def = blockMap[block.type];
+    if (def?.isContainer && def.getChildBlocks) {
+      for (const childBlocks of def.getChildBlocks(data)) {
+        css += buildResponsiveCSS(childBlocks, tabletBp, mobileBp);
       }
     }
   }

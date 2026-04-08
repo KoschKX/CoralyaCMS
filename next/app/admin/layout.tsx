@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { LogoutButton } from "./LogoutButton";
 
 export const metadata = {
   title: "Admin — CORALYA",
@@ -55,10 +56,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             </Link>
           ))}
         </nav>
-        <div className="border-t border-zinc-800 px-5 py-4 text-xs text-zinc-600">
+        <div className="border-t border-zinc-800 px-5 py-4 text-xs text-zinc-600 flex items-center justify-between">
           <Link href="/" className="hover:text-zinc-400">
             ← Back to site
           </Link>
+          <LogoutButton />
         </div>
       </aside>
 

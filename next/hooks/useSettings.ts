@@ -8,14 +8,21 @@ const listeners = new Set<() => void>();
 
 async function fetchSettings(): Promise<SiteSettings> {
   const res = await fetch("/api/settings");
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const data: SiteSettings = await res.json();
   cachedSettings = data;
   listeners.forEach((l) => l());
   return data;
 }
 
-export function useSettings(): SiteSettings | null {
+export interface UseSettingsResult {
+  data: SiteSettings | null;
+  error: boolean;
+}
+
+export function useSettings(): UseSettingsResult {
   const [settings, setSettings] = useState<SiteSettings | null>(cachedSettings);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (cachedSettings) {
@@ -24,8 +31,12 @@ export function useSettings(): SiteSettings | null {
     }
     let cancelled = false;
     fetchSettings()
-      .then((data) => { if (!cancelled) setSettings(data); })
-      .catch(() => {});
+      .then((data) => {
+        if (!cancelled) { setSettings(data); setError(false); }
+      })
+      .catch(() => {
+        if (!cancelled) setError(true);
+      });
     return () => { cancelled = true; };
   }, []);
 
@@ -35,5 +46,6 @@ export function useSettings(): SiteSettings | null {
     return () => { listeners.delete(handler); };
   }, []);
 
-  return settings;
+  return { data: settings, error };
 }
+

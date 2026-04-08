@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useRef, useState, useCallback, useEffect, useMemo } from "react";
+import { useRef, useState, useCallback, useMemo } from "react";
 
 import { useRouter } from "next/navigation";
 import type { EditorBlock } from "@/lib/pages-db";
@@ -15,6 +15,8 @@ import BlockPanel from "@/app/admin/editor/BlockPanel";
 import InjectCodePanel from "@/app/admin/editor/InjectCodePanel";
 import { useSavePage } from "@/app/admin/editor/hooks/useSavePage";
 import { useResponsiveBlock } from "@/app/admin/editor/hooks/useResponsiveBlock";
+import { useCanvasWidth } from "@/app/admin/editor/hooks/useCanvasWidth";
+import { useEditorPanel, type PanelTab } from "@/app/admin/editor/hooks/useEditorPanel";
 import dynamic from "next/dynamic";
 const CodeEditor = dynamic(() => import("@/components/CodeEditor"), { ssr: false });
 import type { VisualEditorProps } from "@/components/VisualEditor";
@@ -31,10 +33,9 @@ interface EditorPageProps {
   initialStatus?: "draft" | "published";
   initialBlocks?: EditorBlock[];
   initialHtml?: string;
+  initialPageBgColor?: string;
   disabledBlocks?: string[];
 }
-
-type PanelTab = "page" | "block";
 
 interface SelectedBlock {
   id: string;
@@ -49,6 +50,7 @@ export default function EditorPage({
   initialStatus = "draft",
   initialBlocks = [],
   initialHtml = "",
+  initialPageBgColor = "#ffffff",
 }: EditorPageProps) {
   const [mainMode, setMainModeState] = useState<"visual" | "code" | "inject">("visual");
   const setMainMode = (mode: "visual" | "code" | "inject") => {
@@ -65,12 +67,12 @@ export default function EditorPage({
   const router = useRouter();
   const initialParsedBlocks = initialHtml ? shortcodesToBlocks(initialHtml) : initialBlocks;
   const [codeText, setCodeText] = useState(initialHtml || blocksToShortcodes(initialParsedBlocks));
-  const liveBlocks = shortcodesToBlocks(codeText);
+  const liveBlocks = useMemo(() => shortcodesToBlocks(codeText), [codeText]);
 
   const [title, setTitle] = useState(initialTitle);
   const [slug, setSlug] = useState(initialSlug);
   const [status, setStatus] = useState<"draft" | "published">(initialStatus);
-  const [pageBgColor, setPageBgColor] = useState("#ffffff");
+  const [pageBgColor, setPageBgColor] = useState(initialPageBgColor);
   const { saving, saved, handleSave } = useSavePage({
     id,
     title,
@@ -79,22 +81,14 @@ export default function EditorPage({
     pageBgColor,
     onStatusChange: setStatus,
   });
-  const [panelTab, setPanelTab] = useState<PanelTab>("page");
-  useEffect(() => {
-    if (mainMode !== "visual" && panelTab !== "page") setPanelTab("page");
-  }, [mainMode, panelTab]);
-  const [panelOpen, setPanelOpen] = useState(true);
+  const { panelTab, setPanelTab, panelOpen, setPanelOpen } = useEditorPanel(mainMode);
   const [viewport, setViewport] = useState<Viewport>("desktop");
-  const [canvasWidth, setCanvasWidth] = useState(1280);
+  const { canvasRef, canvasWidth } = useCanvasWidth();
 
   const editorViewportContextValue = useMemo(
     () => ({ viewport, canvasWidth }),
     [viewport, canvasWidth],
   );
-
-  function setViewportAndNotify(vp: Viewport) {
-    setViewport(vp);
-  }
 
   function handleTitleChange(value: string) {
     setTitle(value);
@@ -102,17 +96,6 @@ export default function EditorPage({
   }
 
   const updateBlockHandlerRef = useRef<((id: string, newData: Record<string, unknown>) => void) | null>(null);
-  const canvasRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = canvasRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(([entry]) => {
-      setCanvasWidth(entry.contentRect.width);
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
 
   const registerUpdateHandler = useCallback(
     (fn: ((id: string, newData: Record<string, unknown>) => void) | null) => {
@@ -127,7 +110,7 @@ export default function EditorPage({
       setSelectedBlock({ id: blockId, name: type, data });
       setPanelTab("block");
     },
-    [],
+    [setPanelTab],
   );
 
   const [activeColIdx, setActiveColIdx] = useState<number | null>(null);
@@ -248,7 +231,7 @@ export default function EditorPage({
                 <BlockPanel
                   selectedBlock={selectedBlock}
                   viewport={viewport}
-                  onViewportChange={setViewportAndNotify}
+                  onViewportChange={setViewport}
                   isSectionEnabled={isSectionEnabled}
                   toggleSection={toggleSection}
                   controlsDisplayData={controlsDisplayData}
