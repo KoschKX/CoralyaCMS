@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import type { EditorBlock } from "@/lib/pages-db";
 import type { BlockOps } from "@/components/editor/BlockEditorContext";
 import BlockItem from "@/components/editor/BlockItem";
@@ -11,7 +12,7 @@ interface BlockListProps {
   parentInfo?: { type: string; label: string; onSelect: () => void };
 }
 
-export default function BlockList({ list, ops, isInColumn = false, parentInfo }: BlockListProps) {
+function BlockList({ list, ops, isInColumn = false, parentInfo }: BlockListProps) {
   return (
     <>
       {list.map((block, idx) => (
@@ -28,3 +29,5 @@ export default function BlockList({ list, ops, isInColumn = false, parentInfo }:
     </>
   );
 }
+
+export default memo(BlockList);

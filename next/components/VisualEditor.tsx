@@ -33,6 +33,7 @@ import { useEditorViewport } from "@/components/editor/EditorHooks";
 import { AddZone } from "@/components/editor/BlockPickerAndAddZone";
 import { BlockEditorContext } from "@/components/editor/BlockEditorContext";
 import BlockList from "@/components/editor/BlockList";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 function makeNewBlock(type: string): EditorBlock {
   const def = blockMap[type];
@@ -214,6 +215,7 @@ export default function VisualEditor({
 
   return (
     <BlockEditorContext.Provider value={contextValue}>
+      <ErrorBoundary>
       <div className="relative text-zinc-800" style={{ display: "flex", flexDirection: "column" }}>
         {anyPickerOpen && <div className="absolute inset-0 cursor-default" style={{ zIndex: 15 }} />}
         <AddZone onAdd={(type) => addBlockAfter("TOP", type)} onOpenChange={setAnyPickerOpen} />
@@ -232,6 +234,7 @@ export default function VisualEditor({
           onOpenChange={setAnyPickerOpen}
         />
       </div>
+      </ErrorBoundary>
     </BlockEditorContext.Provider>
   );
 }

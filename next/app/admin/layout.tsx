@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { LogoutButton } from "./LogoutButton";
+import "../col-editor-overrides.css";
 
 export const metadata = {
   title: "Admin — CORALYA",

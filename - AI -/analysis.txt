@@ -69,6 +69,6 @@ Please do the following:
 - Provide a short explanation of the new architecture.
 
 Output format:
-- Show improved folder structure
-- Provide refactored code examples for key parts (editor, blocks, state)
-- Explain major changes and why they improve the project
+- Summarize your analysis in clear sections corresponding to the above points.
+- Highlight specific areas of concern or improvement.
+- Ask me what I want to do next before taking any action.

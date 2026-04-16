@@ -44,4 +44,6 @@ Output Requirements:
 - For each issue, briefly suggest how it *could* be improved (high level only)
 
 At the end, ask:
+- Summarize your analysis in clear sections corresponding to the above points.
+- Highlight specific areas of concern or improvement.
 "What would you like me to refactor first?"

@@ -16,6 +16,18 @@ const defaults: SiteSettings = DEFAULT_SETTINGS;
 /** Module-level cache — invalidated on every write so reads are always consistent. */
 let settingsCache: SiteSettings | null = null;
 
+/** Write-queue mutex — serialises concurrent settings saves. */
+let writeQueue: Promise<unknown> = Promise.resolve();
+
+function serialise<T>(fn: () => T): Promise<T> {
+  const p = writeQueue.then(fn);
+  writeQueue = p.then(
+    () => undefined,
+    () => undefined,
+  );
+  return p;
+}
+
 export function getSettings(): SiteSettings {
   if (settingsCache !== null) return settingsCache;
   if (!fs.existsSync(SETTINGS_FILE)) return (settingsCache = structuredClone(defaults));
@@ -43,13 +55,17 @@ export function getSettings(): SiteSettings {
   }
 }
 
-export function saveSettings(settings: Partial<SiteSettings>): SiteSettings {
-  const current = getSettings();
-  const updated: SiteSettings = { ...current, ...settings };
-  fs.mkdirSync(path.dirname(SETTINGS_FILE), { recursive: true });
-  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(updated, null, 2));
-  settingsCache = updated;
-  return updated;
+export function saveSettings(settings: Partial<SiteSettings>): Promise<SiteSettings> {
+  return serialise(() => {
+    const current = getSettings();
+    const updated: SiteSettings = { ...current, ...settings };
+    fs.mkdirSync(path.dirname(SETTINGS_FILE), { recursive: true });
+    const tmp = SETTINGS_FILE + ".tmp";
+    fs.writeFileSync(tmp, JSON.stringify(updated, null, 2));
+    fs.renameSync(tmp, SETTINGS_FILE);
+    settingsCache = updated;
+    return updated;
+  });
 }
 
 /** Consistent page description across all metadata functions. */

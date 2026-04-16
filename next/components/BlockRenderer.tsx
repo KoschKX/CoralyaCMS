@@ -2,6 +2,7 @@ import { memo } from "react";
 import type { EditorBlock } from "@/lib/pages-db";
 import { blockMap } from "@/blocks/index";
 import { parseShortcode } from "@/lib/shortcodes";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 interface Props {
   blocks: EditorBlock[];
@@ -33,17 +34,19 @@ function BlockRenderer({ blocks, disabledBlocks = [] }: Props) {
           if (!def) return null;
 
           return (
-            <div key={block.id} data-block-id={block.id}>
-              <def.Layout
-                data={resolvedData}
-                blockId={block.id}
-                renderBlocks={
-                  def.isContainer
-                    ? (children) => <BlockRenderer blocks={children} disabledBlocks={disabledBlocks} />
-                    : undefined
-                }
-              />
-            </div>
+            <ErrorBoundary key={block.id}>
+              <div data-block-id={block.id}>
+                <def.Layout
+                  data={resolvedData}
+                  blockId={block.id}
+                  renderBlocks={
+                    def.isContainer
+                      ? (children) => <BlockRenderer blocks={children} disabledBlocks={disabledBlocks} />
+                      : undefined
+                  }
+                />
+              </div>
+            </ErrorBoundary>
           );
         })}
     </div>

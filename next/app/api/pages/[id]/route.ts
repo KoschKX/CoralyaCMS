@@ -30,7 +30,7 @@ export async function PUT(
   if (data.blocks !== undefined && !Array.isArray(data.blocks)) {
     return NextResponse.json({ error: "blocks must be an array" }, { status: 400 });
   }
-  const updated = updatePage(id, data);
+  const updated = await updatePage(id, data);
   if (!updated)
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   // Bust the ISR cache for this page's public URL immediately.
@@ -44,7 +44,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const ok = deletePage(id);
+  const ok = await deletePage(id);
   if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
   revalidatePath("/", "layout");
   return new NextResponse(null, { status: 204 });

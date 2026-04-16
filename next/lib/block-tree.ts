@@ -1,17 +1,24 @@
 import type { EditorBlock } from "@/lib/pages-db";
+import { blockMap } from "@/blocks/index";
 
 /**
- * Returns the child-block arrays for any container block (e.g. columns),
- * or null for non-container blocks.
+ * Returns the child-block arrays for a container block by delegating to the
+ * block registry's getChildBlocks/setChildBlocks hooks.
+ * Returns null for non-container blocks.
  *
- * Add new container block types here when introduced; this is the single place
- * that needs updating in this file.
+ * To add a new container block type, set isContainer + getChildBlocks +
+ * setChildBlocks in its BlockDefinition — no changes needed here.
  */
-function getContainerChildren(block: EditorBlock): Array<{ blocks: EditorBlock[] }> | null {
-  if (block.type === "columns") {
-    return (block.data.cols as Array<{ blocks: EditorBlock[] }>) ?? [];
-  }
-  return null;
+function getChildArrays(block: EditorBlock): EditorBlock[][] | null {
+  const def = blockMap[block.type];
+  if (!def?.isContainer || !def.getChildBlocks) return null;
+  return def.getChildBlocks(block.data);
+}
+
+function applyChildArrays(block: EditorBlock, arrays: EditorBlock[][]): EditorBlock {
+  const def = blockMap[block.type];
+  if (!def?.setChildBlocks) return block;
+  return { ...block, data: def.setChildBlocks(block.data, arrays) };
 }
 
 /** Recursively update a block anywhere in the tree by id. */
@@ -22,18 +29,10 @@ export function deepUpdateBlock(
 ): EditorBlock[] {
   return blocks.map((b) => {
     if (b.id === id) return { ...b, data: newData };
-    const cols = getContainerChildren(b);
-    if (cols !== null) {
-      return {
-        ...b,
-        data: {
-          ...b.data,
-          cols: cols.map((col) => ({
-            ...col,
-            blocks: deepUpdateBlock(col.blocks ?? [], id, newData),
-          })),
-        },
-      };
+    const childArrays = getChildArrays(b);
+    if (childArrays !== null) {
+      const updated = childArrays.map((arr) => deepUpdateBlock(arr, id, newData));
+      return applyChildArrays(b, updated);
     }
     return b;
   });
@@ -43,10 +42,10 @@ export function deepUpdateBlock(
 export function findBlockById(blocks: EditorBlock[], id: string): EditorBlock | undefined {
   for (const b of blocks) {
     if (b.id === id) return b;
-    const cols = getContainerChildren(b);
-    if (cols !== null) {
-      for (const col of cols) {
-        const found = findBlockById(col.blocks ?? [], id);
+    const childArrays = getChildArrays(b);
+    if (childArrays !== null) {
+      for (const arr of childArrays) {
+        const found = findBlockById(arr, id);
         if (found) return found;
       }
     }
@@ -56,10 +55,10 @@ export function findBlockById(blocks: EditorBlock[], id: string): EditorBlock | 
 
 /** Returns true if targetId is a descendant of block (at any depth). */
 export function isDescendant(block: EditorBlock, targetId: string): boolean {
-  const cols = getContainerChildren(block);
-  if (cols !== null) {
-    for (const col of cols) {
-      for (const child of col.blocks ?? []) {
+  const childArrays = getChildArrays(block);
+  if (childArrays !== null) {
+    for (const arr of childArrays) {
+      for (const child of arr) {
         if (child.id === targetId || isDescendant(child, targetId)) return true;
       }
     }

@@ -40,7 +40,7 @@ export async function PATCH(req: Request) {
     if (key in raw) (sanitized as Record<string, unknown>)[key] = raw[key];
   }
 
-  const updated = saveSettings(sanitized);
+  const updated = await saveSettings(sanitized);
   // Bust the layout cache so the new CSS custom properties take effect site-wide.
   revalidatePath("/", "layout");
   return NextResponse.json(updated);

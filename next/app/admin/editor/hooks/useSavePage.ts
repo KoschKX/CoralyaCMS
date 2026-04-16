@@ -24,20 +24,23 @@ export function useSavePage({
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   async function handleSave(targetStatus: "draft" | "published") {
     setSaving(true);
     setSaved(false);
+    setSaveError(null);
     try {
       const html = codeText;
       const blocks = shortcodesToBlocks(codeText);
       const payload = { title, slug, status: targetStatus, blocks, html, pageBgColor };
       if (id) {
-        await fetch(`/api/pages/${id}`, {
+        const res = await fetch(`/api/pages/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
+        if (!res.ok) throw new Error(`Server error ${res.status}`);
         onStatusChange(targetStatus);
       } else {
         const res = await fetch("/api/pages", {
@@ -45,6 +48,7 @@ export function useSavePage({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
+        if (!res.ok) throw new Error(`Server error ${res.status}`);
         const created: { id: string } = await res.json();
         router.replace(`/admin/editor/${created.id}`);
       }
@@ -52,10 +56,11 @@ export function useSavePage({
       setTimeout(() => setSaved(false), 2500);
     } catch (err) {
       console.error("Save failed:", err);
+      setSaveError("Save failed. Please try again.");
     } finally {
       setSaving(false);
     }
   }
 
-  return { saving, saved, handleSave };
+  return { saving, saved, saveError, handleSave };
 }

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import "./col-editor-overrides.css";
 import { getSettings, buildPageDescription } from "@/lib/settings-db";
 
 // No force-dynamic — layout is served from cache and revalidated when settings change.

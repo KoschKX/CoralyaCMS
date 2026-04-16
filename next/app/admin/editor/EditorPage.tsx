@@ -73,7 +73,7 @@ export default function EditorPage({
   const [slug, setSlug] = useState(initialSlug);
   const [status, setStatus] = useState<"draft" | "published">(initialStatus);
   const [pageBgColor, setPageBgColor] = useState(initialPageBgColor);
-  const { saving, saved, handleSave } = useSavePage({
+  const { saving, saved, saveError, handleSave } = useSavePage({
     id,
     title,
     slug,
@@ -110,7 +110,7 @@ export default function EditorPage({
       setSelectedBlock({ id: blockId, name: type, data });
       setPanelTab("block");
     },
-    [setPanelTab],
+    [setSelectedBlock, setPanelTab],
   );
 
   const [activeColIdx, setActiveColIdx] = useState<number | null>(null);
@@ -136,6 +136,7 @@ export default function EditorPage({
         setPanelOpen={setPanelOpen}
         saving={saving}
         saved={saved}
+        saveError={saveError}
         slug={slug}
         status={status}
         onSave={handleSave}

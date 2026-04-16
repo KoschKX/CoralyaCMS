@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { Viewport } from "@/components/block-shared";
 
 interface EditorToolbarProps {
   mainMode: "visual" | "code" | "inject";
@@ -10,6 +9,7 @@ interface EditorToolbarProps {
   setPanelOpen: (fn: (o: boolean) => boolean) => void;
   saving: boolean;
   saved: boolean;
+  saveError: string | null;
   slug: string;
   status: "draft" | "published";
   onSave: (targetStatus: "draft" | "published") => void;
@@ -23,6 +23,7 @@ export default function EditorToolbar({
   setPanelOpen,
   saving,
   saved,
+  saveError,
   slug,
   status,
   onSave,
@@ -81,21 +82,28 @@ export default function EditorToolbar({
         </div>
       </div>
       {/* Floating Save/Update buttons */}
-      <div className="fixed bottom-6 right-6 z-30 flex gap-3">
-        <button
-          onClick={() => onSave("draft")}
-          disabled={saving}
-          className="rounded-md border border-zinc-200 bg-white px-5 py-2 text-base font-medium text-zinc-700 shadow-lg transition hover:bg-zinc-50 disabled:opacity-40"
-        >
-          {saving ? "Saving…" : "Save draft"}
-        </button>
-        <button
-          onClick={() => onSave("published")}
-          disabled={saving}
-          className="rounded-md bg-zinc-900 px-5 py-2 text-base font-medium text-white shadow-lg transition hover:bg-zinc-700 disabled:opacity-40"
-        >
-          {status === "published" ? "Update" : "Publish"}
-        </button>
+      <div className="fixed bottom-6 right-6 z-30 flex flex-col items-end gap-2">
+        {saveError && (
+          <p role="alert" className="rounded-md bg-red-50 border border-red-200 px-3 py-1.5 text-xs font-medium text-red-700 shadow">
+            {saveError}
+          </p>
+        )}
+        <div className="flex gap-3">
+          <button
+            onClick={() => onSave("draft")}
+            disabled={saving}
+            className="rounded-md border border-zinc-200 bg-white px-5 py-2 text-base font-medium text-zinc-700 shadow-lg transition hover:bg-zinc-50 disabled:opacity-40"
+          >
+            {saving ? "Saving…" : "Save draft"}
+          </button>
+          <button
+            onClick={() => onSave("published")}
+            disabled={saving}
+            className="rounded-md bg-zinc-900 px-5 py-2 text-base font-medium text-white shadow-lg transition hover:bg-zinc-700 disabled:opacity-40"
+          >
+            {status === "published" ? "Update" : "Publish"}
+          </button>
+        </div>
       </div>
     </>
   );

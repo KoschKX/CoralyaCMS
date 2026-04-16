@@ -23,7 +23,8 @@ export async function POST(req: Request) {
   if (data.blocks !== undefined && !Array.isArray(data.blocks)) {
     return NextResponse.json({ error: "blocks must be an array" }, { status: 400 });
   }
-  const page = createPage(data);
+  const page = await createPage(data);
   if (page.slug) revalidatePath(`/${page.slug}`);
+  revalidatePath("/");
   return NextResponse.json(page, { status: 201 });
 }

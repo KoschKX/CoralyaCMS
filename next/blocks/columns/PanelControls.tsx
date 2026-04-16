@@ -8,7 +8,7 @@ import { FRACTION_PRESETS } from "./fraction-presets";
 // In tablet/mobile mode, controlsDisplayData() in EditorPage merges responsive[viewport]
 // onto the top-level data, so col-N-width keys appear directly on data. We read from
 // there first, then fall back to the default cols[N].width.
-function getColWidth(data: Record<string, any>, colIdx: number, viewport: string) {
+function getColWidth(data: Record<string, unknown>, colIdx: number, viewport: string) {
   const key = `col-${colIdx}-width`;
   if (viewport !== "desktop" && key in data && data[key] != null && data[key] !== "") {
     return data[key] as string;

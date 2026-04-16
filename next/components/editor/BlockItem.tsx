@@ -237,6 +237,7 @@ function BlockItem({
                   onClick={() => ops.move(block.id, -1)}
                   disabled={idx === 0}
                   title="Move up"
+                  aria-label="Move block up"
                   className="flex w-8 items-center justify-center text-zinc-500 hover:bg-zinc-100 transition disabled:opacity-25 disabled:cursor-not-allowed"
                 >
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
@@ -246,6 +247,7 @@ function BlockItem({
                   onClick={() => ops.move(block.id, 1)}
                   disabled={idx === listLength - 1}
                   title="Move down"
+                  aria-label="Move block down"
                   className="flex w-8 items-center justify-center text-zinc-500 hover:bg-zinc-100 transition disabled:opacity-25 disabled:cursor-not-allowed"
                 >
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
@@ -256,6 +258,7 @@ function BlockItem({
                 <button
                   onClick={() => ops.remove(block.id)}
                   title="Delete block"
+                  aria-label="Delete block"
                   className="flex w-8 items-center justify-center text-zinc-400 hover:bg-red-50 hover:text-red-500 transition"
                 >
                   <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>

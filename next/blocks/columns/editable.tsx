@@ -9,6 +9,7 @@ import type { EditableProps } from "@/lib/block-types";
 // file, and this file needs EditableBlock for the renderChildBlocks fallback.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let EditableBlockComponent: React.ComponentType<any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function setEditableBlockComponent(c: React.ComponentType<any>) {
   EditableBlockComponent = c;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 type PanelTab = "page" | "block";
 export type { PanelTab };
@@ -10,12 +10,8 @@ export function useEditorPanel(mainMode: string) {
   const [panelTab, setPanelTab] = useState<PanelTab>("page");
   const [panelOpen, setPanelOpen] = useState(true);
 
-  // When switching away from visual mode, reset to the page tab
-  useEffect(() => {
-    if (mainMode !== "visual" && panelTab !== "page") {
-      setPanelTab("page");
-    }
-  }, [mainMode, panelTab]);
+  // Derive the active tab: force "page" when not in visual mode
+  const activeTab: PanelTab = mainMode !== "visual" && panelTab !== "page" ? "page" : panelTab;
 
-  return { panelTab, setPanelTab, panelOpen, setPanelOpen };
+  return { panelTab: activeTab, setPanelTab, panelOpen, setPanelOpen };
 }
