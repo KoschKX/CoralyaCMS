@@ -13,6 +13,8 @@ interface UseSavePageOptions {
   pageBgColor: string;
   injectCode?: InjectCode;
   onStatusChange: (s: "draft" | "published") => void;
+  /** Called after a successful save — used to clear the sessionStorage draft. */
+  onSaveSuccess?: () => void;
 }
 
 export function useSavePage({
@@ -23,6 +25,7 @@ export function useSavePage({
   pageBgColor,
   injectCode,
   onStatusChange,
+  onSaveSuccess,
 }: UseSavePageOptions) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
@@ -56,6 +59,7 @@ export function useSavePage({
         router.replace(`/admin/editor/${created.id}`);
       }
       setSaved(true);
+      onSaveSuccess?.();
       setTimeout(() => setSaved(false), 2500);
     } catch (err) {
       console.error("Save failed:", err);

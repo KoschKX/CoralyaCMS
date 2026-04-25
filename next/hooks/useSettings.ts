@@ -1,19 +1,51 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useEffect } from "react";
+import { create } from "zustand";
 import type { SiteSettings } from "@/lib/settings-types";
 
-let cachedSettings: SiteSettings | null = null;
-const listeners = new Set<() => void>();
+// ── Zustand store ─────────────────────────────────────────────────────────────
+// Replaces the previous manual module-level cache + listeners Set pattern.
+// Zustand automatically notifies all subscribers when state changes, so there
+// is no need for a hand-rolled listener registry.
+//
+// `_fetched` acts as a mutex: the first component to mount triggers the fetch;
+// subsequent mounts see `_fetched: true` and skip the request. On error,
+// `_fetched` is reset to false so the next refetch() can retry.
 
-async function fetchSettings(): Promise<SiteSettings> {
-  const res = await fetch("/api/settings");
-  if (!res.ok) throw new Error(`Failed to load settings (HTTP ${res.status})`);
-  const data: SiteSettings = await res.json();
-  cachedSettings = data;
-  listeners.forEach((l) => l());
-  return data;
+interface SettingsState {
+  data: SiteSettings | null;
+  error: Error | null;
+  _fetched: boolean;
+  _fetch: () => Promise<void>;
+  _reset: () => void;
 }
+
+const useSettingsStore = create<SettingsState>((set, get) => ({
+  data: null,
+  error: null,
+  _fetched: false,
+
+  _fetch: async () => {
+    if (get()._fetched) return; // already in-flight or completed
+    set({ _fetched: true });
+    try {
+      const res = await fetch("/api/settings");
+      if (!res.ok) throw new Error(`Failed to load settings (HTTP ${res.status})`);
+      const data: SiteSettings = await res.json();
+      set({ data, error: null });
+    } catch (err) {
+      set({
+        error: err instanceof Error ? err : new Error(String(err)),
+        _fetched: false, // allow a retry on the next refetch() call
+      });
+    }
+  },
+
+  _reset: () => set({ data: null, error: null, _fetched: false }),
+}));
+
+// ── Public hook ───────────────────────────────────────────────────────────────
 
 export interface UseSettingsResult {
   data: SiteSettings | null;
@@ -24,44 +56,20 @@ export interface UseSettingsResult {
 }
 
 export function useSettings(): UseSettingsResult {
-  const [settings, setSettings] = useState<SiteSettings | null>(cachedSettings);
-  const [error, setError] = useState<Error | null>(null);
+  const { data, error, _fetch, _reset } = useSettingsStore();
 
-  const refetch = useCallback(() => {
-    cachedSettings = null;
-    setSettings(null);
-    setError(null);
-    fetchSettings()
-      .then((data) => { setSettings(data); setError(null); })
-      .catch((err: unknown) => {
-        setError(err instanceof Error ? err : new Error(String(err)));
-      });
-  }, []);
-
+  // Trigger the fetch on first mount. Subsequent mounts are no-ops because
+  // _fetched is true and _fetch returns immediately.
   useEffect(() => {
-    if (cachedSettings) {
-      setSettings(cachedSettings);
-      return;
-    }
-    let cancelled = false;
-    fetchSettings()
-      .then((data) => {
-        if (!cancelled) { setSettings(data); setError(null); }
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) {
-          setError(err instanceof Error ? err : new Error(String(err)));
-        }
-      });
-    return () => { cancelled = true; };
-  }, []);
+    _fetch();
+  }, [_fetch]);
 
-  useEffect(() => {
-    const handler = () => setSettings(cachedSettings);
-    listeners.add(handler);
-    return () => { listeners.delete(handler); };
-  }, []);
+  function refetch() {
+    // Reset synchronously so _fetched becomes false, then kick off a new fetch.
+    _reset();
+    useSettingsStore.getState()._fetch();
+  }
 
-  return { data: settings, error, refetch };
+  return { data, error, refetch };
 }
 

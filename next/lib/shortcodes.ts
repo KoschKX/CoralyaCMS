@@ -245,7 +245,18 @@ function buildBlocks(
     }
 
     if (tok.type === "self") {
-      blocks.push({ id: `sc-${counter.n++}`, type: tok.name, data: tok.attrs });
+      const def = blockMap[tok.name];
+      if (def) {
+        // If the block defines a validator, run it. Fall back to defaultData when
+        // the parsed attributes fail validation so the editor never renders a block
+        // in a known-corrupt state.
+        const data = !def.validate || def.validate(tok.attrs)
+          ? tok.attrs
+          : { ...(def.defaultData ?? {}) };
+        blocks.push({ id: `sc-${counter.n++}`, type: tok.name, data });
+      }
+      // Unknown token types are silently dropped — they have no registered Layout
+      // so rendering them would throw. Users can see them in code view.
       pos++; continue;
     }
 

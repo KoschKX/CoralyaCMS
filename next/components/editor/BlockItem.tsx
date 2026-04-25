@@ -5,13 +5,12 @@ import type { EditorBlock } from "@/lib/pages-db";
 import { blockMap } from "@/blocks/index";
 import { isDescendant, insertBlockAfter } from "@/lib/block-tree";
 import { resolveColWidth } from "@/lib/editor/col-width";
-import { BlockIcon } from "@/components/BlockIcon";
 import { ColToolbar } from "@/components/editor/ColToolbar";
 import { EditableBlock } from "@/components/editor/EditableBlock";
 import { AddZone } from "@/components/editor/BlockPickerAndAddZone";
+import { BlockToolbar } from "@/components/editor/BlockToolbar";
 import { useBlockEditor, type BlockOps } from "@/components/editor/BlockEditorContext";
 import { useEditorViewport } from "@/components/editor/EditorHooks";
-import { ChevronUpIcon, ChevronDownIcon, TrashIcon } from "@/components/editor/ToolbarIcons";
 
 interface ColViewportToolbarProps {
   blockId: string;
@@ -275,78 +274,20 @@ function BlockItem({
 
         {isSelected && (
           <>
-            {/* Main block toolbar — left */}
-            <div
-              className="absolute bottom-full left-0 z-20 mb-1.5 flex items-end gap-1.5"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {(parentInfo || (isColBlock && activeColInfo?.blockId === block.id)) && (
-                <button
-                  title={parentInfo ? `Select parent (${parentInfo.label})` : "Select columns block"}
-                  onClick={
-                    parentInfo
-                      ? parentInfo.onSelect
-                      : () => { setActiveColInfo(null); onColSelect?.(block.id, null); }
-                  }
-                  className="flex items-center justify-center w-9 rounded-md border border-zinc-200 bg-white shadow-md text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 transition"
-                  style={{ minHeight: 36 }}
-                >
-                  <BlockIcon
-                    name={parentInfo ? parentInfo.type : "columns"}
-                    label={parentInfo ? parentInfo.label : "Columns"}
-                    size={18}
-                  />
-                </button>
-              )}
-              <div
-                className="flex items-stretch overflow-hidden rounded-md border border-zinc-200 bg-white shadow-md"
-                style={{ minHeight: 36 }}
-              >
-                <button
-                  title={isColBlock && activeColInfo?.blockId === block.id ? "Column" : def.label}
-                  className="flex items-center justify-center w-9 text-lg text-zinc-700 rounded-l-md transition cursor-default"
-                >
-                  <BlockIcon
-                    name={isColBlock && activeColInfo?.blockId === block.id ? "column" : block.type}
-                    label={isColBlock && activeColInfo?.blockId === block.id ? "Column" : def.label}
-                    size={20}
-                  />
-                </button>
-
-                <div className="w-px self-stretch bg-zinc-200" />
-
-                <button
-                  onClick={() => ops.move(block.id, -1)}
-                  disabled={idx === 0}
-                  title="Move up"
-                  aria-label="Move block up"
-                  className="flex w-8 items-center justify-center text-zinc-500 hover:bg-zinc-100 transition disabled:opacity-25 disabled:cursor-not-allowed"
-                >
-                  <ChevronUpIcon />
-                </button>
-
-                <button
-                  onClick={() => ops.move(block.id, 1)}
-                  disabled={idx === listLength - 1}
-                  title="Move down"
-                  aria-label="Move block down"
-                  className="flex w-8 items-center justify-center text-zinc-500 hover:bg-zinc-100 transition disabled:opacity-25 disabled:cursor-not-allowed"
-                >
-                  <ChevronDownIcon />
-                </button>
-
-                <div className="w-px self-stretch bg-zinc-200" />
-
-                <button
-                  onClick={() => ops.remove(block.id)}
-                  title="Delete block"
-                  aria-label="Delete block"
-                  className="flex w-8 items-center justify-center text-zinc-400 hover:bg-red-50 hover:text-red-500 transition"
-                >
-                  <TrashIcon />
-                </button>
-              </div>
-            </div>
+            <BlockToolbar
+              block={block}
+              def={def}
+              idx={idx}
+              listLength={listLength}
+              ops={ops}
+              isColBlock={isColBlock}
+              activeColInfo={activeColInfo}
+              parentInfo={parentInfo}
+              onDeselectCol={() => {
+                setActiveColInfo(null);
+                onColSelect?.(block.id, null);
+              }}
+            />
 
             {/* Col toolbar pill — right */}
             {block.type === "columns" && activeColInfo?.blockId === block.id && (() => {

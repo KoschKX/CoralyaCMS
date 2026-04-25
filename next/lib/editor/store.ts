@@ -86,6 +86,27 @@ export function createEditorStore() {
     onColSelect: ((blockId: string, colIdx: number | null) => void) | null;
   } = { onChange: null, onSelectBlock: null, onColSelect: null };
 
+  // Debounce timer for the onChange callback inside publish().
+  // History commits are immediate (cheap array push via Immer), but the
+  // expensive blocksToShortcodes() serialization + onChange notification is
+  // deferred so rapid typing doesn't serialize on every keystroke.
+  let publishDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function cancelPublishDebounce() {
+    if (publishDebounceTimer !== null) {
+      clearTimeout(publishDebounceTimer);
+      publishDebounceTimer = null;
+    }
+  }
+
+  function scheduleOnChange(blocks: EditorBlock[]) {
+    cancelPublishDebounce();
+    publishDebounceTimer = setTimeout(() => {
+      publishDebounceTimer = null;
+      cb.onChange?.(blocksToShortcodes(blocks), blocks);
+    }, 150);
+  }
+
   return create<EditorStore>()(
     immer((set, get) => ({
       past: [],
@@ -117,10 +138,15 @@ export function createEditorStore() {
           s.present = newBlocks;
           s.future = [];
         });
-        cb.onChange?.(blocksToShortcodes(newBlocks), newBlocks);
+        // Debounce onChange so rapid block updates (e.g. typing in a text field)
+        // don't trigger a full blocksToShortcodes() serialization on every keystroke.
+        scheduleOnChange(newBlocks);
       },
 
       undo() {
+        // Cancel any pending debounced onChange so undo always fires immediately
+        // and doesn't race with a stale debounced update from before the undo.
+        cancelPublishDebounce();
         set((s) => {
           if (s.past.length === 0) return;
           const prev = s.past[s.past.length - 1];
@@ -133,6 +159,8 @@ export function createEditorStore() {
       },
 
       redo() {
+        // Cancel any pending debounced onChange for the same reason as undo.
+        cancelPublishDebounce();
         set((s) => {
           if (s.future.length === 0) return;
           const next = s.future[0];

@@ -1,17 +1,15 @@
 
 "use client";
 
-import { useRef, useState, useCallback, useMemo, useEffect } from "react";
+import { useRef, useState, useCallback, useMemo } from "react";
 
 import { useRouter } from "next/navigation";
 import type { EditorBlock } from "@/lib/pages-db";
 import type { InjectCode } from "@/lib/types";
 import { ViewportContext } from "@/components/ui/ViewportContext";
-import { blocksToShortcodes, shortcodesToBlocks } from "@/lib/shortcodes";
 import { EditorViewportContext } from "@/components/editor/EditorContext";
 import { ResponsiveStyleInjector } from "@/components/ResponsiveStyleInjector";
 import { getEditorBreakpoints } from "@/lib/editor-breakpoints";
-import type { SelectedBlock } from "@/lib/types";
 import EditorToolbar from "@/app/admin/editor/EditorToolbar";
 import PagePanel from "@/app/admin/editor/PagePanel";
 import BlockPanel from "@/app/admin/editor/BlockPanel";
@@ -21,6 +19,7 @@ import { useResponsiveBlock } from "@/app/admin/editor/hooks/useResponsiveBlock"
 import { useCanvasWidth } from "@/app/admin/editor/hooks/useCanvasWidth";
 import { useEditorPanel, type PanelTab } from "@/app/admin/editor/hooks/useEditorPanel";
 import { usePageMeta } from "@/app/admin/editor/hooks/usePageMeta";
+import { useEditorPageState } from "@/app/admin/editor/hooks/useEditorPageState";
 import dynamic from "next/dynamic";
 const CodeEditor = dynamic(() => import("@/components/CodeEditor"), { ssr: false });
 import type { VisualEditorProps } from "@/components/VisualEditor";
@@ -52,12 +51,19 @@ export default function EditorPage({
   initialPageBgColor = "#ffffff",
   initialInjectCode,
 }: EditorPageProps) {
-  const [mainMode, setMainModeState] = useState<"visual" | "code" | "inject">("visual");
-  const [selectedBlock, setSelectedBlock] = useState<SelectedBlock | null>(null);
-  const setMainMode = useCallback((mode: "visual" | "code" | "inject") => {
-    setMainModeState(mode);
-    if (mode !== "visual") setSelectedBlock(null);
-  }, []);
+  const {
+    mainMode,
+    setMainMode,
+    selectedBlock,
+    setSelectedBlock,
+    codeText,
+    setCodeText,
+    visualBlocks,
+    setVisualBlocks,
+    liveBlocks,
+    clearDraft,
+  } = useEditorPageState({ id, initialBlocks, initialHtml });
+
   const [injectFields, setInjectFields] = useState<InjectCode>({
     tracking:   initialInjectCode?.tracking   ?? "",
     head:       initialInjectCode?.head       ?? "",
@@ -65,29 +71,6 @@ export default function EditorPage({
     afterBody:  initialInjectCode?.afterBody  ?? "",
   });
   const router = useRouter();
-  const draftKey = `editor-draft-${id ?? 'new'}`;
-  const initialParsedBlocks = initialHtml ? shortcodesToBlocks(initialHtml) : initialBlocks;
-  // Read from sessionStorage draft on first render for crash recovery (client-only component).
-  const [codeText, setCodeText] = useState(() => {
-    try {
-      return sessionStorage.getItem(draftKey) ?? (initialHtml || blocksToShortcodes(initialParsedBlocks));
-    } catch {
-      return initialHtml || blocksToShortcodes(initialParsedBlocks);
-    }
-  });
-  // Debounce shortcode→block parsing so the parser doesn't run on every keystroke in code view.
-  const [debouncedCode, setDebouncedCode] = useState(codeText);
-  useEffect(() => {
-    const debounceTimer = setTimeout(() => setDebouncedCode(codeText), 300);
-    return () => clearTimeout(debounceTimer);
-  }, [codeText]);
-
-  // In visual mode, the Zustand store owns the block tree. We receive parsed blocks
-  // from the store's onChange callback to avoid a redundant shortcode→blocks round-trip.
-  // In code/inject mode, we parse the debounced code directly.
-  const [visualBlocks, setVisualBlocks] = useState(initialParsedBlocks);
-  const parsedCodeBlocks = useMemo(() => shortcodesToBlocks(debouncedCode), [debouncedCode]);
-  const liveBlocks = mainMode === "visual" ? visualBlocks : parsedCodeBlocks;
 
   const { title, slug, setSlug, status, setStatus, pageBgColor, setPageBgColor, handleTitleChange } =
     usePageMeta({ id, initialTitle, initialSlug, initialStatus, initialPageBgColor });
@@ -99,22 +82,8 @@ export default function EditorPage({
     pageBgColor,
     injectCode: injectFields,
     onStatusChange: setStatus,
+    onSaveSuccess: clearDraft,
   });
-
-  // Persist draft to sessionStorage on change (1 s debounce) for crash recovery.
-  useEffect(() => {
-    const draftTimer = setTimeout(() => {
-      try { sessionStorage.setItem(draftKey, codeText); } catch {}
-    }, 1000);
-    return () => clearTimeout(draftTimer);
-  }, [codeText, draftKey]);
-
-  // Clear the draft after a successful save so stale drafts don't linger.
-  useEffect(() => {
-    if (saved) {
-      try { sessionStorage.removeItem(draftKey); } catch {}
-    }
-  }, [saved, draftKey]);
 
   const { panelTab, setPanelTab, panelOpen, setPanelOpen } = useEditorPanel(mainMode);
   const { tablet: tabletBp, mobile: mobileBp } = getEditorBreakpoints();
