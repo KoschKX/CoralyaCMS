@@ -50,6 +50,35 @@ export const UpdatePageSchema = z.object({
   injectCode: InjectCodeSchema.optional(),
 });
 
+// ── Posts ─────────────────────────────────────────────────────────────────────
+
+export const CreatePostSchema = z.object({
+  title: z.string().max(500).optional(),
+  slug: z.string().max(500).regex(/^[a-z0-9-]*$/, "slug must be lowercase alphanumeric and hyphens only").optional(),
+  status: z.enum(["draft", "published"]).optional(),
+  blocks: z.array(EditorBlockSchema).optional(),
+  html: z.string().optional(),
+  excerpt: z.string().max(2000).optional(),
+  tags: z.array(z.string().uuid()).optional(),
+  categories: z.array(z.string().uuid()).optional(),
+  injectCode: InjectCodeSchema.optional(),
+});
+
+export const UpdatePostSchema = CreatePostSchema;
+
+// ── Taxonomies ────────────────────────────────────────────────────────────────
+
+export const CreateTaxonomySchema = z.object({
+  name: z.string().min(1).max(200),
+  slug: z.string().max(200).regex(/^[a-z0-9-]*$/, "slug must be lowercase alphanumeric and hyphens only"),
+  type: z.enum(["tag", "category"]),
+});
+
+export const UpdateTaxonomySchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  slug: z.string().max(200).regex(/^[a-z0-9-]*$/, "slug must be lowercase alphanumeric and hyphens only").optional(),
+});
+
 // ── Settings ─────────────────────────────────────────────────────────────────
 
 const PaletteColorSchema = z.object({

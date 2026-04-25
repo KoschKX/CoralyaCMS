@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { LogoutButton } from "./LogoutButton";
+import { SidebarContentNav } from "./SidebarContentNav";
 import "../col-editor-overrides.css";
 // Ensure plugins are installed before reading their admin pages
 import "@/plugins/index";
@@ -29,18 +30,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
             Content
           </p>
-          <Link
-            href="/admin"
-            className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
-          >
-            <span className="w-5 h-5 inline-flex items-center justify-center"><img src="/icons/pages.svg" alt="" className="w-5 h-5" /></span> Pages
-          </Link>
-          <Link
-            href="/admin/editor/new"
-            className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
-          >
-            <span>＋</span> New page
-          </Link>
+          <SidebarContentNav />
 
           <p className="mb-1 mt-5 px-2 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
             Settings

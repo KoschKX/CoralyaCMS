@@ -47,6 +47,34 @@ export interface Page {
   updatedAt: string;
 }
 
+// ── Taxonomy types ────────────────────────────────────────────────────────────
+
+export interface Taxonomy {
+  id: string;
+  name: string;
+  slug: string;
+  type: "tag" | "category";
+}
+
+// ── Post types ────────────────────────────────────────────────────────────────
+
+export interface Post {
+  id: string;
+  title: string;
+  slug: string;
+  status: PageStatus;
+  blocks: EditorBlock[];
+  html?: string;
+  excerpt?: string;
+  /** Tag IDs */
+  tags: string[];
+  /** Category IDs */
+  categories: string[];
+  injectCode?: InjectCode;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ── Editor types ──────────────────────────────────────────────────────────────
 
 /** Represents the currently selected block in the editor panel. */
