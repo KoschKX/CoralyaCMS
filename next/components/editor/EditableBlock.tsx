@@ -5,7 +5,6 @@ import { blockMap } from "@/blocks/index";
 import BlockRenderer from "@/components/BlockRenderer";
 import type { EditorBlock } from "@/lib/pages-db";
 import type { EditableProps } from "@/lib/block-types";
-import { setEditableBlockComponent } from "@/blocks/columns/editable";
 import { useEditorViewport } from "@/components/editor/EditorHooks";
 import { mergeViewportOverrides } from "@/lib/responsive-css";
 
@@ -101,9 +100,4 @@ export function EditableBlock({
     </div>
   );
 }
-
-// Break the circular dependency: ColumnsEditable needs EditableBlock for its
-// renderChildBlocks fallback, but can't import it directly (circular). We
-// register the component after both modules have loaded.
-setEditableBlockComponent(EditableBlock);
 

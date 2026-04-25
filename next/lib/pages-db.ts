@@ -71,6 +71,7 @@ export function createPage(data: Partial<Page>): Promise<Page> {
       blocks: data.blocks ?? [],
       html: data.html ?? "",
       pageBgColor: data.pageBgColor ?? "#ffffff",
+      injectCode: data.injectCode,
       createdAt: now,
       updatedAt: now,
     };

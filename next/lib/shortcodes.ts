@@ -13,6 +13,12 @@
  */
 
 import type { EditorBlock } from "@/lib/pages-db";
+import { blockMap } from "@/lib/plugin-registry";
+
+// ── Synthetic container token names (not registered as blocks) ────────────────
+// "column" is a nested syntax token used inside [columns]...[/columns].
+// It is never in blockMap but must produce open/close tokens during tokenisation.
+const SYNTHETIC_CONTAINERS = new Set(["column"]);
 
 // ── Attribute value encoding / decoding ─────────────────────────────────────
 
@@ -28,8 +34,10 @@ function unescapeBrackets(s: string): string {
  * Serialise key + value to an attr token.
  *  scalar  → key="value"  (double-quote; escape " and [ ])
  *  complex → key='json'   (single-quote; escape [ ] only — JSON uses " internally)
+ *
+ * Exported so block definitions can use it inside their `serializeShortcode` hook.
  */
-function serializeAttr(key: string, v: unknown): string {
+export function serializeAttr(key: string, v: unknown): string {
   if (typeof v === "string") {
     const encoded = escapeBrackets(v).replace(/"/g, "&quot;");
     return `${key}="${encoded}"`;
@@ -68,6 +76,26 @@ function parseAttrsStr(raw: string): Record<string, unknown> {
   return attrs;
 }
 
+// ── Container block detection ────────────────────────────────────────────────
+
+/**
+ * Returns true if this token name should produce open/close shortcode tags
+ * rather than a self-closing tag.
+ *
+ * Checks:
+ *  1. Synthetic tokens not in blockMap (e.g. "column" inside columns syntax)
+ *  2. The "html" block, which always captures raw content between open/close tags
+ *  3. Any registered block whose BlockDefinition has `isContainer: true`
+ *
+ * This means adding a new container block only requires setting `isContainer: true`
+ * in its BlockDefinition — no changes to this file needed.
+ */
+function isContainerToken(name: string): boolean {
+  if (SYNTHETIC_CONTAINERS.has(name)) return true;
+  if (name === "html") return true;
+  return !!(blockMap[name]?.isContainer);
+}
+
 // ── Single-shortcode parse (used by BlockRenderer paragraph fallback) ────────
 
 const SHORTCODE_RE = /^\[([a-z][a-z0-9_-]*)([^\]]*)\]$/i;
@@ -97,10 +125,6 @@ type ParseToken =
   | { type: "self";  name: string; attrs: Record<string, unknown> }
   | { type: "text";  content: string };
 
-/** Block types that use [open]…[/close] syntax instead of self-closing. */
-const CONTAINER_BLOCKS = new Set(["columns", "column", "html"]);
-
-
 function tokenise(text: string): ParseToken[] {
   const tokens: ParseToken[] = [];
   // Since encodeAttrValue escapes [ and ], the only ] that can appear
@@ -122,7 +146,7 @@ function tokenise(text: string): ParseToken[] {
     } else {
       const name = rawName.toLowerCase();
       const attrs = parseAttrsStr(m[2]);
-      tokens.push(CONTAINER_BLOCKS.has(name)
+      tokens.push(isContainerToken(name)
         ? { type: "open", name, attrs }
         : { type: "self", name, attrs });
     }
@@ -245,33 +269,20 @@ const INDENT = "  "; // two spaces per level
 
 function blockToShortcode(type: string, data: Record<string, unknown>, depth = 0): string {
   const pad = INDENT.repeat(depth);
-  const childPad = INDENT.repeat(depth + 1);
 
-  // html blocks → [html]content[/html] container
+  // html blocks → [html]content[/html] container.
+  // The html block has a built-in parser that captures raw content; keep it here.
   if (type === "html") {
     const content = (data.content as string) ?? "";
     return `${pad}[html]\n${content}\n${pad}[/html]`;
   }
 
-  if (type === "columns") {
-    const cols = (data.cols as Array<{ blocks: EditorBlock[]; width?: string; responsive?: Record<string, string> }>) ?? [];
-    // Serialize responsive attribute if present
-    const responsive = data.responsive ? ` ${serializeAttr("responsive", data.responsive)}` : "";
-    const inner = cols.map((col, i) => {
-      let widthAttr = col.width ? ` ${serializeAttr("width", col.width)}` : "";
-      // Serialize per-column responsive widths as width_desktop, width_tablet, width_mobile
-      let responsiveAttrs = "";
-      if (col.responsive) {
-        Object.entries(col.responsive).forEach(([bp, val]) => {
-          if (val) responsiveAttrs += ` width_${bp}='${val}'`;
-        });
-      }
-      const colInner = blocksToShortcodes(col.blocks ?? [], depth + 2);
-      return colInner
-        ? `${childPad}[column${widthAttr}${responsiveAttrs}]\n${colInner}\n${childPad}[/column]`
-        : `${childPad}[column${widthAttr}${responsiveAttrs}][/column]`;
-    }).join("\n");
-    return `${pad}[columns${responsive}]\n${inner}\n${pad}[/columns]`;
+  // Delegate to the block's own serializeShortcode hook if provided.
+  // This removes the hardcoded special-case for each container block type —
+  // new container blocks only need to define their own serializer.
+  const def = blockMap[type];
+  if (def?.serializeShortcode) {
+    return def.serializeShortcode(data, depth, blocksToShortcodes, serializeAttr);
   }
 
   // All properties — scalar and complex — are serialised

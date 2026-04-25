@@ -23,6 +23,13 @@ const cssColorSchema = z
     "pageBgColor must be a valid CSS color",
   );
 
+const InjectCodeSchema = z.object({
+  tracking:   z.string().optional(),
+  head:       z.string().optional(),
+  beforeBody: z.string().optional(),
+  afterBody:  z.string().optional(),
+});
+
 export const CreatePageSchema = z.object({
   title: z.string().max(500).optional(),
   slug: z.string().max(500).regex(/^[a-z0-9-]*$/, "slug must be lowercase alphanumeric and hyphens only").optional(),
@@ -30,6 +37,7 @@ export const CreatePageSchema = z.object({
   blocks: z.array(EditorBlockSchema).optional(),
   html: z.string().optional(),
   pageBgColor: cssColorSchema.optional(),
+  injectCode: InjectCodeSchema.optional(),
 });
 
 export const UpdatePageSchema = z.object({
@@ -39,6 +47,7 @@ export const UpdatePageSchema = z.object({
   blocks: z.array(EditorBlockSchema).optional(),
   html: z.string().optional(),
   pageBgColor: cssColorSchema.optional(),
+  injectCode: InjectCodeSchema.optional(),
 });
 
 // ── Settings ─────────────────────────────────────────────────────────────────

@@ -5,6 +5,7 @@ import { useRef, useState, useCallback, useMemo, useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 import type { EditorBlock } from "@/lib/pages-db";
+import type { InjectCode } from "@/lib/types";
 import { ViewportContext } from "@/components/ui/ViewportContext";
 import { blocksToShortcodes, shortcodesToBlocks } from "@/lib/shortcodes";
 import { EditorViewportContext } from "@/components/editor/EditorContext";
@@ -37,6 +38,7 @@ interface EditorPageProps {
   initialBlocks?: EditorBlock[];
   initialHtml?: string;
   initialPageBgColor?: string;
+  initialInjectCode?: InjectCode;
   disabledBlocks?: string[];
 }
 
@@ -48,6 +50,7 @@ export default function EditorPage({
   initialBlocks = [],
   initialHtml = "",
   initialPageBgColor = "#ffffff",
+  initialInjectCode,
 }: EditorPageProps) {
   const [mainMode, setMainModeState] = useState<"visual" | "code" | "inject">("visual");
   const [selectedBlock, setSelectedBlock] = useState<SelectedBlock | null>(null);
@@ -55,11 +58,11 @@ export default function EditorPage({
     setMainModeState(mode);
     if (mode !== "visual") setSelectedBlock(null);
   }, []);
-  const [injectFields, setInjectFields] = useState({
-    tracking: "",
-    head: "",
-    beforeBody: "",
-    afterBody: "",
+  const [injectFields, setInjectFields] = useState<InjectCode>({
+    tracking:   initialInjectCode?.tracking   ?? "",
+    head:       initialInjectCode?.head       ?? "",
+    beforeBody: initialInjectCode?.beforeBody ?? "",
+    afterBody:  initialInjectCode?.afterBody  ?? "",
   });
   const router = useRouter();
   const draftKey = `editor-draft-${id ?? 'new'}`;
@@ -75,10 +78,16 @@ export default function EditorPage({
   // Debounce shortcode→block parsing so the parser doesn't run on every keystroke in code view.
   const [debouncedCode, setDebouncedCode] = useState(codeText);
   useEffect(() => {
-    const id = setTimeout(() => setDebouncedCode(codeText), 300);
-    return () => clearTimeout(id);
+    const debounceTimer = setTimeout(() => setDebouncedCode(codeText), 300);
+    return () => clearTimeout(debounceTimer);
   }, [codeText]);
-  const liveBlocks = useMemo(() => shortcodesToBlocks(debouncedCode), [debouncedCode]);
+
+  // In visual mode, the Zustand store owns the block tree. We receive parsed blocks
+  // from the store's onChange callback to avoid a redundant shortcode→blocks round-trip.
+  // In code/inject mode, we parse the debounced code directly.
+  const [visualBlocks, setVisualBlocks] = useState(initialParsedBlocks);
+  const parsedCodeBlocks = useMemo(() => shortcodesToBlocks(debouncedCode), [debouncedCode]);
+  const liveBlocks = mainMode === "visual" ? visualBlocks : parsedCodeBlocks;
 
   const { title, slug, setSlug, status, setStatus, pageBgColor, setPageBgColor, handleTitleChange } =
     usePageMeta({ id, initialTitle, initialSlug, initialStatus, initialPageBgColor });
@@ -88,15 +97,16 @@ export default function EditorPage({
     slug,
     codeText,
     pageBgColor,
+    injectCode: injectFields,
     onStatusChange: setStatus,
   });
 
   // Persist draft to sessionStorage on change (1 s debounce) for crash recovery.
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const draftTimer = setTimeout(() => {
       try { sessionStorage.setItem(draftKey, codeText); } catch {}
     }, 1000);
-    return () => clearTimeout(timer);
+    return () => clearTimeout(draftTimer);
   }, [codeText, draftKey]);
 
   // Clear the draft after a successful save so stale drafts don't linger.
@@ -217,7 +227,7 @@ export default function EditorPage({
                     />
                     <VisualEditor
                       initialBlocks={liveBlocks}
-                      onChange={(newCode) => setCodeText(newCode)}
+                      onChange={(newCode, newBlocks) => { setCodeText(newCode); setVisualBlocks(newBlocks); }}
                       onSelectBlock={handleSelectBlock}
                       selectedBlockId={selectedBlock?.id ?? null}
                       registerUpdateHandler={registerUpdateHandler}

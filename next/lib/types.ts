@@ -22,6 +22,14 @@ export interface EditorBlock {
 
 export type PageStatus = "draft" | "published";
 
+/** Per-page code injection slots (tracking scripts, <head> additions, etc.). */
+export interface InjectCode {
+  tracking?: string;
+  head?: string;
+  beforeBody?: string;
+  afterBody?: string;
+}
+
 export interface Page {
   id: string;
   title: string;
@@ -33,6 +41,17 @@ export interface Page {
   html?: string;
   /** Optional background color for the page. */
   pageBgColor?: string;
+  /** Per-page code injection (tracking, head, body snippets). */
+  injectCode?: InjectCode;
   createdAt: string;
   updatedAt: string;
+}
+
+// ── Editor types ──────────────────────────────────────────────────────────────
+
+/** Represents the currently selected block in the editor panel. */
+export interface SelectedBlock {
+  id: string;
+  name: string;
+  data: Record<string, unknown>;
 }

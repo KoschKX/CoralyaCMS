@@ -49,6 +49,20 @@ export interface BlockDefinition {
   getChildBlocks?: (data: BlockData) => EditorBlock[][];
   /** Returns updated data with the given child-block arrays written back. */
   setChildBlocks?: (data: BlockData, arrays: EditorBlock[][]) => BlockData;
+  /**
+   * Custom shortcode serializer for container blocks.
+   * Called by `blocksToShortcodes` instead of the default attribute serializer.
+   * Receives a helper to recursively serialize child block arrays and a helper
+   * to serialize individual attribute key-value pairs.
+   *
+   * When omitted, the default self-closing `[type key="value"]` format is used.
+   */
+  serializeShortcode?: (
+    data: BlockData,
+    depth: number,
+    blocksToShortcodes: (blocks: EditorBlock[], depth: number) => string,
+    serializeAttr: (key: string, value: unknown) => string,
+  ) => string;
   Layout: (props: BlockLayoutProps) => ReactNode;
   PanelControls?: (props: PanelControlProps) => ReactNode;
   /** Editor-mode render. When omitted, EditableBlock falls back to the read-only Layout. */

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { shortcodesToBlocks } from "@/lib/shortcodes";
+import type { InjectCode } from "@/lib/types";
 
 interface UseSavePageOptions {
   id?: string;
@@ -10,6 +11,7 @@ interface UseSavePageOptions {
   slug: string;
   codeText: string;
   pageBgColor: string;
+  injectCode?: InjectCode;
   onStatusChange: (s: "draft" | "published") => void;
 }
 
@@ -19,6 +21,7 @@ export function useSavePage({
   slug,
   codeText,
   pageBgColor,
+  injectCode,
   onStatusChange,
 }: UseSavePageOptions) {
   const router = useRouter();
@@ -33,7 +36,7 @@ export function useSavePage({
     try {
       const html = codeText;
       const blocks = shortcodesToBlocks(codeText);
-      const payload = { title, slug, status: targetStatus, blocks, html, pageBgColor };
+      const payload = { title, slug, status: targetStatus, blocks, html, pageBgColor, injectCode };
       if (id) {
         const res = await fetch(`/api/pages/${id}`, {
           method: "PUT",

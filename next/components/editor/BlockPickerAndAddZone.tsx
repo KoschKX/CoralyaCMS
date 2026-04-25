@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useContext } from "react";
 import { blockRegistry } from "@/blocks/index";
+import { applyBlockPickerBlocks } from "@/filters/block-picker";
 import { BlockEditorContext } from "@/components/editor/BlockEditorContext";
 import { BlockIcon } from "@/components/BlockIcon";
 
@@ -14,9 +15,12 @@ export function BlockPicker({
 }) {
   const ctx = useContext(BlockEditorContext);
   const disabledBlocks = ctx?.disabledBlocks ?? [];
+  // Apply the block.picker.blocks filter so plugins can hide, reorder, or
+  // inject blocks into the picker without modifying the global registry.
+  const filtered = applyBlockPickerBlocks(blockRegistry);
   const visibleBlocks = disabledBlocks.length
-    ? blockRegistry.filter((def) => !disabledBlocks.includes(def.name))
-    : blockRegistry;
+    ? filtered.filter((def) => !disabledBlocks.includes(def.name))
+    : filtered;
 
   const ref = useRef<HTMLDivElement>(null);
 

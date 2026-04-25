@@ -1,3 +1,25 @@
+/**
+ * Blocks — public entry point
+ * ────────────────────────────
+ * Single import for everything block-related. Use this in plugin code and
+ * custom block definitions — you should never need to import from
+ * @/lib/plugin-registry or @/lib/block-types directly.
+ *
+ * Quick reference:
+ *
+ *   // Define and register a custom block:
+ *   import { registerBlock, type BlockDefinition } from "@/blocks";
+ *
+ *   // Look up a registered block at runtime:
+ *   import { blockMap, blockRegistry } from "@/blocks";
+ *
+ *   // Register a custom icon for use in the block picker:
+ *   import { registerIcon } from "@/blocks";
+ *
+ * Importing this module also registers all built-in core blocks as a side
+ * effect — that is intentional and required before using blockMap / blockRegistry.
+ */
+
 import paragraph from "./paragraph/config";
 import header    from "./header/config";
 import list      from "./list/config";
@@ -9,11 +31,31 @@ import embed     from "./embed/config";
 import columns   from "./columns/config";
 import html      from "./html/config";
 
-import { registerBlock, blockRegistry, blockMap } from "@/lib/plugin-registry";
+import {
+  registerBlock,
+  unregisterBlock,
+  blockRegistry,
+  blockMap,
+  registerIcon,
+  getPluginIcon,
+} from "@/lib/plugin-registry";
 
 for (const block of [paragraph, header, list, code, quote, delimiter, table, embed, columns, html]) {
   registerBlock(block);
 }
 
+// ── Block registry ────────────────────────────────────────────────────────────
 export { blockRegistry, blockMap };
+
+// ── Registration API ──────────────────────────────────────────────────────────
+export { registerBlock, unregisterBlock, registerIcon, getPluginIcon };
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+export type {
+  BlockDefinition,
+  BlockData,
+  BlockLayoutProps,
+  EditableProps,
+  PanelControlProps,
+} from "@/lib/block-types";
 

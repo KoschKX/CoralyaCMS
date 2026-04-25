@@ -30,6 +30,7 @@ export default async function EditPage({ params }: Props) {
       initialBlocks={page.blocks}
       initialHtml={page.html ?? ""}
       initialPageBgColor={page.pageBgColor ?? "#ffffff"}
+      initialInjectCode={page.injectCode}
       disabledBlocks={disabledBlocks}
     />
   );

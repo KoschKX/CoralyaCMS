@@ -2,12 +2,7 @@
 
 import { blockMap } from "@/blocks/index";
 import { ViewportContext, type Viewport } from "@/components/ui/ViewportContext";
-
-interface SelectedBlock {
-  id: string;
-  name: string;
-  data: Record<string, unknown>;
-}
+import type { SelectedBlock } from "@/lib/types";
 
 interface BlockPanelProps {
   selectedBlock: SelectedBlock | null;
@@ -71,10 +66,14 @@ export default function BlockPanel({
         {supportsBreakpoints && (
           <div className="flex items-center gap-0.5" role="group" aria-label="Active viewport">
             {VIEWPORT_OPTIONS.map(({ vp, label, icon }) => (
+              // Rendered as non-interactive indicators — viewport switches via window resize.
+              // The title explains this to sighted users; aria-current signals the active one
+              // to screen readers without implying interactivity.
               <span
                 key={vp}
-                aria-label={label}
-                title={`${label} (resize window to switch)`}
+                role="img"
+                aria-label={`${label}${viewport === vp ? " (active)" : ""}`}
+                title={`${label}${viewport === vp ? " — active" : " (resize window to switch)"}`}
                 className={`flex h-6 w-6 items-center justify-center rounded ${viewport === vp ? "bg-zinc-900 text-white" : "text-zinc-300"}`}
               >
                 {icon}
@@ -86,7 +85,7 @@ export default function BlockPanel({
       {Controls ? (
         <ViewportContext.Provider value={{ viewport: activeViewport, isSectionEnabled, toggleSection }}>
           <p className={`-mt-1 text-[10px] transition-opacity ${supportsBreakpoints && activeViewport !== "desktop" ? "text-zinc-400 opacity-100" : "select-none opacity-0"}`}>
-            Toggle switches to override at this breakpoint. Resize the window to preview.
+            Viewport: <strong>{activeViewport}</strong>. Toggle switches to override at this breakpoint.
           </p>
           <Controls
             data={{

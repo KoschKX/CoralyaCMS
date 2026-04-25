@@ -11,6 +11,7 @@ import { EditableBlock } from "@/components/editor/EditableBlock";
 import { AddZone } from "@/components/editor/BlockPickerAndAddZone";
 import { useBlockEditor, type BlockOps } from "@/components/editor/BlockEditorContext";
 import { useEditorViewport } from "@/components/editor/EditorHooks";
+import { ChevronUpIcon, ChevronDownIcon, TrashIcon } from "@/components/editor/ToolbarIcons";
 
 interface ColViewportToolbarProps {
   blockId: string;
@@ -143,6 +144,12 @@ function BlockItem({
   const blockRef = useRef(block);
   blockRef.current = block;
 
+  // Keep a ref to selectedBlockId so renderChildBlocks doesn't need it as a dep.
+  // Without this, any selection change would recreate renderChildBlocks and force
+  // all column children to re-render even when the columns block itself didn't change.
+  const selectedBlockIdRef = useRef(selectedBlockId);
+  selectedBlockIdRef.current = selectedBlockId;
+
   const def = blockMap[block.type];
   if (!def) return null;
 
@@ -158,10 +165,12 @@ function BlockItem({
     onUpdateAll: (newBlocks: EditorBlock[]) => void,
     colIdx?: number,
   ): ReactNode => {
-    // Read from ref so the closure always sees the latest block identity/data
-    // without needing block.id / block.data / block.type as deps.
+    // Read from refs so the closure sees the latest values without adding them
+    // to the dependency array. This prevents renderChildBlocks from being
+    // recreated on every selection change, which would cause all column
+    // children to re-render unnecessarily.
     const { id: blockId, data: blockData, type: blockType } = blockRef.current;
-    const colOps = makeColOps(colBlocks, onUpdateAll, selectedBlockId, onSelectBlock, makeNewBlock);
+    const colOps = makeColOps(colBlocks, onUpdateAll, selectedBlockIdRef.current, onSelectBlock, makeNewBlock);
     return (
       <>
         {colBlocks.length === 0 ? (
@@ -202,8 +211,9 @@ function BlockItem({
       </>
     );
   // block.id / block.data / block.type intentionally omitted — read from blockRef.current.
+  // selectedBlockId intentionally omitted — read from selectedBlockIdRef.current.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedBlockId, onSelectBlock, makeNewBlock, setAnyPickerOpen, setActiveColInfo, onColSelect]);
+  }, [onSelectBlock, makeNewBlock, setAnyPickerOpen, setActiveColInfo, onColSelect]);
 
   const isLast = idx === listLength - 1;
   const colBlockParentSelected = isSelected && isColBlock && activeColInfo?.blockId !== block.id;
@@ -312,7 +322,7 @@ function BlockItem({
                   aria-label="Move block up"
                   className="flex w-8 items-center justify-center text-zinc-500 hover:bg-zinc-100 transition disabled:opacity-25 disabled:cursor-not-allowed"
                 >
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+                  <ChevronUpIcon />
                 </button>
 
                 <button
@@ -322,7 +332,7 @@ function BlockItem({
                   aria-label="Move block down"
                   className="flex w-8 items-center justify-center text-zinc-500 hover:bg-zinc-100 transition disabled:opacity-25 disabled:cursor-not-allowed"
                 >
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  <ChevronDownIcon />
                 </button>
 
                 <div className="w-px self-stretch bg-zinc-200" />
@@ -333,7 +343,7 @@ function BlockItem({
                   aria-label="Delete block"
                   className="flex w-8 items-center justify-center text-zinc-400 hover:bg-red-50 hover:text-red-500 transition"
                 >
-                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                  <TrashIcon />
                 </button>
               </div>
             </div>

@@ -5,15 +5,18 @@ import { useEditorViewport } from "@/components/editor/EditorHooks";
 import { resolveColWidthForDisplay } from "@/lib/editor/col-width";
 import type { EditableProps } from "@/lib/block-types";
 
-// Forward-declared to avoid a circular import — EditableBlock imports this
-// file, and this file needs EditableBlock for the renderChildBlocks fallback.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let EditableBlockComponent: React.ComponentType<any>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function setEditableBlockComponent(c: React.ComponentType<any>) {
-  EditableBlockComponent = c;
-}
-
+/**
+ * ColumnsEditable
+ * ───────────────
+ * Renders N resizable columns in editor mode. Child block rendering is
+ * delegated entirely to the `renderChildBlocks` prop, which is always
+ * provided by `BlockItem` when this component is rendered inside the editor.
+ *
+ * The previous fallback that used a module-level `EditableBlockComponent`
+ * ref (to break a circular import) has been removed — it was dead code
+ * because `BlockItem` unconditionally passes `renderChildBlocks` for
+ * columns blocks.
+ */
 export function ColumnsEditable({
   data,
   onUpdate,
@@ -53,33 +56,13 @@ export function ColumnsEditable({
               onClick={(e) => { e.stopPropagation(); onActiveColChange?.(colIdx); onSelect?.(); }}
             >
               <div className="block-columns__col min-w-0 relative rounded transition cursor-pointer">
-                {renderChildBlocks
-                  ? renderChildBlocks(
-                      col.blocks ?? [],
-                      (newBlocks) => {
-                        onUpdate({ ...data, cols: cols.map((c, ci) => ci === colIdx ? { ...c, blocks: newBlocks } : c) });
-                      },
-                      colIdx,
-                    )
-                  : (col.blocks ?? []).map((childBlock) =>
-                      EditableBlockComponent ? (
-                        <EditableBlockComponent
-                          key={childBlock.id}
-                          block={childBlock}
-                          onUpdate={(newData: Record<string, unknown>) => {
-                            onUpdate({
-                              ...data,
-                              cols: cols.map((c, ci) =>
-                                ci === colIdx
-                                  ? { ...c, blocks: c.blocks.map((b) => b.id === childBlock.id ? { ...b, data: newData } : b) }
-                                  : c,
-                              ),
-                            });
-                          }}
-                          activeColIdx={isColSelected ? null : undefined}
-                        />
-                      ) : null,
-                    )}
+                {renderChildBlocks?.(
+                  col.blocks ?? [],
+                  (newBlocks) => {
+                    onUpdate({ ...data, cols: cols.map((c, ci) => ci === colIdx ? { ...c, blocks: newBlocks } : c) });
+                  },
+                  colIdx,
+                )}
               </div>
             </div>
           );
