@@ -206,6 +206,7 @@ export default function EditorPage({
                       tabletBp={tabletBp}
                       mobileBp={mobileBp}
                       forContainer
+                      forcedViewport={panelOpen ? viewport : undefined}
                     />
                     <VisualEditor
                       initialBlocks={liveBlocks}
@@ -227,6 +228,31 @@ export default function EditorPage({
         {/* Right panel */}
         {panelOpen && (
           <aside className="sticky top-0 h-[calc(100vh-3rem)] w-72 shrink-0 overflow-y-auto border-l border-zinc-200 bg-white">
+            {/* Viewport switcher — always visible at the top of the panel */}
+            {mainMode === "visual" && (
+              <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-2">
+                <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Preview</span>
+                <div className="flex items-center gap-0.5" role="group" aria-label="Preview viewport">
+                  {([
+                    { vp: "desktop" as const, label: "Desktop", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> },
+                    { vp: "tablet"  as const, label: "Tablet",  icon: <svg width="13" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/></svg> },
+                    { vp: "mobile"  as const, label: "Mobile",  icon: <svg width="10" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/></svg> },
+                  ]).map(({ vp, label, icon }) => (
+                    <button
+                      key={vp}
+                      onClick={() => setViewport(vp)}
+                      aria-label={`${label} viewport`}
+                      aria-pressed={viewport === vp}
+                      className={`flex h-7 w-7 items-center justify-center rounded transition ${
+                        viewport === vp ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100"
+                      }`}
+                    >
+                      {icon}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="flex border-b border-zinc-200" role="tablist" aria-label="Panel sections">
               {(mainMode === "visual" ? ["page", "block"] : ["page"]).map((tab) => (
                 <button

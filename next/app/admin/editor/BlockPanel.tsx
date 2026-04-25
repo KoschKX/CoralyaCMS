@@ -61,25 +61,10 @@ export default function BlockPanel({
 
   return (
     <>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center">
         <span className="rounded bg-zinc-100 px-2 py-0.5 font-mono text-[11px] text-zinc-600">
           {selectedBlock.name}
         </span>
-        {supportsBreakpoints && (
-          <div className="flex items-center gap-0.5" role="group" aria-label="Active viewport">
-            {VIEWPORT_OPTIONS.map(({ vp, label, icon }) => (
-              <button
-                key={vp}
-                onClick={() => setViewport(vp)}
-                aria-label={`${label} viewport`}
-                aria-pressed={viewport === vp}
-                className={`flex h-6 w-6 items-center justify-center rounded transition ${viewport === vp ? "bg-zinc-900 text-white" : "text-zinc-300 hover:text-zinc-600 hover:bg-zinc-100"}`}
-              >
-                {icon}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
       {Controls ? (
         <ViewportContext.Provider value={{ viewport: activeViewport, isSectionEnabled, toggleSection }}>

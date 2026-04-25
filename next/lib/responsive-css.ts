@@ -47,16 +47,70 @@ function gridTemplateColumnsCSS(
 /** Recursively build @media override CSS for blocks that have data.responsive set.
  *  The generated rules target [data-block-id="..."] which BlockRenderer places on every block wrapper.
  *
- *  @param forContainer  When true, emits @container rules (for the editor canvas) instead of
- *                       @media rules. This allows the editor to respond to canvas width instantly
- *                       in pure CSS without any JavaScript ResizeObserver state.
+ *  @param forContainer   When true, emits @container rules (for the editor canvas) instead of
+ *                        @media rules. This allows the editor to respond to canvas width instantly
+ *                        in pure CSS without any JavaScript ResizeObserver state.
+ *  @param forcedViewport When provided (panel-open mode), skips @container/@media wrappers entirely
+ *                        and emits the chosen viewport's overrides as unconditional rules so the
+ *                        selected breakpoint is always shown regardless of actual canvas width.
  */
 export function buildResponsiveCSS(
   blocks: EditorBlock[],
   tabletBp: string,
   mobileBp: string,
   forContainer = false,
+  forcedViewport?: "desktop" | "tablet" | "mobile",
 ): string {
+  // In forced-viewport mode the container/media queries must not fire, because
+  // the physical canvas width may not match the selected breakpoint.
+  // Instead, emit the chosen viewport's overrides as plain unconditional rules.
+  if (forcedViewport && forcedViewport !== "desktop") {
+    let css = "";
+    for (const block of blocks) {
+      const data = block.data as Record<string, unknown>;
+      const responsive = data?.responsive as Record<string, Record<string, unknown>> | undefined;
+
+      // Cascade: mobile inherits from tablet, tablet inherits from desktop (base).
+      // Merge parent overrides first, then child overrides win.
+      const cascaded: Record<string, unknown> =
+        forcedViewport === "mobile"
+          ? { ...(responsive?.tablet ?? {}), ...(responsive?.mobile ?? {}) }
+          : { ...(responsive?.tablet ?? {}) };
+
+      if (block.type === "columns" && Array.isArray(data.cols)) {
+        const sel = `[data-block-id="${block.id}"] > .block-columns`;
+        // For columns grid, use the cascaded viewport (prefer exact, fall back to tablet)
+        const effectiveVp =
+          forcedViewport === "mobile" && responsive?.mobile && "cols" in responsive.mobile
+            ? "mobile"
+            : "tablet";
+        const grid = gridTemplateColumnsCSS(data.cols, responsive, effectiveVp);
+        if (grid) css += `${sel} { ${grid} }\n`;
+        if (cascaded["stack"]) css += `${sel} { grid-template-columns: 1fr !important; }\n`;
+      }
+
+      if (Object.keys(cascaded).length > 0) {
+        const rules = rulesFor(cascaded);
+        if (rules) {
+          const sel = `[data-block-id="${block.id}"], [data-block-id="${block.id}"] *`;
+          css += `${sel} { ${rules} }\n`;
+        }
+      }
+
+      const def = blockMap[block.type];
+      if (def?.isContainer && def.getChildBlocks) {
+        for (const childBlocks of def.getChildBlocks(data)) {
+          css += buildResponsiveCSS(childBlocks, tabletBp, mobileBp, forContainer, forcedViewport);
+        }
+      }
+    }
+    return css;
+  }
+
+  // Normal mode: desktop shows no overrides (base styles apply), tablet/mobile
+  // use container or media queries so CSS reacts to actual canvas width.
+  if (forcedViewport === "desktop") return "";
+
   const tabletQuery = forContainer
     ? `@container (max-width: ${tabletBp})`
     : `@media (max-width: ${tabletBp})`;
