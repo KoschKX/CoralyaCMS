@@ -153,6 +153,12 @@ function BlockItem({
   const def = blockMap[block.type];
   const isUnavailable = !def || disabledBlocks.includes(block.type);
 
+  // Warn once in development when an unregistered block type is encountered,
+  // so authors know they have broken content rather than silently seeing a placeholder.
+  if (!def && process.env.NODE_ENV !== "production") {
+    console.warn(`[editor] BlockItem: unregistered block type "${block.type}" (id: ${block.id}). Check that all plugins are loaded.`);
+  }
+
   const isSelected = block.id === selectedBlockId;
   const isColBlock = block.type === "columns";
   const descendantSelected =

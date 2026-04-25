@@ -43,12 +43,12 @@ export default function EditorToolbar({
           &larr; Pages
         </button>
         {mainMode === "visual" && (
-          <div className="flex items-center gap-0.5 ml-4" role="group" aria-label="Viewport">
+        <div className="flex items-center gap-0.5 ml-4" role="group" aria-label="Preview viewport">
             {(["desktop", "tablet", "mobile"] as Viewport[]).map((vp) => (
               <button
                 key={vp}
                 onClick={() => setViewport(vp)}
-                title={vp.charAt(0).toUpperCase() + vp.slice(1)}
+                aria-label={`${vp.charAt(0).toUpperCase() + vp.slice(1)} viewport`}
                 aria-pressed={viewport === vp}
                 className={`flex h-8 w-8 items-center justify-center rounded transition ${viewport === vp ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100"}`}
               >
@@ -87,14 +87,16 @@ export default function EditorToolbar({
           )}
           <button
             onClick={() => setMainMode(mainMode === "inject" ? "visual" : "inject")}
+            aria-label="Code injection"
+            aria-pressed={mainMode === "inject"}
             className={`rounded-md border px-2.5 py-1.5 text-sm transition border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 flex items-center justify-center ${mainMode === "inject" ? "border-zinc-900 bg-zinc-900 text-white" : ""}`}
-            title="Show code injection fields"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 9h8M8 15h8"/></svg>
           </button>
           <button
             onClick={() => setMainMode(mainMode === "code" ? "visual" : "code")}
-            title={mainMode === "code" ? "Back to visual editor" : "Code view"}
+            aria-label={mainMode === "code" ? "Back to visual editor" : "Code view"}
+            aria-pressed={mainMode === "code"}
             className={`rounded-md border px-2.5 py-1.5 text-sm font-mono transition ${mainMode === "code" ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
           >
             {mainMode === "code" ? (
@@ -109,7 +111,8 @@ export default function EditorToolbar({
           </button>
           <button
             onClick={() => setPanelOpen((o) => !o)}
-            title="Toggle panel"
+            aria-label="Toggle settings panel"
+            aria-pressed={panelOpen}
             className={`ml-1 rounded-md border px-2.5 py-1.5 text-sm transition ${panelOpen ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
           >
             &#8863;

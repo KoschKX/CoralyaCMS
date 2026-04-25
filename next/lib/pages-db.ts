@@ -23,9 +23,15 @@ function readAll(): Page[] {
   if (pagesCache !== null) return pagesCache;
   if (!fs.existsSync(DATA_FILE)) return (pagesCache = []);
   try {
-    pagesCache = JSON.parse(fs.readFileSync(DATA_FILE, "utf-8")) as Page[];
+    const raw = JSON.parse(fs.readFileSync(DATA_FILE, "utf-8"));
+    if (!Array.isArray(raw)) {
+      console.error("[pages-db] pages.json is not an array — resetting to empty.");
+      return (pagesCache = []);
+    }
+    pagesCache = raw as Page[];
     return pagesCache;
-  } catch {
+  } catch (err) {
+    console.error("[pages-db] Failed to parse pages.json:", err);
     return (pagesCache = []);
   }
 }

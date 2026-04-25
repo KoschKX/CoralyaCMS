@@ -198,7 +198,7 @@
     "html": "[columns responsive='{\"tablet\":{\"stack\":null,\"col-1-width\":\"100%\"},\"mobile\":{\"col-0-width\":\"100%\",\"stack\":true}}']\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraphs\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"},\"mobile\":{}}']\n  [/column]\n  [column width=\"33.333%\"]\n    [header text=\"New heading\" level=\"2\" align=\"center\" color=\"#dc2626\" responsive='{\"tablet\":{\"color\":\"#16a34a\"},\"mobile\":{\"align\":\"center\"}}']\n    [paragraph text=\"New paragraph\"]\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"}}']\n  [/column]\n  [column width=\"100%\"]\n    [paragraph text=\"New paragraph\" align=\"center\"]\n  [/column]\n[/columns]\n\n[list items='&#91;\"Item 1\",\"Item 2\"&#93;' style=\"unordered\"]",
     "pageBgColor": "#ffffff",
     "createdAt": "2026-03-25T19:58:40.950Z",
-    "updatedAt": "2026-04-25T23:15:58.536Z",
+    "updatedAt": "2026-04-25T23:33:54.431Z",
     "injectCode": {
       "tracking": "",
       "head": "",

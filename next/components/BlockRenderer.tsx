@@ -26,13 +26,16 @@ type ResolvedEntry = ResolvedBlock | UnavailableBlock;
 /**
  * Resolve shortcode paragraphs once per render cycle rather than inside the
  * map loop. This avoids re-parsing the same strings on every React reconcile.
+ *
+ * Uses a Set for O(1) disabled-block lookups instead of Array.includes().
  */
 function resolveBlocks(
   blocks: EditorBlock[],
   disabledBlocks: string[],
 ): ResolvedEntry[] {
+  const disabledSet = new Set(disabledBlocks);
   return blocks.map((block) => {
-    if (disabledBlocks.includes(block.type)) {
+    if (disabledSet.has(block.type)) {
       return { id: block.id, originalType: block.type, reason: "disabled", unavailable: true };
     }
     // If a paragraph's entire text is a shortcode like [header text="Hi" level="2"],
@@ -41,7 +44,7 @@ function resolveBlocks(
       const text = (block.data.text as string) ?? "";
       const sc = parseShortcode(text);
       if (sc) {
-        if (disabledBlocks.includes(sc.name)) {
+        if (disabledSet.has(sc.name)) {
           return { id: block.id, originalType: sc.name, reason: "disabled", unavailable: true };
         }
         if (blockMap[sc.name]) {

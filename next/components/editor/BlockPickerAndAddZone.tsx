@@ -103,10 +103,16 @@ export function AddZone({
   onOpenChange?: (open: boolean) => void;
 }) {
   const [open, setOpen] = useState(false);
+  // Keep a ref to the trigger button so focus is restored when the picker closes.
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => { onOpenChange?.(open); }, [open, onOpenChange]);
 
-  const close = useCallback(() => { setOpen(false); }, []);
+  const close = useCallback(() => {
+    setOpen(false);
+    // Return focus to the button that opened the picker.
+    triggerRef.current?.focus();
+  }, []);
   const select = useCallback((t: string) => { setOpen(false); onAdd(t); }, [onAdd]);
   const toggle = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -117,9 +123,11 @@ export function AddZone({
     return (
       <div className="group relative flex h-full min-h-[60px] items-center justify-center">
         <button
+          ref={triggerRef}
           onClick={toggle}
+          aria-label="Add block"
+          aria-expanded={open}
           className="flex h-6 w-6 items-center justify-center rounded-full border border-zinc-400 bg-white text-zinc-500 text-sm leading-none opacity-0 group-hover:opacity-100 hover:border-blue-500 hover:text-blue-500 transition-all"
-          title="Add block"
         >
           +
         </button>
@@ -136,10 +144,13 @@ export function AddZone({
     return (
       <div className="relative">
         <button
+          ref={triggerRef}
           onClick={toggle}
+          aria-label="Add block"
+          aria-expanded={open}
           className="flex w-full items-center gap-2 px-1 py-2 text-sm text-zinc-400 hover:text-zinc-600 transition"
         >
-          <span className="flex h-6 w-6 items-center justify-center rounded border border-zinc-300 bg-white text-zinc-400 text-sm leading-none hover:border-zinc-500 hover:text-zinc-600">+</span>
+          <span className="flex h-6 w-6 items-center justify-center rounded border border-zinc-300 bg-white text-zinc-400 text-sm leading-none hover:border-zinc-500 hover:text-zinc-600" aria-hidden="true">+</span>
           <span>Type / to choose a block</span>
         </button>
         {open && (
@@ -155,9 +166,11 @@ export function AddZone({
     <div className={`insert-zone${variant === "col-last" ? " insert-zone--col-last" : ""}${isSelected ? " insert-zone--selected" : ""}`}>
       <div className="insert-zone__line" />
       <button
+        ref={triggerRef}
         onClick={toggle}
+        aria-label="Add block"
+        aria-expanded={open}
         className="insert-zone__btn"
-        title="Add block"
       >
         +
       </button>

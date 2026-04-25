@@ -71,7 +71,7 @@ export default function BlockPanel({
               <button
                 key={vp}
                 onClick={() => setViewport(vp)}
-                title={label}
+                aria-label={`${label} viewport`}
                 aria-pressed={viewport === vp}
                 className={`flex h-6 w-6 items-center justify-center rounded transition ${viewport === vp ? "bg-zinc-900 text-white" : "text-zinc-300 hover:text-zinc-600 hover:bg-zinc-100"}`}
               >

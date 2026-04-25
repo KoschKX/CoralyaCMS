@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useContext } from "react";
+import { useCallback, useContext, useRef } from "react";
 import { blockMap } from "@/blocks/index";
 import BlockRenderer from "@/components/BlockRenderer";
 import type { EditorBlock } from "@/lib/pages-db";
@@ -76,6 +76,12 @@ export function EditableBlock({
   const blockData = block.data as Record<string, unknown>;
   const displayData = mergeViewportOverrides(blockData, viewport);
 
+  // Keep a ref so safeOnUpdate can read the latest blockData without adding
+  // blockData itself to the dep array (which would recreate the callback on
+  // every keystroke, causing unnecessary child re-renders).
+  const blockDataRef = useRef(blockData);
+  blockDataRef.current = blockData;
+
   // Wrap onUpdate: restore the original desktop values for any fields that were
   // injected by the viewport merge, so inline content edits (e.g. typing text)
   // don't accidentally overwrite desktop style values with responsive ones.
@@ -85,13 +91,14 @@ export function EditableBlock({
         onUpdate(newData);
         return;
       }
-      const responsive = (blockData.responsive as Record<string, Record<string, unknown>>) ?? {};
+      const currentData = blockDataRef.current;
+      const responsive = (currentData.responsive as Record<string, Record<string, unknown>>) ?? {};
       const viewportOverrides = responsive[viewport] ?? {};
       const restored: Record<string, unknown> = { ...newData };
       for (const key of Object.keys(viewportOverrides)) {
         if (key in restored) {
-          if (key in blockData) {
-            restored[key] = blockData[key];
+          if (key in currentData) {
+            restored[key] = currentData[key];
           } else {
             delete restored[key];
           }
@@ -99,8 +106,7 @@ export function EditableBlock({
       }
       onUpdate(restored);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [viewport, blockData, onUpdate],
+    [viewport, onUpdate],
   );
 
   if (def.Editable) {

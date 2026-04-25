@@ -199,7 +199,10 @@ export function createEditorStore() {
         const block = findBlockById(get().present, id);
         if (block) {
           const def = blockMap[block.type];
-          if (def?.validate && !def.validate(newData)) return;
+          if (def?.validate && !def.validate(newData)) {
+            console.warn(`[editor] updateBlock: validation failed for block "${id}" (type "${block.type}"). Update ignored.`);
+            return;
+          }
         }
         // Use deepUpdateBlock so updates work on blocks nested inside containers.
         const updated = deepUpdateBlock(get().present, id, newData);

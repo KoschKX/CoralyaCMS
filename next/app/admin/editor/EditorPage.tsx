@@ -217,10 +217,12 @@ export default function EditorPage({
         {/* Right panel */}
         {panelOpen && (
           <aside className="sticky top-0 h-[calc(100vh-3rem)] w-72 shrink-0 overflow-y-auto border-l border-zinc-200 bg-white">
-            <div className="flex border-b border-zinc-200">
+            <div className="flex border-b border-zinc-200" role="tablist" aria-label="Panel sections">
               {(mainMode === "visual" ? ["page", "block"] : ["page"]).map((tab) => (
                 <button
                   key={tab}
+                  role="tab"
+                  aria-selected={panelTab === tab}
                   onClick={() => setPanelTab(tab as PanelTab)}
                   className={`flex-1 py-2.5 text-xs font-semibold capitalize tracking-wide transition ${panelTab === tab ? "border-b-2 border-zinc-900 text-zinc-900" : "text-zinc-400 hover:text-zinc-700"}`}
                 >
@@ -228,7 +230,7 @@ export default function EditorPage({
                 </button>
               ))}
             </div>
-            <div className="space-y-6 px-4 py-5">
+            <div className="space-y-6 px-4 py-5" role="tabpanel">
               {panelTab === "page" && (
                 <PagePanel
                   status={status}
