@@ -50,6 +50,7 @@ export default function EditorPage({
   initialHtml = "",
   initialPageBgColor = "#ffffff",
   initialInjectCode,
+  disabledBlocks = [],
 }: EditorPageProps) {
   const {
     mainMode,
@@ -88,6 +89,7 @@ export default function EditorPage({
   const { panelTab, setPanelTab, panelOpen, setPanelOpen } = useEditorPanel(mainMode);
   const { tablet: tabletBp, mobile: mobileBp } = getEditorBreakpoints();
   const { canvasRef, viewport } = useCanvasWidth(tabletBp, mobileBp);
+  const [panelViewport, setPanelViewport] = useState<import("@/components/ui/ViewportContext").Viewport>("desktop");
 
   const editorViewportContextValue = useMemo(
     () => ({ viewport }),
@@ -120,7 +122,7 @@ export default function EditorPage({
   const { isSectionEnabled, toggleSection, controlsDisplayData, handleControlsChange } =
     useResponsiveBlock({
       selectedBlock,
-      viewport,
+      viewport: panelViewport,
       updateBlock: (blockId, data) => { updateBlockHandlerRef.current?.(blockId, data); },
       setSelectedBlock,
     });
@@ -131,6 +133,8 @@ export default function EditorPage({
       <EditorToolbar
         mainMode={mainMode}
         setMainMode={setMainMode}
+        viewport={panelViewport}
+        setViewport={setPanelViewport}
         panelOpen={panelOpen}
         setPanelOpen={setPanelOpen}
         saving={saving}
@@ -201,6 +205,7 @@ export default function EditorPage({
                       selectedBlockId={selectedBlock?.id ?? null}
                       registerUpdateHandler={registerUpdateHandler}
                       onColSelect={handleColSelect}
+                      disabledBlocks={disabledBlocks}
                     />
                   </ViewportContext.Provider>
                 </>
@@ -237,7 +242,8 @@ export default function EditorPage({
               {panelTab === "block" && (
                 <BlockPanel
                   selectedBlock={selectedBlock}
-                  viewport={viewport}
+                  viewport={panelViewport}
+                  setViewport={setPanelViewport}
                   isSectionEnabled={isSectionEnabled}
                   toggleSection={toggleSection}
                   controlsDisplayData={controlsDisplayData}

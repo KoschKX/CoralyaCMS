@@ -18,6 +18,7 @@ export interface BlockEditorContextValue {
   onSelectBlock: (id: string | null, data: Record<string, unknown>, type: string) => void;
   onColSelect?: (blockId: string, colIdx: number | null) => void;
   makeNewBlock: (type: string) => EditorBlock;
+  disabledBlocks: string[];
 }
 
 export const BlockEditorContext = createContext<BlockEditorContextValue | null>(null);

@@ -47,6 +47,7 @@ export default function PostEditorPage({
   initialExcerpt = "",
   initialTags = [],
   initialCategories = [],
+  disabledBlocks = [],
 }: PostEditorPageProps) {
   const [codeMode, setCodeMode] = useState(false);
   const [panelOpen, setPanelOpen] = useState(true);
@@ -111,6 +112,7 @@ export default function PostEditorPage({
 
   const { tablet: tabletBp, mobile: mobileBp } = getEditorBreakpoints();
   const { canvasRef, viewport } = useCanvasWidth(tabletBp, mobileBp);
+  const [panelViewport, setPanelViewport] = useState<import("@/components/ui/ViewportContext").Viewport>("desktop");
 
   const editorViewportContextValue = useMemo(() => ({ viewport }), [viewport]);
 
@@ -139,7 +141,7 @@ export default function PostEditorPage({
   const { isSectionEnabled, toggleSection, controlsDisplayData, handleControlsChange } =
     useResponsiveBlock({
       selectedBlock,
-      viewport,
+      viewport: panelViewport,
       updateBlock: (blockId, data) => { updateBlockHandlerRef.current?.(blockId, data); },
       setSelectedBlock,
     });
@@ -157,6 +159,35 @@ export default function PostEditorPage({
         >
           &larr; Posts
         </button>
+        {!codeMode && (
+          <div className="flex items-center gap-0.5 ml-4" role="group" aria-label="Viewport">
+            {(["desktop", "tablet", "mobile"] as const).map((vp) => (
+              <button
+                key={vp}
+                onClick={() => setPanelViewport(vp)}
+                title={vp.charAt(0).toUpperCase() + vp.slice(1)}
+                aria-pressed={panelViewport === vp}
+                className={`flex h-8 w-8 items-center justify-center rounded transition ${panelViewport === vp ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100"}`}
+              >
+                {vp === "desktop" && (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+                  </svg>
+                )}
+                {vp === "tablet" && (
+                  <svg width="14" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/>
+                  </svg>
+                )}
+                {vp === "mobile" && (
+                  <svg width="11" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/>
+                  </svg>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="flex items-center gap-2 ml-auto">
           {saved && <span className="text-xs font-medium text-emerald-600">Saved &#10003;</span>}
           {slug && status === "published" && (
@@ -243,6 +274,7 @@ export default function PostEditorPage({
                       selectedBlockId={selectedBlock?.id ?? null}
                       registerUpdateHandler={registerUpdateHandler}
                       onColSelect={handleColSelect}
+                      disabledBlocks={disabledBlocks}
                     />
                   </ViewportContext.Provider>
                 </>
@@ -283,7 +315,8 @@ export default function PostEditorPage({
               {activePanelTab === "block" && (
                 <BlockPanel
                   selectedBlock={selectedBlock}
-                  viewport={viewport}
+                  viewport={panelViewport}
+                  setViewport={setPanelViewport}
                   isSectionEnabled={isSectionEnabled}
                   toggleSection={toggleSection}
                   controlsDisplayData={controlsDisplayData}

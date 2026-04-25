@@ -37,6 +37,8 @@ export interface VisualEditorProps {
   registerUpdateHandler: (fn: ((id: string, newData: Record<string, unknown>) => void) | null) => void;
   /** Called when a column within a columns block is focused or cleared. */
   onColSelect?: (blockId: string, colIdx: number | null) => void;
+  /** Block types to hide from the picker and exclude from rendering. */
+  disabledBlocks?: string[];
 }
 
 /** Inner component — has access to the store provided by EditorStoreProvider. */
@@ -47,6 +49,7 @@ function VisualEditorInner({
   selectedBlockId,
   registerUpdateHandler,
   onColSelect,
+  disabledBlocks = [],
 }: VisualEditorProps) {
   // Stable refs for callbacks — updated every render, but never cause re-init
   const onChangeRef = useRef(onChange);
@@ -119,7 +122,8 @@ function VisualEditorInner({
     onSelectBlock,
     onColSelect,
     makeNewBlock: actions.makeNewBlock,
-  }), [selectedBlockId, activeColInfo, onSelectBlock, onColSelect, actions]);
+    disabledBlocks,
+  }), [selectedBlockId, activeColInfo, onSelectBlock, onColSelect, actions, disabledBlocks]);
 
   return (
     <BlockEditorContext.Provider value={contextValue}>

@@ -8,7 +8,7 @@ import { z } from "zod";
 // ── Shared primitives ─────────────────────────────────────────────────────────
 
 const EditorBlockSchema: z.ZodType<{ id: string; type: string; data: Record<string, unknown> }> = z.object({
-  id: z.string().uuid(),
+  id: z.string().min(1),
   type: z.string().min(1),
   data: z.record(z.string(), z.unknown()),
 });

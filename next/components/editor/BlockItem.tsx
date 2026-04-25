@@ -134,6 +134,7 @@ function BlockItem({
     onSelectBlock,
     onColSelect,
     makeNewBlock,
+    disabledBlocks,
   } = useBlockEditor();
 
   // Keep a ref to the current block so renderChildBlocks doesn't need block.data /
@@ -150,7 +151,7 @@ function BlockItem({
   selectedBlockIdRef.current = selectedBlockId;
 
   const def = blockMap[block.type];
-  if (!def) return null;
+  const isUnavailable = !def || disabledBlocks.includes(block.type);
 
   const isSelected = block.id === selectedBlockId;
   const isColBlock = block.type === "columns";
@@ -233,7 +234,7 @@ function BlockItem({
       key={block.id}
       data-block-id={block.id}
       className={`relative transition ${ringClass}`}
-      style={{ paddingBottom: "var(--block-spacing, 1.5rem)" }}
+      style={{ paddingBottom: isUnavailable ? 0 : "var(--block-spacing, 1.5rem)" }}
       onClick={(e) => {
         if (isSelected) { e.stopPropagation(); return; }
         if (isColBlock) { e.stopPropagation(); onSelectBlock(block.id, block.data as Record<string, unknown>, block.type); }

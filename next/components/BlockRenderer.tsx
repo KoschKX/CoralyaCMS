@@ -9,6 +9,20 @@ interface Props {
   disabledBlocks?: string[];
 }
 
+interface ResolvedBlock {
+  id: string;
+  resolvedType: string;
+  resolvedData: Record<string, unknown>;
+  unavailable: false;
+}
+interface UnavailableBlock {
+  id: string;
+  originalType: string;
+  reason: "disabled" | "unknown";
+  unavailable: true;
+}
+type ResolvedEntry = ResolvedBlock | UnavailableBlock;
+
 /**
  * Resolve shortcode paragraphs once per render cycle rather than inside the
  * map loop. This avoids re-parsing the same strings on every React reconcile.
@@ -16,21 +30,53 @@ interface Props {
 function resolveBlocks(
   blocks: EditorBlock[],
   disabledBlocks: string[],
-): Array<{ id: string; resolvedType: string; resolvedData: Record<string, unknown> }> {
-  return blocks
-    .filter((block) => !disabledBlocks.includes(block.type))
-    .map((block) => {
-      // If a paragraph's entire text is a shortcode like [header text="Hi" level="2"],
-      // render it as that block type instead of a paragraph.
-      if (block.type === "paragraph") {
-        const text = (block.data.text as string) ?? "";
-        const sc = parseShortcode(text);
-        if (sc && blockMap[sc.name] && !disabledBlocks.includes(sc.name)) {
-          return { id: block.id, resolvedType: sc.name, resolvedData: sc.attrs };
+): ResolvedEntry[] {
+  return blocks.map((block) => {
+    if (disabledBlocks.includes(block.type)) {
+      return { id: block.id, originalType: block.type, reason: "disabled", unavailable: true };
+    }
+    // If a paragraph's entire text is a shortcode like [header text="Hi" level="2"],
+    // render it as that block type instead of a paragraph.
+    if (block.type === "paragraph") {
+      const text = (block.data.text as string) ?? "";
+      const sc = parseShortcode(text);
+      if (sc) {
+        if (disabledBlocks.includes(sc.name)) {
+          return { id: block.id, originalType: sc.name, reason: "disabled", unavailable: true };
+        }
+        if (blockMap[sc.name]) {
+          return { id: block.id, resolvedType: sc.name, resolvedData: sc.attrs, unavailable: false };
         }
       }
-      return { id: block.id, resolvedType: block.type, resolvedData: block.data as Record<string, unknown> };
-    });
+    }
+    if (!blockMap[block.type]) {
+      return { id: block.id, originalType: block.type, reason: "unknown", unavailable: true };
+    }
+    return { id: block.id, resolvedType: block.type, resolvedData: block.data as Record<string, unknown>, unavailable: false };
+  });
+}
+
+function UnavailablePlaceholder({ type, reason }: { type: string; reason: "disabled" | "unknown" }) {
+  const message = reason === "disabled"
+    ? `Block "${type}" is disabled and cannot be displayed.`
+    : `Block "${type}" is no longer available.`;
+  return (
+    <div
+      role="note"
+      aria-label={message}
+      style={{
+        border: "1px dashed #d4d4d8",
+        borderRadius: "0.375rem",
+        color: "#a1a1aa",
+        fontSize: "0.8125rem",
+        fontFamily: "monospace",
+        background: "#fafafa",
+        padding: "0.25rem 0.5rem",
+      }}
+    >
+      {message}
+    </div>
+  );
 }
 
 function BlockRenderer({ blocks, disabledBlocks = [] }: Props) {
@@ -41,16 +87,23 @@ function BlockRenderer({ blocks, disabledBlocks = [] }: Props) {
 
   return (
     <div className="text-zinc-800" style={{ display: "flex", flexDirection: "column", gap: "var(--block-spacing, 1.5rem)" }}>
-      {resolved.map(({ id, resolvedType, resolvedData }) => {
-          const def = blockMap[resolvedType];
+      {resolved.map((entry) => {
+          if (entry.unavailable) {
+            return (
+              <div key={entry.id} data-block-id={entry.id}>
+                <UnavailablePlaceholder type={entry.originalType} reason={entry.reason} />
+              </div>
+            );
+          }
+          const def = blockMap[entry.resolvedType];
           if (!def) return null;
 
           return (
-            <ErrorBoundary key={id}>
-              <div data-block-id={id}>
+            <ErrorBoundary key={entry.id}>
+              <div data-block-id={entry.id}>
                 <def.Layout
-                  data={resolvedData}
-                  blockId={id}
+                  data={entry.resolvedData}
+                  blockId={entry.id}
                   renderBlocks={
                     def.isContainer
                       ? (children) => <BlockRenderer blocks={children} disabledBlocks={disabledBlocks} />

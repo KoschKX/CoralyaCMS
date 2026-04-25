@@ -10,7 +10,7 @@ import type { ActiveColInfo } from "@/lib/editor/store";
 
 interface BlockToolbarProps {
   block: EditorBlock;
-  def: BlockDefinition;
+  def: BlockDefinition | undefined;
   idx: number;
   listLength: number;
   ops: BlockOps;
@@ -80,13 +80,13 @@ export const BlockToolbar = memo(function BlockToolbar({
       >
         {/* Block type identifier — non-interactive */}
         <button
-          title={activeColOnThisBlock ? "Column" : def.label}
+          title={activeColOnThisBlock ? "Column" : (def?.label ?? block.type)}
           className="flex items-center justify-center w-9 text-lg text-zinc-700 rounded-l-md transition cursor-default"
           tabIndex={-1}
         >
           <BlockIcon
             name={activeColOnThisBlock ? "column" : block.type}
-            label={activeColOnThisBlock ? "Column" : def.label}
+            label={activeColOnThisBlock ? "Column" : (def?.label ?? block.type)}
             size={20}
           />
         </button>

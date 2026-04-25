@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useContext } from "react";
 import { blockMap } from "@/blocks/index";
 import BlockRenderer from "@/components/BlockRenderer";
 import type { EditorBlock } from "@/lib/pages-db";
 import type { EditableProps } from "@/lib/block-types";
 import { useEditorViewport } from "@/components/editor/EditorHooks";
 import { mergeViewportOverrides } from "@/lib/responsive-css";
+import { BlockEditorContext } from "@/components/editor/BlockEditorContext";
 
 export interface EditableBlockProps {
   block: EditorBlock;
@@ -16,6 +17,26 @@ export interface EditableBlockProps {
   activeColIdx?: number | null;
   onActiveColChange?: (ci: number | null) => void;
   renderChildBlocks?: EditableProps["renderChildBlocks"];
+}
+
+function UnavailablePlaceholder({ type, reason }: { type: string; reason: "disabled" | "unknown" }) {
+  const message = reason === "disabled"
+    ? `Block "${type}" is disabled.`
+    : `Block "${type}" is no longer available.`;
+  return (
+    <div
+      role="note"
+      aria-label={message}
+      className="flex items-center gap-2 rounded border border-dashed border-zinc-300 bg-zinc-50 px-2 py-1 text-xs text-zinc-400"
+      style={{ fontFamily: "monospace" }}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="shrink-0">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+      </svg>
+      {message}
+    </div>
+  );
 }
 
 /**
@@ -39,8 +60,18 @@ export function EditableBlock({
   onActiveColChange,
   renderChildBlocks,
 }: EditableBlockProps) {
+  const ctx = useContext(BlockEditorContext);
+  const disabledBlocks = ctx?.disabledBlocks ?? [];
   const def = blockMap[block.type];
   const viewport = useEditorViewport();
+
+  // Show placeholder for disabled or unregistered block types.
+  if (disabledBlocks.includes(block.type)) {
+    return <UnavailablePlaceholder type={block.type} reason="disabled" />;
+  }
+  if (!def) {
+    return <UnavailablePlaceholder type={block.type} reason="unknown" />;
+  }
 
   const blockData = block.data as Record<string, unknown>;
   const displayData = mergeViewportOverrides(blockData, viewport);
@@ -71,8 +102,6 @@ export function EditableBlock({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [viewport, blockData, onUpdate],
   );
-
-  if (!def) return null;
 
   if (def.Editable) {
     return (

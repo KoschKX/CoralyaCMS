@@ -7,6 +7,7 @@ import type { SelectedBlock } from "@/lib/types";
 interface BlockPanelProps {
   selectedBlock: SelectedBlock | null;
   viewport: Viewport;
+  setViewport: (vp: Viewport) => void;
   isSectionEnabled: (fields: string[]) => boolean;
   toggleSection: (title: string, fields: string[]) => void;
   controlsDisplayData: (data: Record<string, unknown>) => Record<string, unknown>;
@@ -43,6 +44,7 @@ const VIEWPORT_OPTIONS: { vp: Viewport; label: string; icon: React.ReactNode }[]
 export default function BlockPanel({
   selectedBlock,
   viewport,
+  setViewport,
   isSectionEnabled,
   toggleSection,
   controlsDisplayData,
@@ -66,18 +68,15 @@ export default function BlockPanel({
         {supportsBreakpoints && (
           <div className="flex items-center gap-0.5" role="group" aria-label="Active viewport">
             {VIEWPORT_OPTIONS.map(({ vp, label, icon }) => (
-              // Rendered as non-interactive indicators — viewport switches via window resize.
-              // The title explains this to sighted users; aria-current signals the active one
-              // to screen readers without implying interactivity.
-              <span
+              <button
                 key={vp}
-                role="img"
-                aria-label={`${label}${viewport === vp ? " (active)" : ""}`}
-                title={`${label}${viewport === vp ? " — active" : " (resize window to switch)"}`}
-                className={`flex h-6 w-6 items-center justify-center rounded ${viewport === vp ? "bg-zinc-900 text-white" : "text-zinc-300"}`}
+                onClick={() => setViewport(vp)}
+                title={label}
+                aria-pressed={viewport === vp}
+                className={`flex h-6 w-6 items-center justify-center rounded transition ${viewport === vp ? "bg-zinc-900 text-white" : "text-zinc-300 hover:text-zinc-600 hover:bg-zinc-100"}`}
               >
                 {icon}
-              </span>
+              </button>
             ))}
           </div>
         )}
