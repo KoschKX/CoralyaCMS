@@ -1,11 +1,24 @@
 // Side-effect import: ensures plugins are registered before reading them.
 import "@/plugins/index";
 import { installedPlugins } from "@/lib/plugin-registry";
+import { PluginToggle } from "./PluginToggle";
+import fs from "fs";
+import path from "path";
 
 export const metadata = { title: "Plugins — CMS" };
 
+function readPluginStates(): Record<string, boolean> {
+  try {
+    const file = path.join(process.cwd(), "data", "plugin-settings", "plugin-states.json");
+    return JSON.parse(fs.readFileSync(file, "utf-8")) as Record<string, boolean>;
+  } catch {
+    return {};
+  }
+}
+
 export default function PluginsPage() {
   const plugins = installedPlugins;
+  const states = readPluginStates();
 
   return (
     <div className="mx-auto max-w-2xl px-8 py-10">
@@ -40,9 +53,15 @@ export default function PluginsPage() {
                     <p className="mt-0.5 text-xs text-zinc-400">by {plugin.author}</p>
                   )}
                 </div>
-                <span className="shrink-0 rounded bg-zinc-100 px-2 py-0.5 font-mono text-[11px] text-zinc-500">
-                  v{plugin.version}
-                </span>
+                <div className="flex shrink-0 items-center gap-3">
+                  <span className="rounded bg-zinc-100 px-2 py-0.5 font-mono text-[11px] text-zinc-500">
+                    v{plugin.version}
+                  </span>
+                  <PluginToggle
+                    name={plugin.name}
+                    initialEnabled={states[plugin.name] !== false}
+                  />
+                </div>
               </div>
               {plugin.adminPages && plugin.adminPages.length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-1.5">

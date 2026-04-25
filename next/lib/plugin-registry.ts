@@ -70,6 +70,12 @@ export function getPluginIcon(
 export const installedPlugins: PluginDefinition[] = [];
 
 /**
+ * Names of plugins that have been disabled via the admin UI.
+ * Checked at request time by filters and the plugins page.
+ */
+export const disabledPlugins = new Set<string>();
+
+/**
  * All admin pages contributed by plugins, keyed by slug for O(1) lookup.
  * Used by the dynamic `/admin/settings/plugins/[slug]` route.
  */
@@ -81,7 +87,13 @@ export const pluginAdminPages: Record<string, PluginAdminPage> = {};
  */
 export function installPlugin(plugin: PluginDefinition): void {
   for (const { hook, callback, priority } of plugin.filters ?? []) {
-    addFilter(hook, callback, priority);
+    // Wrap so the disabled check is evaluated at call time, not install time.
+    const pluginName = plugin.name;
+    const guarded = (value: unknown, ...args: unknown[]) => {
+      if (disabledPlugins.has(pluginName)) return value;
+      return (callback as (v: unknown, ...a: unknown[]) => unknown)(value, ...args);
+    };
+    addFilter(hook, guarded, priority);
   }
   for (const page of plugin.adminPages ?? []) {
     pluginAdminPages[page.slug] = page;

@@ -12,14 +12,20 @@ export function PluginToggle({ name, initialEnabled }: PluginToggleProps) {
   const [busy, setBusy] = useState(false);
 
   async function toggle() {
+    const next = !enabled;
+    setEnabled(next); // optimistic
     setBusy(true);
-    await fetch("/api/plugins/states", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, enabled: !enabled }),
-    });
-    setEnabled((e) => !e);
-    setBusy(false);
+    try {
+      await fetch("/api/plugins/states", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, enabled: next }),
+      });
+    } catch {
+      setEnabled(!next); // revert on error
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (

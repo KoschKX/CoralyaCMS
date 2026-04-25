@@ -20,7 +20,21 @@
  *   installPlugin(myPlugin);
  */
 
-// import { installPlugin } from "@/lib/plugin-registry";
-// import myPlugin from "./my-plugin";
-// installPlugin(myPlugin);
+import fs from "fs";
+import path from "path";
+import { installPlugin, disabledPlugins } from "@/lib/plugin-registry";
+import alertOnLoad from "./alert-on-load";
+
+// Seed disabled set from persisted states so filters are bypassed on startup.
+try {
+  const file = path.join(process.cwd(), "data", "plugin-settings", "plugin-states.json");
+  const states = JSON.parse(fs.readFileSync(file, "utf-8")) as Record<string, boolean>;
+  for (const [name, enabled] of Object.entries(states)) {
+    if (!enabled) disabledPlugins.add(name);
+  }
+} catch {
+  // No states file yet — all plugins enabled by default.
+}
+
+installPlugin(alertOnLoad);
 
