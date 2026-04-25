@@ -1,14 +1,16 @@
 
 "use client";
 
-import { useRef, useState, useCallback, useMemo } from "react";
+import { useRef, useState, useCallback, useMemo, useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 import type { EditorBlock } from "@/lib/pages-db";
-import { ViewportContext, type Viewport } from "@/components/block-shared";
+import { ViewportContext } from "@/components/ui/ViewportContext";
 import { blocksToShortcodes, shortcodesToBlocks } from "@/lib/shortcodes";
-import { autoSlug } from "@/lib/utils/slug";
 import { EditorViewportContext } from "@/components/editor/EditorContext";
+import { ResponsiveStyleInjector } from "@/components/ResponsiveStyleInjector";
+import { getEditorBreakpoints } from "@/lib/editor-breakpoints";
+import type { SelectedBlock } from "@/lib/types";
 import EditorToolbar from "@/app/admin/editor/EditorToolbar";
 import PagePanel from "@/app/admin/editor/PagePanel";
 import BlockPanel from "@/app/admin/editor/BlockPanel";
@@ -17,6 +19,7 @@ import { useSavePage } from "@/app/admin/editor/hooks/useSavePage";
 import { useResponsiveBlock } from "@/app/admin/editor/hooks/useResponsiveBlock";
 import { useCanvasWidth } from "@/app/admin/editor/hooks/useCanvasWidth";
 import { useEditorPanel, type PanelTab } from "@/app/admin/editor/hooks/useEditorPanel";
+import { usePageMeta } from "@/app/admin/editor/hooks/usePageMeta";
 import dynamic from "next/dynamic";
 const CodeEditor = dynamic(() => import("@/components/CodeEditor"), { ssr: false });
 import type { VisualEditorProps } from "@/components/VisualEditor";
@@ -37,12 +40,6 @@ interface EditorPageProps {
   disabledBlocks?: string[];
 }
 
-interface SelectedBlock {
-  id: string;
-  name: string;
-  data: Record<string, unknown>;
-}
-
 export default function EditorPage({
   id,
   initialTitle = "",
@@ -53,26 +50,38 @@ export default function EditorPage({
   initialPageBgColor = "#ffffff",
 }: EditorPageProps) {
   const [mainMode, setMainModeState] = useState<"visual" | "code" | "inject">("visual");
-  const setMainMode = (mode: "visual" | "code" | "inject") => {
+  const [selectedBlock, setSelectedBlock] = useState<SelectedBlock | null>(null);
+  const setMainMode = useCallback((mode: "visual" | "code" | "inject") => {
     setMainModeState(mode);
     if (mode !== "visual") setSelectedBlock(null);
-  };
+  }, []);
   const [injectFields, setInjectFields] = useState({
     tracking: "",
     head: "",
     beforeBody: "",
     afterBody: "",
   });
-  const [selectedBlock, setSelectedBlock] = useState<SelectedBlock | null>(null);
   const router = useRouter();
+  const draftKey = `editor-draft-${id ?? 'new'}`;
   const initialParsedBlocks = initialHtml ? shortcodesToBlocks(initialHtml) : initialBlocks;
-  const [codeText, setCodeText] = useState(initialHtml || blocksToShortcodes(initialParsedBlocks));
-  const liveBlocks = useMemo(() => shortcodesToBlocks(codeText), [codeText]);
+  // Read from sessionStorage draft on first render for crash recovery (client-only component).
+  const [codeText, setCodeText] = useState(() => {
+    try {
+      return sessionStorage.getItem(draftKey) ?? (initialHtml || blocksToShortcodes(initialParsedBlocks));
+    } catch {
+      return initialHtml || blocksToShortcodes(initialParsedBlocks);
+    }
+  });
+  // Debounce shortcode→block parsing so the parser doesn't run on every keystroke in code view.
+  const [debouncedCode, setDebouncedCode] = useState(codeText);
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedCode(codeText), 300);
+    return () => clearTimeout(id);
+  }, [codeText]);
+  const liveBlocks = useMemo(() => shortcodesToBlocks(debouncedCode), [debouncedCode]);
 
-  const [title, setTitle] = useState(initialTitle);
-  const [slug, setSlug] = useState(initialSlug);
-  const [status, setStatus] = useState<"draft" | "published">(initialStatus);
-  const [pageBgColor, setPageBgColor] = useState(initialPageBgColor);
+  const { title, slug, setSlug, status, setStatus, pageBgColor, setPageBgColor, handleTitleChange } =
+    usePageMeta({ id, initialTitle, initialSlug, initialStatus, initialPageBgColor });
   const { saving, saved, saveError, handleSave } = useSavePage({
     id,
     title,
@@ -81,19 +90,30 @@ export default function EditorPage({
     pageBgColor,
     onStatusChange: setStatus,
   });
+
+  // Persist draft to sessionStorage on change (1 s debounce) for crash recovery.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try { sessionStorage.setItem(draftKey, codeText); } catch {}
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [codeText, draftKey]);
+
+  // Clear the draft after a successful save so stale drafts don't linger.
+  useEffect(() => {
+    if (saved) {
+      try { sessionStorage.removeItem(draftKey); } catch {}
+    }
+  }, [saved, draftKey]);
+
   const { panelTab, setPanelTab, panelOpen, setPanelOpen } = useEditorPanel(mainMode);
-  const [viewport, setViewport] = useState<Viewport>("desktop");
-  const { canvasRef, canvasWidth } = useCanvasWidth();
+  const { tablet: tabletBp, mobile: mobileBp } = getEditorBreakpoints();
+  const { canvasRef, viewport } = useCanvasWidth(tabletBp, mobileBp);
 
   const editorViewportContextValue = useMemo(
-    () => ({ viewport, canvasWidth }),
-    [viewport, canvasWidth],
+    () => ({ viewport }),
+    [viewport],
   );
-
-  function handleTitleChange(value: string) {
-    setTitle(value);
-    if (!id || slug === autoSlug(title)) setSlug(autoSlug(value));
-  }
 
   const updateBlockHandlerRef = useRef<((id: string, newData: Record<string, unknown>) => void) | null>(null);
 
@@ -128,7 +148,7 @@ export default function EditorPage({
 
   return (
     <EditorViewportContext.Provider value={editorViewportContextValue}>
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col overflow-hidden">
       <EditorToolbar
         mainMode={mainMode}
         setMainMode={setMainMode}
@@ -153,6 +173,7 @@ export default function EditorPage({
                 maxWidth: "var(--content-max-width, 48rem)",
                 padding: "2.5rem var(--content-padding-x, 1.5rem)",
                 background: pageBgColor || "#fff",
+                containerType: "inline-size",
               }}
             >
               {mainMode === "inject" ? (
@@ -188,6 +209,12 @@ export default function EditorPage({
                     className="sr-only"
                   />
                   <ViewportContext.Provider value={{ viewport, isSectionEnabled, toggleSection }}>
+                    <ResponsiveStyleInjector
+                      blocks={liveBlocks}
+                      tabletBp={tabletBp}
+                      mobileBp={mobileBp}
+                      forContainer
+                    />
                     <VisualEditor
                       initialBlocks={liveBlocks}
                       onChange={(newCode) => setCodeText(newCode)}
@@ -232,7 +259,6 @@ export default function EditorPage({
                 <BlockPanel
                   selectedBlock={selectedBlock}
                   viewport={viewport}
-                  onViewportChange={setViewport}
                   isSectionEnabled={isSectionEnabled}
                   toggleSection={toggleSection}
                   controlsDisplayData={controlsDisplayData}

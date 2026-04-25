@@ -45,52 +45,64 @@ function gridTemplateColumnsCSS(
 }
 
 /** Recursively build @media override CSS for blocks that have data.responsive set.
- *  The generated rules target [data-block-id="..."] which BlockRenderer places on every block wrapper. */
+ *  The generated rules target [data-block-id="..."] which BlockRenderer places on every block wrapper.
+ *
+ *  @param forContainer  When true, emits @container rules (for the editor canvas) instead of
+ *                       @media rules. This allows the editor to respond to canvas width instantly
+ *                       in pure CSS without any JavaScript ResizeObserver state.
+ */
 export function buildResponsiveCSS(
   blocks: EditorBlock[],
   tabletBp: string,
   mobileBp: string,
+  forContainer = false,
 ): string {
+  const tabletQuery = forContainer
+    ? `@container (max-width: ${tabletBp})`
+    : `@media (max-width: ${tabletBp})`;
+  const mobileQuery = forContainer
+    ? `@container (max-width: ${mobileBp})`
+    : `@media (max-width: ${mobileBp})`;
+
   let css = "";
   for (const block of blocks) {
     const data = block.data as Record<string, unknown>;
     const responsive = data?.responsive as Record<string, Record<string, unknown>> | undefined;
 
-
     if (block.type === "columns" && Array.isArray(data.cols)) {
-      const sel = `[data-block-id=\"${block.id}\"] > .block-columns`;
+      const sel = `[data-block-id="${block.id}"] > .block-columns`;
       // Desktop (default): handled by inline style, but add for SSR fallback
       const desktopGrid = gridTemplateColumnsCSS(data.cols, responsive, "desktop");
       if (desktopGrid) css += `${sel} { ${desktopGrid} }\n`;
       // Tablet
       const tabletGrid = gridTemplateColumnsCSS(data.cols, responsive, "tablet");
-      if (tabletGrid) css += `@media (max-width: ${tabletBp}) { ${sel} { ${tabletGrid} } }\n`;
+      if (tabletGrid) css += `${tabletQuery} { ${sel} { ${tabletGrid} } }\n`;
       // Mobile
       const mobileGrid = gridTemplateColumnsCSS(data.cols, responsive, "mobile");
-      if (mobileGrid) css += `@media (max-width: ${mobileBp}) { ${sel} { ${mobileGrid} } }\n`;
+      if (mobileGrid) css += `${mobileQuery} { ${sel} { ${mobileGrid} } }\n`;
 
-      // Stack columns: force 100% width on col wrappers
-      const stackSel = `[data-block-id=\"${block.id}\"] .block-columns__col-wrapper`;
-      if (data.stack) css += `${stackSel} { width: 100% !important; }\n`;
+      // Stack columns: override grid-template-columns to a single column track
+      // (ColumnsLayout uses inline gridTemplateColumns; !important overrides it)
       const tabletStack = responsive?.tablet && "stack" in responsive.tablet ? responsive.tablet.stack : undefined;
       const mobileStack = responsive?.mobile && "stack" in responsive.mobile ? responsive.mobile.stack : undefined;
-      if (tabletStack) css += `@media (max-width: ${tabletBp}) { ${stackSel} { width: 100% !important; } }\n`;
-      if (mobileStack) css += `@media (max-width: ${mobileBp}) { ${stackSel} { width: 100% !important; } }\n`;
+      if (data.stack) css += `${sel} { grid-template-columns: 1fr !important; }\n`;
+      if (tabletStack) css += `${tabletQuery} { ${sel} { grid-template-columns: 1fr !important; } }\n`;
+      if (mobileStack) css += `${mobileQuery} { ${sel} { grid-template-columns: 1fr !important; } }\n`;
     }
 
     if (responsive) {
-      const sel = `[data-block-id=\"${block.id}\"], [data-block-id=\"${block.id}\"] *`;
+      const sel = `[data-block-id="${block.id}"], [data-block-id="${block.id}"] *`;
       const tabletRules = responsive.tablet ? rulesFor(responsive.tablet) : "";
       const mobileRules = responsive.mobile ? rulesFor(responsive.mobile) : "";
-      if (tabletRules) css += `@media (max-width: ${tabletBp}) { ${sel} { ${tabletRules} } }\n`;
-      if (mobileRules) css += `@media (max-width: ${mobileBp}) { ${sel} { ${mobileRules} } }\n`;
+      if (tabletRules) css += `${tabletQuery} { ${sel} { ${tabletRules} } }\n`;
+      if (mobileRules) css += `${mobileQuery} { ${sel} { ${mobileRules} } }\n`;
     }
 
     // Recurse into child blocks of container blocks (e.g. columns)
     const def = blockMap[block.type];
     if (def?.isContainer && def.getChildBlocks) {
       for (const childBlocks of def.getChildBlocks(data)) {
-        css += buildResponsiveCSS(childBlocks, tabletBp, mobileBp);
+        css += buildResponsiveCSS(childBlocks, tabletBp, mobileBp, forContainer);
       }
     }
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { PanelSection } from "@/components/block-shared";
+import { PanelSection } from "@/components/ui/PanelSection";
 import { COLOR_PALETTE } from "@/lib/color-palette";
 import { autoSlug } from "@/lib/utils/slug";
 

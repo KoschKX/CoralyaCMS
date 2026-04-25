@@ -1,8 +1,14 @@
-import { PanelSection } from "@/components/block-shared";
+import { PanelSection } from "@/components/ui/PanelSection";
 import type { BlockDefinition } from "@/lib/block-types";
 import TableLayout from "./layout";
 import { TableEditable } from "./editable";
 
+/**
+ * Table block — a grid of editable cells with an optional heading row.
+ *
+ * @example data
+ * { content: [["Col A", "Col B"], ["Cell 1", "Cell 2"]], withHeadings: true }
+ */
 const table: BlockDefinition = {
   name: "table",
   label: "Table",

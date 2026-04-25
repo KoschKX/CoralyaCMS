@@ -14,9 +14,7 @@ export interface BlockEditorContextValue {
   selectedBlockId: string | null;
   activeColInfo: { blockId: string; colIdx: number } | null;
   setActiveColInfo: (info: { blockId: string; colIdx: number } | null) => void;
-  anyPickerOpen: boolean;
   setAnyPickerOpen: (open: boolean) => void;
-  editorViewport: string;
   onSelectBlock: (id: string | null, data: Record<string, unknown>, type: string) => void;
   onColSelect?: (blockId: string, colIdx: number | null) => void;
   makeNewBlock: (type: string) => EditorBlock;

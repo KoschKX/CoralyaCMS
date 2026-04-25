@@ -1,6 +1,7 @@
 import { listPages } from "@/lib/pages-db";
 import { getSettings, buildPageDescription } from "@/lib/settings-db";
 import { ResponsiveStyleInjector } from "@/components/ResponsiveStyleInjector";
+import { PluginPageInjections } from "@/components/PluginPageInjections";
 import { buildResponsiveCSS } from "@/lib/responsive-css";
 import BlockRenderer from "@/components/BlockRenderer";
 import HTMLRenderer from "@/components/HTMLRenderer";
@@ -38,6 +39,7 @@ export default function Home() {
     marginRight: "auto",
     paddingLeft: "var(--content-padding-x)",
     paddingRight: "var(--content-padding-x)",
+    boxSizing: "border-box" as const,
     background: homePage?.pageBgColor || "#fff",
   };
 
@@ -54,6 +56,7 @@ export default function Home() {
           ? <HTMLRenderer html={homePage.html} disabledBlocks={disabledBlocks} />
           : <BlockRenderer blocks={homePage.blocks} disabledBlocks={disabledBlocks} />
         }
+        <PluginPageInjections slug={homePage.slug || ""} />
       </main>
     );
   }
@@ -63,6 +66,7 @@ export default function Home() {
     <main className="min-h-screen py-16" style={mainStyle}>
       <h1 className="text-3xl font-bold mb-2">{settings.title || "My Site"}</h1>
       <p className="text-zinc-500">{settings.tagline || "Powered by Next.js"}</p>
+      <PluginPageInjections slug="" />
     </main>
   );
 }

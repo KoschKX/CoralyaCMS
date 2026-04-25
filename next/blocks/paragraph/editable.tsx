@@ -2,14 +2,10 @@
 
 import type { CSSProperties } from "react";
 import { CE } from "@/components/editor/ContentEditable";
-import { useMediaViewport } from "@/components/editor/EditorHooks";
-import { mergeViewportOverrides } from "@/lib/responsive-css";
 import type { EditableProps } from "@/lib/block-types";
 
 export function ParagraphEditable({ data, onUpdate }: EditableProps) {
-  const mediaViewport = useMediaViewport();
-  const resolved = mergeViewportOverrides(data, mediaViewport);
-  const fontSize = (resolved.fontSize as string) || "base";
+  const fontSize = (data.fontSize as string) || "base";
   return (
     <CE
       as="p"
@@ -18,8 +14,8 @@ export function ParagraphEditable({ data, onUpdate }: EditableProps) {
       className="block-paragraph leading-relaxed focus:outline-none"
       style={{
         fontSize: `var(--font-size-${fontSize})`,
-        textAlign: ((resolved.align as string) || "left") as CSSProperties["textAlign"],
-        color: (resolved.color as string) || undefined,
+        textAlign: ((data.align as string) || "left") as CSSProperties["textAlign"],
+        color: (data.color as string) || undefined,
       }}
     />
   );

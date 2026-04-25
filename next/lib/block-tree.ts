@@ -77,3 +77,63 @@ export function insertBlockAfter(
   return [...blocks.slice(0, idx + 1), newBlock, ...blocks.slice(idx + 1)];
 }
 
+/** Recursively delete a block anywhere in the tree by id. */
+export function deepDeleteBlock(blocks: EditorBlock[], id: string): EditorBlock[] {
+  return blocks
+    .filter((b) => b.id !== id)
+    .map((b) => {
+      const childArrays = getChildArrays(b);
+      if (childArrays !== null) {
+        return applyChildArrays(b, childArrays.map((arr) => deepDeleteBlock(arr, id)));
+      }
+      return b;
+    });
+}
+
+/**
+ * Recursively move a block up or down within its sibling list at any depth.
+ * Only the list that directly contains the block is reordered.
+ */
+export function deepMoveBlock(blocks: EditorBlock[], id: string, dir: -1 | 1): EditorBlock[] {
+  const idx = blocks.findIndex((b) => b.id === id);
+  if (idx >= 0) {
+    const newIdx = idx + dir;
+    if (newIdx < 0 || newIdx >= blocks.length) return blocks;
+    const updated = [...blocks];
+    [updated[idx], updated[newIdx]] = [updated[newIdx], updated[idx]];
+    return updated;
+  }
+  return blocks.map((b) => {
+    const childArrays = getChildArrays(b);
+    if (childArrays !== null) {
+      const updated = childArrays.map((arr) => deepMoveBlock(arr, id, dir));
+      if (updated.some((arr, i) => arr !== childArrays[i])) {
+        return applyChildArrays(b, updated);
+      }
+    }
+    return b;
+  });
+}
+
+/**
+ * Recursively applies any pending data migrations to a block tree.
+ * Should be called when pages are loaded from storage to ensure block data
+ * matches the current schema version defined in each block's BlockDefinition.
+ */
+export function applyMigrations(blocks: EditorBlock[]): EditorBlock[] {
+  return blocks.map((block) => {
+    const def = blockMap[block.type];
+    let current = block;
+    if (def?.migrate && def.version !== undefined) {
+      const blockVersion = block.version ?? 1;
+      if (blockVersion < def.version) {
+        current = { ...block, data: def.migrate(block.data, blockVersion), version: def.version };
+      }
+    }
+    const childArrays = getChildArrays(current);
+    if (childArrays !== null) {
+      return applyChildArrays(current, childArrays.map(applyMigrations));
+    }
+    return current;
+  });
+}

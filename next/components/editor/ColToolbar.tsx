@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { FRACTION_PRESETS } from "@/blocks/columns/fraction-presets";
+import { FRACTION_PRESETS } from "@/lib/editor/col-width";
 
 export { FRACTION_PRESETS };
 

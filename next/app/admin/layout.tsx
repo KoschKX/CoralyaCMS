@@ -2,12 +2,17 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { LogoutButton } from "./LogoutButton";
 import "../col-editor-overrides.css";
+// Ensure plugins are installed before reading their admin pages
+import "@/plugins/index";
+import { installedPlugins } from "@/lib/plugin-registry";
 
 export const metadata = {
   title: "Admin — CORALYA",
 };
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
+  const pluginPages = installedPlugins.flatMap((p) => p.adminPages ?? []);
+
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
@@ -66,7 +71,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 overflow-hidden bg-zinc-50">{children}</main>
+      <main className="flex-1 overflow-y-auto bg-zinc-50">{children}</main>
     </div>
   );
 }
+

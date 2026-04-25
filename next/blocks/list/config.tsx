@@ -1,8 +1,14 @@
-import { PanelSection } from "@/components/block-shared";
+import { PanelSection } from "@/components/ui/PanelSection";
 import type { BlockDefinition } from "@/lib/block-types";
 import ListLayout from "./layout";
 import { ListEditable } from "./editable";
 
+/**
+ * List block — ordered or unordered list of plain-text items.
+ *
+ * @example data
+ * { items: ["First", "Second"], style: "unordered" }
+ */
 const list: BlockDefinition = {
   name: "list",
   label: "List",

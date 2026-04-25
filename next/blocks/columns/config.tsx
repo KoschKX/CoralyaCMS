@@ -6,6 +6,21 @@ import { ColumnsEditable } from "./editable";
 
 type ColEntry = { blocks: EditorBlock[]; width?: string };
 
+/**
+ * Columns block — a container with N resizable columns, each holding child blocks.
+ * Implements `isContainer` so the block tree utilities recurse into child blocks.
+ *
+ * @example data
+ * {
+ *   cols: [
+ *     { blocks: [], width: "50%" },
+ *     { blocks: [], width: "50%" },
+ *   ],
+ *   responsive: {
+ *     mobile: { "col-0-width": "100%", "col-1-width": "100%" }
+ *   }
+ * }
+ */
 const columns: BlockDefinition = {
   name: "columns",
   label: "Columns",

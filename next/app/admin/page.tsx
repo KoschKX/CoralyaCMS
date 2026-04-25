@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { listPages } from "@/lib/pages-db";
+import { listPagesMeta } from "@/lib/pages-db";
 import DeleteButton from "./DeleteButton";
 import CloneButton from "./CloneButton";
 
 export const dynamic = "force-dynamic";
 
 export default function AdminPage() {
-  const pages = listPages().sort(
+  const pages = listPagesMeta().sort(
     (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
   );
 

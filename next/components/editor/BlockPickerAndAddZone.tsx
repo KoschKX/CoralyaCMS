@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useContext } from "react";
 import { blockRegistry } from "@/blocks/index";
+import { BlockEditorContext } from "@/components/editor/BlockEditorContext";
 import { BlockIcon } from "@/components/BlockIcon";
 
 export function BlockPicker({
@@ -11,8 +12,15 @@ export function BlockPicker({
   onSelect: (type: string) => void;
   onClose: () => void;
 }) {
+  const ctx = useContext(BlockEditorContext);
+  const disabledBlocks = ctx?.disabledBlocks ?? [];
+  const visibleBlocks = disabledBlocks.length
+    ? blockRegistry.filter((def) => !disabledBlocks.includes(def.name))
+    : blockRegistry;
+
   const ref = useRef<HTMLDivElement>(null);
 
+  // Close on outside click
   useEffect(() => {
     function handler(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) onClose();
@@ -21,17 +29,52 @@ export function BlockPicker({
     return () => document.removeEventListener("mousedown", handler);
   }, [onClose]);
 
+  // Close on Escape
+  useEffect(() => {
+    function handler(e: KeyboardEvent) {
+      if (e.key === "Escape") { e.preventDefault(); onClose(); }
+    }
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  // Focus the first button on mount
+  useEffect(() => {
+    const first = ref.current?.querySelector<HTMLElement>("button");
+    first?.focus();
+  }, []);
+
+  // Trap focus within the picker
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== "Tab") return;
+    const focusable = Array.from(
+      ref.current?.querySelectorAll<HTMLElement>("button") ?? [],
+    );
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey) {
+      if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+    } else {
+      if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  }, []);
+
   return (
     <div
       ref={ref}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Insert block"
+      onKeyDown={handleKeyDown}
       className="absolute z-40 mt-1 w-52 rounded-lg border border-zinc-200 bg-white shadow-lg"
     >
       <div className="p-1">
-        {blockRegistry.map((def) => (
+        {visibleBlocks.map((def) => (
           <button
             key={def.name}
             onClick={() => onSelect(def.name)}
-            className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm transition hover:bg-zinc-50"
+            className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm transition hover:bg-zinc-50 focus:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded border border-zinc-200 font-mono text-[11px] text-zinc-500">
               <BlockIcon name={def.name} label={def.label} size={20} />

@@ -1,13 +1,8 @@
 "use client";
 
-import type { Viewport } from "@/components/block-shared";
+import type { SelectedBlock } from "@/lib/types";
+import type { Viewport } from "@/components/ui/ViewportContext";
 import { mergeViewportOverrides } from "@/lib/responsive-css";
-
-interface SelectedBlock {
-  id: string;
-  name: string;
-  data: Record<string, unknown>;
-}
 
 interface UseResponsiveBlockOptions {
   selectedBlock: SelectedBlock | null;

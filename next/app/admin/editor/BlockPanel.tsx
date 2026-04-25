@@ -1,7 +1,7 @@
 "use client";
 
 import { blockMap } from "@/blocks/index";
-import { ViewportContext, type Viewport } from "@/components/block-shared";
+import { ViewportContext, type Viewport } from "@/components/ui/ViewportContext";
 
 interface SelectedBlock {
   id: string;
@@ -12,7 +12,6 @@ interface SelectedBlock {
 interface BlockPanelProps {
   selectedBlock: SelectedBlock | null;
   viewport: Viewport;
-  onViewportChange: (vp: Viewport) => void;
   isSectionEnabled: (fields: string[]) => boolean;
   toggleSection: (title: string, fields: string[]) => void;
   controlsDisplayData: (data: Record<string, unknown>) => Record<string, unknown>;
@@ -20,10 +19,35 @@ interface BlockPanelProps {
   activeColIdx: number | null;
 }
 
+// ── Viewport icons (extracted to avoid recreation on every render) ────────────
+
+const DesktopIcon = (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+  </svg>
+);
+
+const TabletIcon = (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/>
+  </svg>
+);
+
+const MobileIcon = (
+  <svg width="12" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/>
+  </svg>
+);
+
+const VIEWPORT_OPTIONS: { vp: Viewport; label: string; icon: React.ReactNode }[] = [
+  { vp: "desktop", label: "Desktop", icon: DesktopIcon },
+  { vp: "tablet",  label: "Tablet",  icon: TabletIcon  },
+  { vp: "mobile",  label: "Mobile",  icon: MobileIcon  },
+];
+
 export default function BlockPanel({
   selectedBlock,
   viewport,
-  onViewportChange,
   isSectionEnabled,
   toggleSection,
   controlsDisplayData,
@@ -45,44 +69,16 @@ export default function BlockPanel({
           {selectedBlock.name}
         </span>
         {supportsBreakpoints && (
-          <div className="flex items-center gap-0.5">
-            {([
-              {
-                vp: "desktop" as Viewport,
-                title: "Desktop",
-                icon: (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
-                  </svg>
-                ),
-              },
-              {
-                vp: "tablet" as Viewport,
-                title: "Tablet",
-                icon: (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/>
-                  </svg>
-                ),
-              },
-              {
-                vp: "mobile" as Viewport,
-                title: "Mobile",
-                icon: (
-                  <svg width="12" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/>
-                  </svg>
-                ),
-              },
-            ]).map(({ vp, title, icon }) => (
-              <button
+          <div className="flex items-center gap-0.5" role="group" aria-label="Active viewport">
+            {VIEWPORT_OPTIONS.map(({ vp, label, icon }) => (
+              <span
                 key={vp}
-                title={title}
-                onClick={() => onViewportChange(vp)}
-                className={`flex h-6 w-6 items-center justify-center rounded transition ${viewport === vp ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-zinc-700"}`}
+                aria-label={label}
+                title={`${label} (resize window to switch)`}
+                className={`flex h-6 w-6 items-center justify-center rounded ${viewport === vp ? "bg-zinc-900 text-white" : "text-zinc-300"}`}
               >
                 {icon}
-              </button>
+              </span>
             ))}
           </div>
         )}
@@ -90,7 +86,7 @@ export default function BlockPanel({
       {Controls ? (
         <ViewportContext.Provider value={{ viewport: activeViewport, isSectionEnabled, toggleSection }}>
           <p className={`-mt-1 text-[10px] transition-opacity ${supportsBreakpoints && activeViewport !== "desktop" ? "text-zinc-400 opacity-100" : "select-none opacity-0"}`}>
-            Toggle switches to override at this breakpoint.
+            Toggle switches to override at this breakpoint. Resize the window to preview.
           </p>
           <Controls
             data={{

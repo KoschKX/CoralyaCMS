@@ -4,6 +4,7 @@ import {
   DEFAULT_SETTINGS,
   type SiteSettings,
 } from "@/lib/settings-types";
+import { createWriteQueue } from "@/lib/utils/write-queue";
 
 // Re-export types so existing server imports still work
 export type { HeadingStyle, TypographySettings, LayoutSettings, SiteSettings } from "@/lib/settings-types";
@@ -17,16 +18,7 @@ const defaults: SiteSettings = DEFAULT_SETTINGS;
 let settingsCache: SiteSettings | null = null;
 
 /** Write-queue mutex — serialises concurrent settings saves. */
-let writeQueue: Promise<unknown> = Promise.resolve();
-
-function serialise<T>(fn: () => T): Promise<T> {
-  const p = writeQueue.then(fn);
-  writeQueue = p.then(
-    () => undefined,
-    () => undefined,
-  );
-  return p;
-}
+const serialise = createWriteQueue();
 
 export function getSettings(): SiteSettings {
   if (settingsCache !== null) return settingsCache;

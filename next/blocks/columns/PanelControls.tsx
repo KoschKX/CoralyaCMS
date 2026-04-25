@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useContext } from "react";
-import { PanelSection, ViewportContext } from "@/components/block-shared";
+import { PanelSection } from "@/components/ui/PanelSection";
+import { ViewportContext } from "@/components/ui/ViewportContext";
 import type { EditorBlock } from "@/lib/pages-db";
 import { FRACTION_PRESETS } from "./fraction-presets";
 

@@ -12,8 +12,19 @@ function getColWidth(colIdx: number, vp: string, colWidths: string[], responsive
 }
 
 
-import { useState, useEffect } from "react";
+import { useState, useLayoutEffect } from "react";
 import { getEditorBreakpoints } from "@/lib/editor-breakpoints";
+
+function calcViewport(): string {
+  if (typeof window === "undefined") return "desktop";
+  const { tablet: tabletBp, mobile: mobileBp } = getEditorBreakpoints();
+  const parsePx = (val: string) => parseInt(val, 10) || 0;
+  const w = window.innerWidth;
+  if (w <= parsePx(mobileBp)) return "mobile";
+  if (w <= parsePx(tabletBp)) return "tablet";
+  return "desktop";
+}
+
 
 import type { ReactNode } from "react";
 
@@ -27,23 +38,24 @@ interface ColumnsGridProps {
 
 export default function ColumnsGrid({ colWidths, responsive, children, selectedColIdx, stack }: ColumnsGridProps) {
 
-  // Use the editor canvas width (not window width) so breakpoints fire at the
-  // correct point when the right panel is open and the canvas is narrower.
   const [editorViewport, setEditorViewport] = useState<string>("desktop");
 
-  useEffect(() => {
-    const { tablet: tabletBp, mobile: mobileBp } = getEditorBreakpoints();
-    function parsePx(val: string) { return parseInt(val, 10) || 0; }
+  useLayoutEffect(() => {
+    setEditorViewport(calcViewport());
+
+    let rafId: ReturnType<typeof requestAnimationFrame> | null = null;
     function update() {
-      const w = typeof window !== "undefined" ? window.innerWidth : 1280;
-      if (w <= parsePx(mobileBp)) setEditorViewport("mobile");
-      else if (w <= parsePx(tabletBp)) setEditorViewport("tablet");
-      else setEditorViewport("desktop");
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        setEditorViewport(calcViewport());
+      });
     }
-    update();
+
     window.addEventListener("resize", update);
     return () => {
       window.removeEventListener("resize", update);
+      if (rafId !== null) cancelAnimationFrame(rafId);
     };
   }, []);
 

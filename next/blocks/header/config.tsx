@@ -1,9 +1,16 @@
-import { AlignButtons, PanelSection } from "@/components/block-shared";
+import { AlignButtons } from "@/components/ui/AlignButtons";
+import { PanelSection } from "@/components/ui/PanelSection";
 import { ColorPicker } from "@/components/ColorPicker";
 import type { BlockDefinition } from "@/lib/block-types";
 import HeaderLayout from "./layout";
 import { HeaderEditable } from "./editable";
 
+/**
+ * Header block — heading element (H1–H4) with alignment and color.
+ *
+ * @example data
+ * { text: "My Heading", level: 2, align: "left", color: "" }
+ */
 const header: BlockDefinition = {
   name: "header",
   label: "Heading",

@@ -1,7 +1,7 @@
 "use client";
 
 import type { EditorBlock } from "@/lib/pages-db";
-import { useMediaViewport } from "@/components/editor/EditorHooks";
+import { useEditorViewport } from "@/components/editor/EditorHooks";
 import { resolveColWidthForDisplay } from "@/lib/editor/col-width";
 import type { EditableProps } from "@/lib/block-types";
 
@@ -22,7 +22,7 @@ export function ColumnsEditable({
   onSelect,
   renderChildBlocks,
 }: EditableProps) {
-  const mediaViewport = useMediaViewport();
+  const mediaViewport = useEditorViewport();
   const cols = (data.cols as Array<{ blocks: EditorBlock[]; width?: string }>) ?? [];
   const colsResponsive = (data.responsive as Record<string, Record<string, unknown>>) ?? {};
 

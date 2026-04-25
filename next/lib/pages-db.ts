@@ -1,50 +1,23 @@
 import fs from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
+// Re-export shared types so existing imports of EditorBlock / Page from this
+// module continue to work without changes.
+export type { EditorBlock, Page, PageStatus } from "@/lib/types";
+import type { EditorBlock, Page } from "@/lib/types";
+import { applyMigrations } from "@/lib/block-tree";
+import { createWriteQueue } from "@/lib/utils/write-queue";
 
 const DATA_FILE = path.join(process.cwd(), "data", "pages.json");
-
-export type PageStatus = "draft" | "published";
 
 /** Module-level cache — invalidated on every write so reads are always consistent. */
 let pagesCache: Page[] | null = null;
 
 /**
- * Write-queue mutex: all mutating operations are chained through this promise
- * so that concurrent API requests cannot interleave their read-modify-write cycles.
+ * Write-queue mutex: all mutating operations are serialised so concurrent API
+ * requests cannot interleave their read-modify-write cycles.
  */
-let writeQueue: Promise<unknown> = Promise.resolve();
-
-function serialise<T>(fn: () => T): Promise<T> {
-  const p = writeQueue.then(fn);
-  // Keep the queue advancing even if fn throws, so it never gets stuck.
-  writeQueue = p.then(
-    () => undefined,
-    () => undefined,
-  );
-  return p;
-}
-
-export interface EditorBlock {
-  id: string;
-  type: string;
-  data: Record<string, unknown>;
-}
-
-export interface Page {
-  id: string;
-  title: string;
-  slug: string;
-  status: PageStatus;
-  blocks: EditorBlock[];
-  /** Rendered HTML string — source of truth for the live site front end.
-   *  Generated from blocks on every save, or edited directly via the HTML code view. */
-  html?: string;
-  /** Optional background color for the page. */
-  pageBgColor?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+const serialise = createWriteQueue();
 
 function readAll(): Page[] {
   if (pagesCache !== null) return pagesCache;
@@ -70,8 +43,20 @@ export function listPages(): Page[] {
   return readAll();
 }
 
+/** Returns only the metadata fields needed for list views — never includes blocks or html. */
+export type PageMeta = Pick<Page, "id" | "title" | "slug" | "status" | "pageBgColor" | "createdAt" | "updatedAt">;
+
+export function listPagesMeta(): PageMeta[] {
+  return readAll().map(({ id, title, slug, status, pageBgColor, createdAt, updatedAt }) => ({
+    id, title, slug, status: status as Page["status"], pageBgColor, createdAt, updatedAt,
+  }));
+}
+
 export function getPage(id: string): Page | null {
-  return readAll().find((p) => p.id === id) ?? null;
+  const page = readAll().find((p) => p.id === id) ?? null;
+  if (!page) return null;
+  // Apply any pending block data migrations before returning the page.
+  return { ...page, blocks: applyMigrations(page.blocks) };
 }
 
 export function createPage(data: Partial<Page>): Promise<Page> {

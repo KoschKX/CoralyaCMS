@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, useCallback, type ReactNode } from "react";
+import React, { memo, useCallback, useRef, type ReactNode } from "react";
 import type { EditorBlock } from "@/lib/pages-db";
 import { blockMap } from "@/blocks/index";
 import { isDescendant, insertBlockAfter } from "@/lib/block-tree";
@@ -10,6 +10,69 @@ import { ColToolbar } from "@/components/editor/ColToolbar";
 import { EditableBlock } from "@/components/editor/EditableBlock";
 import { AddZone } from "@/components/editor/BlockPickerAndAddZone";
 import { useBlockEditor, type BlockOps } from "@/components/editor/BlockEditorContext";
+import { useEditorViewport } from "@/components/editor/EditorHooks";
+
+interface ColViewportToolbarProps {
+  blockId: string;
+  ci: number;
+  cols: Array<{ blocks: EditorBlock[]; width?: string }>;
+  colData: Record<string, unknown>;
+  colResp: Record<string, Record<string, unknown>>;
+  ops: BlockOps;
+  setActiveColInfo: (info: { blockId: string; colIdx: number } | null) => void;
+}
+
+/**
+ * Isolated component so only it subscribes to EditorViewportContext.
+ * Rendered only when a column is actively selected — never causes other blocks to re-render.
+ */
+function ColViewportToolbar({ blockId, ci, cols, colData, colResp, ops, setActiveColInfo }: ColViewportToolbarProps) {
+  const editorViewport = useEditorViewport();
+  const col = cols[ci];
+  const vpWidthKey = `col-${ci}-width`;
+  const effectiveColWidth = resolveColWidth(col ?? {}, ci, colResp, editorViewport);
+  return (
+    <div
+      className="absolute bottom-full right-0 z-20 mb-1.5"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div
+        className="flex items-stretch rounded-md border border-zinc-200 bg-white shadow-md"
+        style={{ minHeight: 36 }}
+      >
+        <ColToolbar
+          colIdx={ci}
+          total={cols.length}
+          width={effectiveColWidth}
+          onMove={(dir) => {
+            const ni = ci + dir;
+            if (ni < 0 || ni >= cols.length) return;
+            const nc = [...cols]; [nc[ci], nc[ni]] = [nc[ni], nc[ci]];
+            ops.update(blockId, { ...colData, cols: nc });
+            setActiveColInfo({ blockId, colIdx: ni });
+          }}
+          onDelete={() => {
+            if (cols.length <= 1) return;
+            ops.update(blockId, { ...colData, cols: cols.filter((_, i) => i !== ci) });
+            setActiveColInfo(null);
+          }}
+          onAddCol={() => {
+            const nc = [...cols.slice(0, ci + 1), { blocks: [], width: undefined }, ...cols.slice(ci + 1)];
+            ops.update(blockId, { ...colData, cols: nc });
+          }}
+          onResize={(w) => {
+            if (editorViewport === "desktop") {
+              ops.update(blockId, { ...colData, cols: cols.map((c, i) => i === ci ? { ...c, width: w || undefined } : c) });
+            } else {
+              const vpOverrides = { ...((colResp[editorViewport] as Record<string, unknown>) ?? {}), [vpWidthKey]: w || null };
+              ops.update(blockId, { ...colData, responsive: { ...colResp, [editorViewport]: vpOverrides } });
+            }
+          }}
+        />
+      </div>
+    </div>
+  );
+}
 
 interface BlockItemProps {
   block: EditorBlock;
@@ -68,11 +131,17 @@ function BlockItem({
     activeColInfo,
     setActiveColInfo,
     setAnyPickerOpen,
-    editorViewport,
     onSelectBlock,
     onColSelect,
     makeNewBlock,
   } = useBlockEditor();
+
+  // Keep a ref to the current block so renderChildBlocks doesn't need block.data /
+  // block.type in its dependency array. Without this, Immer would cause
+  // renderChildBlocks to be recreated on every publish (even unrelated ones),
+  // forcing all column children to remount.
+  const blockRef = useRef(block);
+  blockRef.current = block;
 
   const def = blockMap[block.type];
   if (!def) return null;
@@ -83,13 +152,15 @@ function BlockItem({
     !isSelected && !!selectedBlockId && isDescendant(block, selectedBlockId);
   const showOverlay = !isSelected && !descendantSelected && !isColBlock;
 
-  // Stable callback — deps change when selection changes, which is unavoidable
-  // since the inner BlockItems need to reflect the current selectedBlockId.
+  // Only recreated when selection or stable actions change — not on every block.data update.
   const renderChildBlocks = useCallback((
     colBlocks: EditorBlock[],
     onUpdateAll: (newBlocks: EditorBlock[]) => void,
     colIdx?: number,
   ): ReactNode => {
+    // Read from ref so the closure always sees the latest block identity/data
+    // without needing block.id / block.data / block.type as deps.
+    const { id: blockId, data: blockData, type: blockType } = blockRef.current;
     const colOps = makeColOps(colBlocks, onUpdateAll, selectedBlockId, onSelectBlock, makeNewBlock);
     return (
       <>
@@ -115,13 +186,13 @@ function BlockItem({
                   label: `Column ${colIdx !== undefined ? colIdx + 1 : ""}`,
                   onSelect: () => {
                     if (colIdx !== undefined) {
-                      setActiveColInfo({ blockId: block.id, colIdx });
-                      onColSelect?.(block.id, colIdx);
+                      setActiveColInfo({ blockId, colIdx });
+                      onColSelect?.(blockId, colIdx);
                     } else {
                       setActiveColInfo(null);
-                      onColSelect?.(block.id, null);
+                      onColSelect?.(blockId, null);
                     }
-                    onSelectBlock(block.id, block.data as Record<string, unknown>, block.type);
+                    onSelectBlock(blockId, blockData as Record<string, unknown>, blockType);
                   },
                 }}
               />
@@ -130,8 +201,9 @@ function BlockItem({
         )}
       </>
     );
+  // block.id / block.data / block.type intentionally omitted — read from blockRef.current.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedBlockId, onSelectBlock, makeNewBlock, setAnyPickerOpen, setActiveColInfo, onColSelect, block.id, block.data, block.type]);
+  }, [selectedBlockId, onSelectBlock, makeNewBlock, setAnyPickerOpen, setActiveColInfo, onColSelect]);
 
   const isLast = idx === listLength - 1;
   const colBlockParentSelected = isSelected && isColBlock && activeColInfo?.blockId !== block.id;
@@ -270,52 +342,19 @@ function BlockItem({
             {block.type === "columns" && activeColInfo?.blockId === block.id && (() => {
               const ci = activeColInfo.colIdx;
               const cols = ((block.data as Record<string, unknown>).cols as Array<{ blocks: EditorBlock[]; width?: string }>) ?? [];
-              const col = cols[ci];
               const colData = block.data as Record<string, unknown>;
               const colResp = (colData.responsive as Record<string, Record<string, unknown>>) ?? {};
-              const vpWidthKey = `col-${ci}-width`;
-              const effectiveColWidth = resolveColWidth(col ?? {}, ci, colResp, editorViewport);
               return (
-                <div
+                <ColViewportToolbar
                   key={`coltoolbar-${ci}`}
-                  className="absolute bottom-full right-0 z-20 mb-1.5"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div
-                    className="flex items-stretch rounded-md border border-zinc-200 bg-white shadow-md"
-                    style={{ minHeight: 36 }}
-                  >
-                    <ColToolbar
-                      colIdx={ci}
-                      total={cols.length}
-                      width={effectiveColWidth}
-                      onMove={(dir) => {
-                        const ni = ci + dir;
-                        if (ni < 0 || ni >= cols.length) return;
-                        const nc = [...cols]; [nc[ci], nc[ni]] = [nc[ni], nc[ci]];
-                        ops.update(block.id, { ...colData, cols: nc });
-                        setActiveColInfo({ blockId: block.id, colIdx: ni });
-                      }}
-                      onDelete={() => {
-                        if (cols.length <= 1) return;
-                        ops.update(block.id, { ...colData, cols: cols.filter((_, i) => i !== ci) });
-                        setActiveColInfo(null);
-                      }}
-                      onAddCol={() => {
-                        const nc = [...cols.slice(0, ci + 1), { blocks: [], width: undefined }, ...cols.slice(ci + 1)];
-                        ops.update(block.id, { ...colData, cols: nc });
-                      }}
-                      onResize={(w) => {
-                        if (editorViewport === "desktop") {
-                          ops.update(block.id, { ...colData, cols: cols.map((c, i) => i === ci ? { ...c, width: w || undefined } : c) });
-                        } else {
-                          const vpOverrides = { ...((colResp[editorViewport] as Record<string, unknown>) ?? {}), [vpWidthKey]: w || null };
-                          ops.update(block.id, { ...colData, responsive: { ...colResp, [editorViewport]: vpOverrides } });
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
+                  blockId={block.id}
+                  ci={ci}
+                  cols={cols}
+                  colData={colData}
+                  colResp={colResp}
+                  ops={ops}
+                  setActiveColInfo={setActiveColInfo}
+                />
               );
             })()}
           </>

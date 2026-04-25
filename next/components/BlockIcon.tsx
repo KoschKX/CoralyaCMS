@@ -1,9 +1,10 @@
 
 import * as React from "react";
 import { ICON_COMPONENTS } from "./icons";
+import { getPluginIcon } from "@/lib/plugin-registry";
 
 export function BlockIcon({ name, label, size = 20, color = "#64748b" }: { name: string; label: string; size?: number; color?: string }) {
-  const Icon = ICON_COMPONENTS[name];
+  const Icon = ICON_COMPONENTS[name] ?? getPluginIcon(name);
   if (!Icon) {
     // Fallback: blank SVG for unknown icon
     return (

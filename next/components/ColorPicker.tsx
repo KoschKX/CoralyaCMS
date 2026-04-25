@@ -3,7 +3,7 @@
 import type { BlockData } from "@/lib/block-types";
 import type { PaletteColor } from "@/lib/color-palette";
 import { COLOR_PALETTE } from "@/lib/color-palette";
-import { PanelSection } from "@/components/block-shared";
+import { PanelSection } from "@/components/ui/PanelSection";
 import { useSettings } from "@/hooks/useSettings";
 
 export function ColorPicker({

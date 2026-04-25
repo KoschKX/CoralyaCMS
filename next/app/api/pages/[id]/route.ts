@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { getPage, updatePage, deletePage } from "@/lib/pages-db";
+import { UpdatePageSchema } from "@/lib/api-schemas";
 
 export async function GET(
   _: Request,
@@ -23,16 +24,17 @@ export async function PUT(
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
-  if (typeof body !== "object" || body === null || Array.isArray(body)) {
-    return NextResponse.json({ error: "Request body must be an object" }, { status: 400 });
+
+  const result = UpdatePageSchema.safeParse(body);
+  if (!result.success) {
+    return NextResponse.json(
+      { error: "Validation failed", issues: result.error.flatten().fieldErrors },
+      { status: 400 },
+    );
   }
-  const data = body as Record<string, unknown>;
-  if (data.blocks !== undefined && !Array.isArray(data.blocks)) {
-    return NextResponse.json({ error: "blocks must be an array" }, { status: 400 });
-  }
-  const updated = await updatePage(id, data);
-  if (!updated)
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  const updated = await updatePage(id, result.data);
+  if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
   // Bust the ISR cache for this page's public URL immediately.
   if (updated.slug) revalidatePath(`/${updated.slug}`);
   revalidatePath("/");
@@ -44,8 +46,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
+  // Get the slug before deleting so we can revalidate the specific public URL.
+  const page = getPage(id);
   const ok = await deletePage(id);
   if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (page?.slug) revalidatePath(`/${page.slug}`);
+  revalidatePath("/");
   revalidatePath("/", "layout");
   return new NextResponse(null, { status: 204 });
 }
+

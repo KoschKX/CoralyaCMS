@@ -2,6 +2,13 @@ import type { BlockDefinition } from "@/lib/block-types";
 import HtmlLayout from "./layout";
 import { HtmlEditable } from "./editable";
 
+/**
+ * Raw HTML block — freeform HTML input rendered verbatim on the public site.
+ * Unclosed tags are sanitized by `closeUnclosedTags()` at render time.
+ *
+ * @example data
+ * { content: "<div class=\"banner\">Hello</div>" }
+ */
 const htmlBlock: BlockDefinition = {
   name: "html",
   label: "Raw HTML",

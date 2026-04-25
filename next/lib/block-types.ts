@@ -53,4 +53,21 @@ export interface BlockDefinition {
   PanelControls?: (props: PanelControlProps) => ReactNode;
   /** Editor-mode render. When omitted, EditableBlock falls back to the read-only Layout. */
   Editable?: (props: EditableProps) => ReactNode;
+  /**
+   * Optional data validator called before saving a block.
+   * Return false to reject the save and signal corrupted/invalid block data.
+   * When omitted, all data is considered valid.
+   */
+  validate?: (data: BlockData) => boolean;
+  /**
+   * Schema version number for this block type's data format.
+   * Increment when the data shape changes in a breaking way.
+   * When omitted, version is assumed to be 1.
+   */
+  version?: number;
+  /**
+   * Migrates block data from an older schema version to the current one.
+   * Called automatically when loading pages whose blocks have a lower version.
+   */
+  migrate?: (data: BlockData, fromVersion: number) => BlockData;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { SiteSettings } from "@/lib/settings-types";
 
 let cachedSettings: SiteSettings | null = null;
@@ -8,7 +8,7 @@ const listeners = new Set<() => void>();
 
 async function fetchSettings(): Promise<SiteSettings> {
   const res = await fetch("/api/settings");
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) throw new Error(`Failed to load settings (HTTP ${res.status})`);
   const data: SiteSettings = await res.json();
   cachedSettings = data;
   listeners.forEach((l) => l());
@@ -17,12 +17,26 @@ async function fetchSettings(): Promise<SiteSettings> {
 
 export interface UseSettingsResult {
   data: SiteSettings | null;
-  error: boolean;
+  /** Non-null when the last fetch failed. Use `.message` for a human-readable reason. */
+  error: Error | null;
+  /** Clears the cache and re-fetches settings from the server. */
+  refetch: () => void;
 }
 
 export function useSettings(): UseSettingsResult {
   const [settings, setSettings] = useState<SiteSettings | null>(cachedSettings);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const refetch = useCallback(() => {
+    cachedSettings = null;
+    setSettings(null);
+    setError(null);
+    fetchSettings()
+      .then((data) => { setSettings(data); setError(null); })
+      .catch((err: unknown) => {
+        setError(err instanceof Error ? err : new Error(String(err)));
+      });
+  }, []);
 
   useEffect(() => {
     if (cachedSettings) {
@@ -32,10 +46,12 @@ export function useSettings(): UseSettingsResult {
     let cancelled = false;
     fetchSettings()
       .then((data) => {
-        if (!cancelled) { setSettings(data); setError(false); }
+        if (!cancelled) { setSettings(data); setError(null); }
       })
-      .catch(() => {
-        if (!cancelled) setError(true);
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err : new Error(String(err)));
+        }
       });
     return () => { cancelled = true; };
   }, []);
@@ -46,6 +62,6 @@ export function useSettings(): UseSettingsResult {
     return () => { listeners.delete(handler); };
   }, []);
 
-  return { data: settings, error };
+  return { data: settings, error, refetch };
 }
 
