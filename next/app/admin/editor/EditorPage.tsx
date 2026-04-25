@@ -88,8 +88,7 @@ export default function EditorPage({
 
   const { panelTab, setPanelTab, panelOpen, setPanelOpen } = useEditorPanel(mainMode);
   const { tablet: tabletBp, mobile: mobileBp } = getEditorBreakpoints();
-  const { canvasRef, viewport } = useCanvasWidth(tabletBp, mobileBp);
-  const [panelViewport, setPanelViewport] = useState<import("@/components/ui/ViewportContext").Viewport>("desktop");
+  const { canvasRef, viewport, setViewport } = useCanvasWidth(tabletBp, mobileBp, panelOpen);
 
   const editorViewportContextValue = useMemo(
     () => ({ viewport }),
@@ -122,7 +121,7 @@ export default function EditorPage({
   const { isSectionEnabled, toggleSection, controlsDisplayData, handleControlsChange } =
     useResponsiveBlock({
       selectedBlock,
-      viewport: panelViewport,
+      viewport,
       updateBlock: (blockId, data) => { updateBlockHandlerRef.current?.(blockId, data); },
       setSelectedBlock,
     });
@@ -133,8 +132,6 @@ export default function EditorPage({
       <EditorToolbar
         mainMode={mainMode}
         setMainMode={setMainMode}
-        viewport={panelViewport}
-        setViewport={setPanelViewport}
         panelOpen={panelOpen}
         setPanelOpen={setPanelOpen}
         saving={saving}
@@ -150,6 +147,18 @@ export default function EditorPage({
         {/* Editor canvas */}
         <div ref={canvasRef} className="flex-1 overflow-y-auto bg-zinc-100">
           <div className="py-10">
+            {/* When the panel is open, constrain canvas width to the selected
+                viewport breakpoint so responsive CSS fires at the right size.
+                When the panel is closed the ResizeObserver handles this automatically. */}
+            <div
+              className="mx-auto transition-[max-width] duration-300"
+              style={panelOpen ? {
+                maxWidth:
+                  viewport === "mobile" ? "390px"
+                  : viewport === "tablet" ? "768px"
+                  : undefined,
+              } : undefined}
+            >
             <div
               className="text-zinc-900 bg-white rounded-lg shadow-sm mx-auto"
               style={{
@@ -211,6 +220,7 @@ export default function EditorPage({
                 </>
               )}
             </div>
+            </div>
           </div>
         </div>
 
@@ -244,8 +254,8 @@ export default function EditorPage({
               {panelTab === "block" && (
                 <BlockPanel
                   selectedBlock={selectedBlock}
-                  viewport={panelViewport}
-                  setViewport={setPanelViewport}
+                  viewport={viewport}
+                  setViewport={setViewport}
                   isSectionEnabled={isSectionEnabled}
                   toggleSection={toggleSection}
                   controlsDisplayData={controlsDisplayData}

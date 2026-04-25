@@ -2,13 +2,9 @@
 
 import { useRouter } from "next/navigation";
 
-type Viewport = "desktop" | "tablet" | "mobile";
-
 interface EditorToolbarProps {
   mainMode: "visual" | "code" | "inject";
   setMainMode: (mode: "visual" | "code" | "inject") => void;
-  viewport: Viewport;
-  setViewport: (vp: Viewport) => void;
   panelOpen: boolean;
   setPanelOpen: (fn: (o: boolean) => boolean) => void;
   saving: boolean;
@@ -23,8 +19,6 @@ interface EditorToolbarProps {
 export default function EditorToolbar({
   mainMode,
   setMainMode,
-  viewport,
-  setViewport,
   panelOpen,
   setPanelOpen,
   saving,
@@ -42,35 +36,6 @@ export default function EditorToolbar({
         <button onClick={() => router.push("/admin")} className="text-sm text-zinc-500 hover:text-zinc-800 mr-2">
           &larr; Pages
         </button>
-        {mainMode === "visual" && (
-        <div className="flex items-center gap-0.5 ml-4" role="group" aria-label="Preview viewport">
-            {(["desktop", "tablet", "mobile"] as Viewport[]).map((vp) => (
-              <button
-                key={vp}
-                onClick={() => setViewport(vp)}
-                aria-label={`${vp.charAt(0).toUpperCase() + vp.slice(1)} viewport`}
-                aria-pressed={viewport === vp}
-                className={`flex h-8 w-8 items-center justify-center rounded transition ${viewport === vp ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100"}`}
-              >
-                {vp === "desktop" && (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
-                  </svg>
-                )}
-                {vp === "tablet" && (
-                  <svg width="14" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/>
-                  </svg>
-                )}
-                {vp === "mobile" && (
-                  <svg width="11" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/>
-                  </svg>
-                )}
-              </button>
-            ))}
-          </div>
-        )}
         <div className="flex items-center gap-2 ml-auto">
           {saved && <span className="text-xs font-medium text-emerald-600">Saved &#10003;</span>}
           {slug && status === "published" && (

@@ -9,16 +9,30 @@ function parseBreakpointPx(bp: string): number {
 }
 
 /**
- * Attaches a ResizeObserver to the editor canvas element.
- * Automatically derives the active viewport (desktop / tablet / mobile)
- * from the canvas width vs. the configured breakpoints, so the editor
- * responds to window resize instead of requiring manual button clicks.
+ * Manages the editor canvas viewport state with two modes:
+ *
+ * - Panel **closed**: a ResizeObserver watches the canvas element and
+ *   automatically derives the active viewport from its pixel width vs.
+ *   the configured breakpoints. The user sees the layout the page will
+ *   actually have at that window size.
+ *
+ * - Panel **open**: the ResizeObserver is disconnected and the viewport
+ *   is controlled manually via `setViewport` (driven by the panel's
+ *   viewport buttons). The canvas width is constrained to the selected
+ *   breakpoint so responsive CSS fires correctly.
  */
-export function useCanvasWidth(tabletBp: string, mobileBp: string) {
+export function useCanvasWidth(
+  tabletBp: string,
+  mobileBp: string,
+  panelOpen: boolean,
+) {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [viewport, setViewport] = useState<Viewport>("desktop");
 
   useEffect(() => {
+    // When the panel is open the user controls viewport manually.
+    if (panelOpen) return;
+
     const el = canvasRef.current;
     if (!el) return;
     const tabletPx = parseBreakpointPx(tabletBp);
@@ -32,7 +46,7 @@ export function useCanvasWidth(tabletBp: string, mobileBp: string) {
     });
     observer.observe(el);
     return () => observer.disconnect();
-  }, [tabletBp, mobileBp]);
+  }, [tabletBp, mobileBp, panelOpen]);
 
-  return { canvasRef, viewport };
+  return { canvasRef, viewport, setViewport };
 }
