@@ -15,7 +15,7 @@ if [ ! -d "$ROOT/next/node_modules" ]; then
 fi
 
 cd "$ROOT/next"
-npm run dev -- --webpack &
+npm run dev &
 NEXT_PID=$!
 
 echo ""

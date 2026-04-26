@@ -8,13 +8,13 @@ if lsof -ti:3000 >/dev/null 2>&1; then
   sleep 1
 fi
 
-echo "▶ Building Next.js for production (webpack)..."
+echo "▶ Building Next.js for production..."
 cd "$ROOT/next"
-npm run build -- --webpack
+npm run build
 
 # Start production server
 echo "▶ Starting Next.js production server on http://localhost:3000 ..."
-npm run start -- --webpack &
+npm run start &
 NEXT_PID=$!
 
 echo ""
