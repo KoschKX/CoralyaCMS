@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type React from "react";
 import type { EditorBlock } from "@/lib/pages-db";
 
 export type BlockData = Record<string, unknown>;
@@ -84,4 +85,14 @@ export interface BlockDefinition {
    * Called automatically when loading pages whose blocks have a lower version.
    */
   migrate?: (data: BlockData, fromVersion: number) => BlockData;
+
+  /**
+   * Optional admin settings page for this block type.
+   * When provided, a gear icon appears next to the block in
+   * Settings → Blocks, linking to `/admin/settings/blocks/{name}`.
+   *
+   * Example:
+   *   settingsPage: MyBlockSettingsPage,
+   */
+  settingsPage?: React.ComponentType;
 }

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import "@/plugins/index";
 import { pluginAdminPages } from "@/lib/plugin-registry";
 
@@ -13,5 +14,20 @@ export default async function PluginSettingsPage({ params }: Props) {
   if (!page) notFound();
 
   const Component = page.component;
-  return <Component />;
+  return (
+    <div>
+      {/* Back-link breadcrumb */}
+      <div className="border-b border-zinc-200 bg-white px-8 py-3">
+        <Link
+          href="/admin/settings/plugins"
+          className="text-xs text-zinc-400 hover:text-zinc-700"
+        >
+          ← Plugins
+        </Link>
+        <span className="mx-2 text-xs text-zinc-300">/</span>
+        <span className="text-xs font-medium text-zinc-700">{page.label}</span>
+      </div>
+      <Component />
+    </div>
+  );
 }
