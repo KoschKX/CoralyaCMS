@@ -32,6 +32,7 @@ export function PanelSection({
         <button
           role="switch"
           aria-checked={isEnabled}
+          aria-label={isEnabled ? `Remove ${title} override at this breakpoint` : `Override ${title} at this breakpoint`}
           onClick={() => isResponsiveMode && toggleSection(title, fields)}
           title={isEnabled ? "Remove breakpoint override" : "Override at this breakpoint"}
           className={`relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer items-center rounded-full focus:outline-none ${

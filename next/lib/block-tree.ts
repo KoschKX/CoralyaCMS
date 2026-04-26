@@ -21,21 +21,30 @@ function applyChildArrays(block: EditorBlock, arrays: EditorBlock[][]): EditorBl
   return { ...block, data: def.setChildBlocks(block.data, arrays) };
 }
 
+/**
+ * Walk every block in the tree, calling fn on each.
+ * Return a replacement block to keep it (with its children re-walked),
+ * or null to remove it from the tree.
+ */
+function walkBlocks(blocks: EditorBlock[], fn: (b: EditorBlock) => EditorBlock | null): EditorBlock[] {
+  return blocks.flatMap((b) => {
+    const result = fn(b);
+    if (result === null) return [];
+    const childArrays = getChildArrays(result);
+    if (childArrays !== null) {
+      return [applyChildArrays(result, childArrays.map((arr) => walkBlocks(arr, fn)))];
+    }
+    return [result];
+  });
+}
+
 /** Recursively update a block anywhere in the tree by id. */
 export function deepUpdateBlock(
   blocks: EditorBlock[],
   id: string,
   newData: Record<string, unknown>,
 ): EditorBlock[] {
-  return blocks.map((b) => {
-    if (b.id === id) return { ...b, data: newData };
-    const childArrays = getChildArrays(b);
-    if (childArrays !== null) {
-      const updated = childArrays.map((arr) => deepUpdateBlock(arr, id, newData));
-      return applyChildArrays(b, updated);
-    }
-    return b;
-  });
+  return walkBlocks(blocks, (b) => (b.id === id ? { ...b, data: newData } : b));
 }
 
 /** Find a block anywhere in the tree by id. */
@@ -79,15 +88,7 @@ export function insertBlockAfter(
 
 /** Recursively delete a block anywhere in the tree by id. */
 export function deepDeleteBlock(blocks: EditorBlock[], id: string): EditorBlock[] {
-  return blocks
-    .filter((b) => b.id !== id)
-    .map((b) => {
-      const childArrays = getChildArrays(b);
-      if (childArrays !== null) {
-        return applyChildArrays(b, childArrays.map((arr) => deepDeleteBlock(arr, id)));
-      }
-      return b;
-    });
+  return walkBlocks(blocks, (b) => (b.id === id ? null : b));
 }
 
 /**

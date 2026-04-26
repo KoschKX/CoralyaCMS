@@ -18,13 +18,14 @@ import {
 import { promisify } from "util";
 import type { User, UserRole, PublicUser } from "@/lib/users-types";
 import { createWriteQueue } from "@/lib/utils/write-queue";
+import { createJsonStore } from "@/lib/utils/json-store";
 
 const scryptAsync = promisify(scrypt);
 const USERS_FILE = path.join(process.cwd(), "data", "users.json");
 
 // ── Cache + write-queue ───────────────────────────────────────────────────────
 
-let usersCache: User[] | null = null;
+const { readAll: readUsers, writeAll: writeUsers } = createJsonStore<User>(USERS_FILE);
 const serialise = createWriteQueue();
 
 // ── Password hashing (scrypt) ─────────────────────────────────────────────────
@@ -49,27 +50,6 @@ export async function verifyPassword(
   } catch {
     return false;
   }
-}
-
-// ── Internal read/write ───────────────────────────────────────────────────────
-
-function readUsers(): User[] {
-  if (usersCache !== null) return usersCache;
-  if (!fs.existsSync(USERS_FILE)) return (usersCache = []);
-  try {
-    usersCache = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8")) as User[];
-    return usersCache;
-  } catch {
-    return (usersCache = []);
-  }
-}
-
-function writeUsers(users: User[]): void {
-  fs.mkdirSync(path.dirname(USERS_FILE), { recursive: true });
-  const tmp = USERS_FILE + ".tmp";
-  fs.writeFileSync(tmp, JSON.stringify(users, null, 2));
-  fs.renameSync(tmp, USERS_FILE);
-  usersCache = users;
 }
 
 // ── Public read API ───────────────────────────────────────────────────────────

@@ -43,7 +43,6 @@ export interface EditorStore {
   // ── Selection ────────────────────────────────────────────────────────────
   selectedBlockId: string | null;
   activeColInfo: ActiveColInfo | null;
-  anyPickerOpen: boolean;
 
   // ── Derived helper ───────────────────────────────────────────────────────
   /** Returns current blocks (alias for `present`). */
@@ -63,7 +62,6 @@ export interface EditorStore {
 
   selectBlock: (id: string | null, data: Readonly<Record<string, unknown>>, type: string) => void;
   setActiveColInfo: (info: ActiveColInfo | null) => void;
-  setAnyPickerOpen: (open: boolean) => void;
 
   updateBlock: (id: string, newData: Readonly<Record<string, unknown>>) => void;
   deleteBlock: (id: string) => void;
@@ -115,7 +113,6 @@ export function createEditorStore() {
 
       selectedBlockId: null,
       activeColInfo: null,
-      anyPickerOpen: false,
 
       blocks() {
         return get().present;
@@ -179,10 +176,6 @@ export function createEditorStore() {
 
       setActiveColInfo(info) {
         set((s) => { s.activeColInfo = info; });
-      },
-
-      setAnyPickerOpen(open) {
-        set((s) => { s.anyPickerOpen = open; });
       },
 
       makeNewBlock(type) {

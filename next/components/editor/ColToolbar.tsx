@@ -42,6 +42,8 @@ export function ColToolbar({
       <div ref={popRef}>
         <button
           title="Resize column"
+          aria-label="Resize column"
+          aria-expanded={sizeOpen}
           onClick={() => setSizeOpen((o) => !o)}
           className="flex items-center px-2 text-xs text-zinc-500 hover:bg-zinc-100 transition h-full"
         >
@@ -70,6 +72,7 @@ export function ColToolbar({
       <div className="w-px self-stretch bg-zinc-200" />
       <button
         title="Move column left"
+        aria-label="Move column left"
         disabled={colIdx === 0}
         onClick={() => onMove(-1)}
         className="flex w-8 items-center justify-center text-zinc-500 hover:bg-zinc-100 transition disabled:opacity-25 disabled:cursor-not-allowed"
@@ -78,6 +81,7 @@ export function ColToolbar({
       </button>
       <button
         title="Move column right"
+        aria-label="Move column right"
         disabled={colIdx === total - 1}
         onClick={() => onMove(1)}
         className="flex w-8 items-center justify-center text-zinc-500 hover:bg-zinc-100 transition disabled:opacity-25 disabled:cursor-not-allowed"
@@ -87,6 +91,7 @@ export function ColToolbar({
       <div className="w-px self-stretch bg-zinc-200" />
       <button
         title="Add column after"
+        aria-label="Add column after"
         onClick={onAddCol}
         className="flex w-8 items-center justify-center text-zinc-500 hover:bg-zinc-100 transition"
       >
@@ -94,6 +99,7 @@ export function ColToolbar({
       </button>
       <button
         title="Delete column"
+        aria-label="Delete column"
         disabled={total <= 1}
         onClick={onDelete}
         className="flex w-8 items-center justify-center text-zinc-400 hover:bg-red-50 hover:text-red-500 transition disabled:opacity-25 disabled:cursor-not-allowed"

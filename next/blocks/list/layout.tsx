@@ -11,7 +11,7 @@ export default function ListLayout({ data, blockId }: BlockLayoutProps & { block
   return (
     <Tag
       data-block-id={blockId}
-      className={`block-list ${ordered ? "list-decimal pl-6 space-y-1" : "list-disc pl-6 space-y-1"} block-${blockId}`}
+      className={`block-list ${ordered ? "list-decimal" : "list-disc"} pl-6 space-y-1 block-${blockId}`}
       style={{ textAlign: ((data.align as string) || "left") as React.CSSProperties["textAlign"] }}
     >
       {items.map((item, i) => (

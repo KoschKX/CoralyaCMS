@@ -18,6 +18,7 @@
  */
 
 import {
+  useState,
   useEffect,
   useRef,
   useMemo,
@@ -62,6 +63,10 @@ function VisualEditorInner({
   // Get stable action references from the store (actions don't change identity)
   const actions = useEditorActions();
 
+  // anyPickerOpen is local React state — keeping it out of the global Zustand
+  // store prevents all store subscribers from re-rendering when a picker opens.
+  const [anyPickerOpen, setAnyPickerOpen] = useState(false);
+
   // One-time init: load initial blocks + wire up external callbacks
   const isInitialized = useRef(false);
   useEffect(() => {
@@ -104,7 +109,6 @@ function VisualEditorInner({
   // Subscribe to store slices — each selector is narrow to minimise re-renders
   const blocks = useEditorStore((s) => s.present);
   const activeColInfo = useEditorStore((s) => s.activeColInfo);
-  const anyPickerOpen = useEditorStore((s) => s.anyPickerOpen);
 
   // Stable ops object — Zustand actions have stable identity across renders
   const topOps = useMemo(() => ({
@@ -118,19 +122,19 @@ function VisualEditorInner({
     selectedBlockId,
     activeColInfo,
     setActiveColInfo: actions.setActiveColInfo,
-    setAnyPickerOpen: actions.setAnyPickerOpen,
+    setAnyPickerOpen,
     onSelectBlock,
     onColSelect,
     makeNewBlock: actions.makeNewBlock,
     disabledBlocks,
-  }), [selectedBlockId, activeColInfo, onSelectBlock, onColSelect, actions, disabledBlocks]);
+  }), [selectedBlockId, activeColInfo, setAnyPickerOpen, onSelectBlock, onColSelect, actions, disabledBlocks]);
 
   return (
     <BlockEditorContext.Provider value={contextValue}>
       <ErrorBoundary>
         <div className="relative text-zinc-800" style={{ display: "flex", flexDirection: "column" }}>
           {anyPickerOpen && <div className="absolute inset-0 cursor-default" style={{ zIndex: 15 }} />}
-          <AddZone onAdd={(type) => actions.addBlockAfter("TOP", type)} onOpenChange={actions.setAnyPickerOpen} />
+          <AddZone onAdd={(type) => actions.addBlockAfter("TOP", type)} onOpenChange={setAnyPickerOpen} />
 
           {blocks.length === 0 && (
             <div className="my-4 flex min-h-[160px] items-center justify-center rounded-xl border-2 border-dashed border-zinc-200 text-sm text-zinc-400">
@@ -143,7 +147,7 @@ function VisualEditorInner({
           <AddZone
             onAdd={(type) => actions.addBlockAfter(blocks[blocks.length - 1]?.id ?? "TOP", type)}
             variant="footer"
-            onOpenChange={actions.setAnyPickerOpen}
+            onOpenChange={setAnyPickerOpen}
           />
         </div>
       </ErrorBoundary>

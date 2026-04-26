@@ -1,34 +1,15 @@
-import fs from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
 import { createWriteQueue } from "@/lib/utils/write-queue";
+import { createJsonStore } from "@/lib/utils/json-store";
 import type { Taxonomy } from "@/lib/types";
 
 export type { Taxonomy } from "@/lib/types";
 
 const DATA_FILE = path.join(process.cwd(), "data", "taxonomies.json");
 
-let cache: Taxonomy[] | null = null;
+const { readAll, writeAll } = createJsonStore<Taxonomy>(DATA_FILE);
 const serialise = createWriteQueue();
-
-function readAll(): Taxonomy[] {
-  if (cache !== null) return cache;
-  if (!fs.existsSync(DATA_FILE)) return (cache = []);
-  try {
-    cache = JSON.parse(fs.readFileSync(DATA_FILE, "utf-8")) as Taxonomy[];
-    return cache;
-  } catch {
-    return (cache = []);
-  }
-}
-
-function writeAll(items: Taxonomy[]): void {
-  fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
-  const tmp = DATA_FILE + ".tmp";
-  fs.writeFileSync(tmp, JSON.stringify(items, null, 2));
-  fs.renameSync(tmp, DATA_FILE);
-  cache = items;
-}
 
 export function listTaxonomies(): Taxonomy[] {
   return readAll();

@@ -4,24 +4,29 @@ import { useRef, useState, useCallback, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { EditorBlock } from "@/lib/posts-db";
 import { ViewportContext } from "@/components/ui/ViewportContext";
-import { blocksToShortcodes, shortcodesToBlocks } from "@/lib/shortcodes";
 import { EditorViewportContext } from "@/components/editor/EditorContext";
 import { ResponsiveStyleInjector } from "@/components/ResponsiveStyleInjector";
 import { getEditorBreakpoints } from "@/lib/editor-breakpoints";
-import type { SelectedBlock } from "@/lib/types";
 import BlockPanel from "@/app/admin/editor/BlockPanel";
 import PostPanel from "@/app/admin/editor/PostPanel";
 import { useSavePost } from "@/app/admin/editor/hooks/useSavePost";
 import { useResponsiveBlock } from "@/app/admin/editor/hooks/useResponsiveBlock";
 import { useCanvasWidth } from "@/app/admin/editor/hooks/useCanvasWidth";
 import { usePageMeta } from "@/app/admin/editor/hooks/usePageMeta";
+import { useEditorPageState } from "@/app/admin/editor/hooks/useEditorPageState";
 import dynamic from "next/dynamic";
-const CodeEditor = dynamic(() => import("@/components/CodeEditor"), { ssr: false });
+const CodeEditor = dynamic(() => import("@/components/CodeEditor"), {
+  ssr: false,
+  loading: () => <div className="h-[60vh] animate-pulse rounded-lg bg-zinc-100" />,
+});
 import type { VisualEditorProps } from "@/components/VisualEditor";
 
 const VisualEditor = dynamic<VisualEditorProps>(
   () => import("@/components/VisualEditor"),
-  { ssr: false },
+  {
+    ssr: false,
+    loading: () => <div className="min-h-[400px] animate-pulse rounded-lg bg-zinc-100" />,
+  },
 );
 
 interface PostEditorPageProps {
@@ -49,35 +54,25 @@ export default function PostEditorPage({
   initialCategories = [],
   disabledBlocks = [],
 }: PostEditorPageProps) {
-  const [codeMode, setCodeMode] = useState(false);
+  const {
+    mainMode,
+    setMainMode,
+    selectedBlock,
+    setSelectedBlock,
+    codeText,
+    setCodeText,
+    visualBlocks,
+    setVisualBlocks,
+    liveBlocks,
+    clearDraft,
+  } = useEditorPageState({ id, initialBlocks, initialHtml });
+
   const [panelOpen, setPanelOpen] = useState(true);
   const [panelTab, setPanelTab] = useState<"post" | "block">("post");
-  const [selectedBlock, setSelectedBlock] = useState<SelectedBlock | null>(null);
   const [excerpt, setExcerpt] = useState(initialExcerpt);
   const [tags, setTags] = useState<string[]>(initialTags);
   const [categories, setCategories] = useState<string[]>(initialCategories);
   const router = useRouter();
-
-  const draftKey = `post-draft-${id ?? "new"}`;
-  const initialParsedBlocks = initialHtml ? shortcodesToBlocks(initialHtml) : initialBlocks;
-
-  const [codeText, setCodeText] = useState(() => {
-    try {
-      return sessionStorage.getItem(draftKey) ?? (initialHtml || blocksToShortcodes(initialParsedBlocks));
-    } catch {
-      return initialHtml || blocksToShortcodes(initialParsedBlocks);
-    }
-  });
-
-  const [debouncedCode, setDebouncedCode] = useState(codeText);
-  useEffect(() => {
-    const t = setTimeout(() => setDebouncedCode(codeText), 300);
-    return () => clearTimeout(t);
-  }, [codeText]);
-
-  const [visualBlocks, setVisualBlocks] = useState(initialParsedBlocks);
-  const parsedCodeBlocks = useMemo(() => shortcodesToBlocks(debouncedCode), [debouncedCode]);
-  const liveBlocks = codeMode ? parsedCodeBlocks : visualBlocks;
 
   const { title, slug, setSlug, status, setStatus, handleTitleChange } = usePageMeta({
     id,
@@ -85,6 +80,30 @@ export default function PostEditorPage({
     initialSlug,
     initialStatus,
   });
+
+  // ── Dirty / unsaved-changes tracking ───────────────────────────────────────
+  const isDirtyRef = useRef(false);
+  const isFirstCodeRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstCodeRender.current) { isFirstCodeRender.current = false; return; }
+    isDirtyRef.current = true;
+  }, [codeText]);
+
+  const handleSaveSuccess = useCallback(() => {
+    isDirtyRef.current = false;
+    clearDraft();
+  }, [clearDraft]);
+
+  useEffect(() => {
+    function handler(e: BeforeUnloadEvent) {
+      if (!isDirtyRef.current) return;
+      e.preventDefault();
+      e.returnValue = "";
+    }
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, []);
 
   const { saving, saved, saveError, handleSave } = useSavePost({
     id,
@@ -95,24 +114,11 @@ export default function PostEditorPage({
     tags,
     categories,
     onStatusChange: setStatus,
+    onSaveSuccess: handleSaveSuccess,
   });
 
-  useEffect(() => {
-    const t = setTimeout(() => {
-      try { sessionStorage.setItem(draftKey, codeText); } catch {}
-    }, 1000);
-    return () => clearTimeout(t);
-  }, [codeText, draftKey]);
-
-  useEffect(() => {
-    if (saved) {
-      try { sessionStorage.removeItem(draftKey); } catch {}
-    }
-  }, [saved, draftKey]);
-
   const { tablet: tabletBp, mobile: mobileBp } = getEditorBreakpoints();
-  const { canvasRef, viewport } = useCanvasWidth(tabletBp, mobileBp);
-  const [panelViewport, setPanelViewport] = useState<import("@/components/ui/ViewportContext").Viewport>("desktop");
+  const { canvasRef, viewport, setViewport } = useCanvasWidth(tabletBp, mobileBp, panelOpen);
 
   const editorViewportContextValue = useMemo(() => ({ viewport }), [viewport]);
 
@@ -141,12 +147,12 @@ export default function PostEditorPage({
   const { isSectionEnabled, toggleSection, controlsDisplayData, handleControlsChange } =
     useResponsiveBlock({
       selectedBlock,
-      viewport: panelViewport,
+      viewport,
       updateBlock: (blockId, data) => { updateBlockHandlerRef.current?.(blockId, data); },
       setSelectedBlock,
     });
 
-  const activePanelTab = !codeMode && panelTab === "block" ? "block" : "post";
+  const activePanelTab = mainMode !== "code" && panelTab === "block" ? "block" : "post";
 
   return (
     <EditorViewportContext.Provider value={editorViewportContextValue}>
@@ -159,15 +165,15 @@ export default function PostEditorPage({
         >
           &larr; Posts
         </button>
-        {!codeMode && (
-          <div className="flex items-center gap-0.5 ml-4" role="group" aria-label="Viewport">
+        {mainMode !== "code" && (
+          <div className="flex items-center gap-0.5 ml-4" role="group" aria-label="Preview viewport">
             {(["desktop", "tablet", "mobile"] as const).map((vp) => (
               <button
                 key={vp}
-                onClick={() => setPanelViewport(vp)}
-                title={vp.charAt(0).toUpperCase() + vp.slice(1)}
-                aria-pressed={panelViewport === vp}
-                className={`flex h-8 w-8 items-center justify-center rounded transition ${panelViewport === vp ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100"}`}
+                onClick={() => setViewport(vp)}
+                aria-label={`${vp.charAt(0).toUpperCase() + vp.slice(1)} viewport`}
+                aria-pressed={viewport === vp}
+                className={`flex h-8 w-8 items-center justify-center rounded transition ${viewport === vp ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100"}`}
               >
                 {vp === "desktop" && (
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -203,14 +209,12 @@ export default function PostEditorPage({
             </a>
           )}
           <button
-            onClick={() => {
-              setCodeMode((m) => !m);
-              if (!codeMode) setSelectedBlock(null);
-            }}
-            title={codeMode ? "Back to visual editor" : "Code view"}
-            className={`rounded-md border px-2.5 py-1.5 text-sm font-mono transition ${codeMode ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
+            onClick={() => setMainMode(mainMode === "code" ? "visual" : "code")}
+            aria-label={mainMode === "code" ? "Back to visual editor" : "Code view"}
+            aria-pressed={mainMode === "code"}
+            className={`rounded-md border px-2.5 py-1.5 text-sm font-mono transition ${mainMode === "code" ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
           >
-            {codeMode ? (
+            {mainMode === "code" ? (
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="currentColor">
                 <path d="M3 6h11v1.5H3V6Zm3.5 5.5h11V13h-11v-1.5ZM21 17H10v1.5h11V17Z" />
               </svg>
@@ -222,7 +226,8 @@ export default function PostEditorPage({
           </button>
           <button
             onClick={() => setPanelOpen((o) => !o)}
-            title="Toggle panel"
+            aria-label="Toggle settings panel"
+            aria-pressed={panelOpen}
             className={`ml-1 rounded-md border px-2.5 py-1.5 text-sm transition ${panelOpen ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
           >
             &#8863;
@@ -235,6 +240,15 @@ export default function PostEditorPage({
         <div ref={canvasRef} className="flex-1 overflow-y-auto bg-zinc-100">
           <div className="py-10">
             <div
+              className="mx-auto transition-[max-width] duration-300"
+              style={panelOpen ? {
+                maxWidth:
+                  viewport === "mobile" ? "390px"
+                  : viewport === "tablet" ? "768px"
+                  : "2000px",
+              } : undefined}
+            >
+            <div
               className="text-zinc-900 bg-white rounded-lg shadow-sm mx-auto"
               style={{
                 maxWidth: "var(--content-max-width, 48rem)",
@@ -242,7 +256,7 @@ export default function PostEditorPage({
                 containerType: "inline-size",
               }}
             >
-              {codeMode ? (
+              {mainMode === "code" ? (
                 <>
                   <CodeEditor value={codeText} onValueChange={setCodeText} minHeight="60vh" />
                   <div className="overflow-hidden rounded-b-lg border border-t-0 border-zinc-700 bg-zinc-800 px-4 py-2">
@@ -266,6 +280,7 @@ export default function PostEditorPage({
                       tabletBp={tabletBp}
                       mobileBp={mobileBp}
                       forContainer
+                      forcedViewport={panelOpen ? viewport : undefined}
                     />
                     <VisualEditor
                       initialBlocks={liveBlocks}
@@ -280,16 +295,19 @@ export default function PostEditorPage({
                 </>
               )}
             </div>
+            </div>
           </div>
         </div>
 
         {/* Right panel */}
         {panelOpen && (
           <aside className="sticky top-0 h-[calc(100vh-3rem)] w-72 shrink-0 overflow-y-auto border-l border-zinc-200 bg-white">
-            <div className="flex border-b border-zinc-200">
-              {(!codeMode ? ["post", "block"] : ["post"]).map((tab) => (
+            <div className="flex border-b border-zinc-200" role="tablist" aria-label="Panel sections">
+              {(mainMode !== "code" ? ["post", "block"] : ["post"]).map((tab) => (
                 <button
                   key={tab}
+                  role="tab"
+                  aria-selected={activePanelTab === tab}
                   onClick={() => setPanelTab(tab as "post" | "block")}
                   className={`flex-1 py-2.5 text-xs font-semibold capitalize tracking-wide transition ${activePanelTab === tab ? "border-b-2 border-zinc-900 text-zinc-900" : "text-zinc-400 hover:text-zinc-700"}`}
                 >
@@ -297,7 +315,7 @@ export default function PostEditorPage({
                 </button>
               ))}
             </div>
-            <div className="space-y-6 px-4 py-5">
+            <div className="space-y-6 px-4 py-5" role="tabpanel">
               {activePanelTab === "post" && (
                 <PostPanel
                   status={status}
@@ -315,8 +333,8 @@ export default function PostEditorPage({
               {activePanelTab === "block" && (
                 <BlockPanel
                   selectedBlock={selectedBlock}
-                  viewport={panelViewport}
-                  setViewport={setPanelViewport}
+                  viewport={viewport}
+                  setViewport={setViewport}
                   isSectionEnabled={isSectionEnabled}
                   toggleSection={toggleSection}
                   controlsDisplayData={controlsDisplayData}

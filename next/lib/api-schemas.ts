@@ -13,6 +13,14 @@ const EditorBlockSchema: z.ZodType<{ id: string; type: string; data: Record<stri
   data: z.record(z.string(), z.unknown()),
 });
 
+const slugSchema = z
+  .string()
+  .max(500)
+  .regex(/^[a-z0-9-]*$/, "slug must be lowercase alphanumeric and hyphens only")
+  .optional();
+
+const titleSchema = z.string().max(500).optional();
+
 // ── Pages ─────────────────────────────────────────────────────────────────────
 
 const cssColorSchema = z
@@ -31,8 +39,8 @@ const InjectCodeSchema = z.object({
 });
 
 export const CreatePageSchema = z.object({
-  title: z.string().max(500).optional(),
-  slug: z.string().max(500).regex(/^[a-z0-9-]*$/, "slug must be lowercase alphanumeric and hyphens only").optional(),
+  title: titleSchema,
+  slug: slugSchema,
   status: z.enum(["draft", "published"]).optional(),
   blocks: z.array(EditorBlockSchema).optional(),
   html: z.string().optional(),
@@ -40,21 +48,13 @@ export const CreatePageSchema = z.object({
   injectCode: InjectCodeSchema.optional(),
 });
 
-export const UpdatePageSchema = z.object({
-  title: z.string().max(500).optional(),
-  slug: z.string().max(500).regex(/^[a-z0-9-]*$/, "slug must be lowercase alphanumeric and hyphens only").optional(),
-  status: z.enum(["draft", "published"]).optional(),
-  blocks: z.array(EditorBlockSchema).optional(),
-  html: z.string().optional(),
-  pageBgColor: cssColorSchema.optional(),
-  injectCode: InjectCodeSchema.optional(),
-});
+export const UpdatePageSchema = CreatePageSchema;
 
 // ── Posts ─────────────────────────────────────────────────────────────────────
 
 export const CreatePostSchema = z.object({
-  title: z.string().max(500).optional(),
-  slug: z.string().max(500).regex(/^[a-z0-9-]*$/, "slug must be lowercase alphanumeric and hyphens only").optional(),
+  title: titleSchema,
+  slug: slugSchema,
   status: z.enum(["draft", "published"]).optional(),
   blocks: z.array(EditorBlockSchema).optional(),
   html: z.string().optional(),

@@ -1,35 +1,15 @@
-import fs from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
 export type { EditorBlock, Post } from "@/lib/types";
 import type { Post } from "@/lib/types";
 import { applyMigrations } from "@/lib/block-tree";
 import { createWriteQueue } from "@/lib/utils/write-queue";
+import { createJsonStore } from "@/lib/utils/json-store";
 
 const DATA_FILE = path.join(process.cwd(), "data", "posts.json");
 
-let postsCache: Post[] | null = null;
-
+const { readAll, writeAll } = createJsonStore<Post>(DATA_FILE);
 const serialise = createWriteQueue();
-
-function readAll(): Post[] {
-  if (postsCache !== null) return postsCache;
-  if (!fs.existsSync(DATA_FILE)) return (postsCache = []);
-  try {
-    postsCache = JSON.parse(fs.readFileSync(DATA_FILE, "utf-8")) as Post[];
-    return postsCache;
-  } catch {
-    return (postsCache = []);
-  }
-}
-
-function writeAll(posts: Post[]): void {
-  fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
-  const tmp = DATA_FILE + ".tmp";
-  fs.writeFileSync(tmp, JSON.stringify(posts, null, 2));
-  fs.renameSync(tmp, DATA_FILE);
-  postsCache = posts;
-}
 
 export function listPosts(): Post[] {
   return readAll();

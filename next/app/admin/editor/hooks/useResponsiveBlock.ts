@@ -56,10 +56,7 @@ export function useResponsiveBlock({
       const current = selectedBlock.data;
       const responsive = { ...((current.responsive as Record<string, Record<string, unknown>>) ?? {}) };
       const overrides = { ...(responsive[viewport] ?? {}) };
-      for (const f of Object.keys(newData)) {
-        overrides[f] = newData[f];
-      }
-      responsive[viewport] = overrides;
+      responsive[viewport] = { ...overrides, ...newData };
       finalData = { ...current, responsive };
     }
     updateBlock(selectedBlock.id, finalData);

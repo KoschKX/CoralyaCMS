@@ -1,6 +1,6 @@
 import { memo, useMemo } from "react";
 import type { EditorBlock } from "@/lib/pages-db";
-import { blockMap } from "@/blocks/index";
+import { publicBlockMap } from "@/blocks/layout-registry";
 import { parseShortcode } from "@/lib/shortcodes";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
@@ -47,12 +47,12 @@ function resolveBlocks(
         if (disabledSet.has(sc.name)) {
           return { id: block.id, originalType: sc.name, reason: "disabled", unavailable: true };
         }
-        if (blockMap[sc.name]) {
+        if (publicBlockMap[sc.name]) {
           return { id: block.id, resolvedType: sc.name, resolvedData: sc.attrs, unavailable: false };
         }
       }
     }
-    if (!blockMap[block.type]) {
+    if (!publicBlockMap[block.type]) {
       return { id: block.id, originalType: block.type, reason: "unknown", unavailable: true };
     }
     return { id: block.id, resolvedType: block.type, resolvedData: block.data as Record<string, unknown>, unavailable: false };
@@ -98,7 +98,7 @@ function BlockRenderer({ blocks, disabledBlocks = [] }: Props) {
               </div>
             );
           }
-          const def = blockMap[entry.resolvedType];
+          const def = publicBlockMap[entry.resolvedType];
           if (!def) return null;
 
           return (

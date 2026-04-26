@@ -32,17 +32,14 @@ const columns: BlockDefinition = {
   supportsBreakpoints: true,
   defaultData: { cols: [{ blocks: [], width: "50%" }, { blocks: [], width: "50%" }] },
   isContainer: true,
-  getChildBlocks: (data: BlockData) => {
-    const cols = (data.cols as ColEntry[]) ?? [];
-    return cols.map((col) => col.blocks ?? []);
-  },
-  setChildBlocks: (data: BlockData, arrays: EditorBlock[][]) => {
-    const cols = (data.cols as ColEntry[]) ?? [];
-    return {
-      ...data,
-      cols: cols.map((col, i) => ({ ...col, blocks: arrays[i] ?? [] })),
-    };
-  },
+  getChildBlocks: (data: BlockData) =>
+    ((data.cols as ColEntry[]) ?? []).map((col) => col.blocks ?? []),
+
+  setChildBlocks: (data: BlockData, arrays: EditorBlock[][]) => ({
+    ...data,
+    cols: ((data.cols as ColEntry[]) ?? []).map((col, i) => ({ ...col, blocks: arrays[i] ?? [] })),
+  }),
+
   serializeShortcode(data, depth, blocksToShortcodes, serializeAttr) {
     const pad = INDENT.repeat(depth);
     const childPad = INDENT.repeat(depth + 1);
@@ -50,12 +47,12 @@ const columns: BlockDefinition = {
     const responsiveAttr = data.responsive ? ` ${serializeAttr("responsive", data.responsive)}` : "";
     const inner = cols.map((col) => {
       const widthAttr = col.width ? ` ${serializeAttr("width", col.width)}` : "";
-      let responsiveAttrs = "";
-      if (col.responsive) {
-        for (const [bp, val] of Object.entries(col.responsive)) {
-          if (val) responsiveAttrs += ` width_${bp}='${val}'`;
-        }
-      }
+      const responsiveAttrs = col.responsive
+        ? Object.entries(col.responsive)
+            .filter(([, val]) => val)
+            .map(([bp, val]) => ` width_${bp}='${val}'`)
+            .join("")
+        : "";
       const colInner = blocksToShortcodes(col.blocks ?? [], depth + 2);
       return colInner
         ? `${childPad}[column${widthAttr}${responsiveAttrs}]\n${colInner}\n${childPad}[/column]`

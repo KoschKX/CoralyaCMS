@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useRef, useState, useCallback, useMemo } from "react";
+import { useRef, useState, useCallback, useMemo, useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 import type { EditorBlock } from "@/lib/pages-db";
@@ -21,12 +21,18 @@ import { useEditorPanel, type PanelTab } from "@/app/admin/editor/hooks/useEdito
 import { usePageMeta } from "@/app/admin/editor/hooks/usePageMeta";
 import { useEditorPageState } from "@/app/admin/editor/hooks/useEditorPageState";
 import dynamic from "next/dynamic";
-const CodeEditor = dynamic(() => import("@/components/CodeEditor"), { ssr: false });
+const CodeEditor = dynamic(() => import("@/components/CodeEditor"), {
+  ssr: false,
+  loading: () => <div className="h-[60vh] animate-pulse rounded-lg bg-zinc-100" />,
+});
 import type { VisualEditorProps } from "@/components/VisualEditor";
 
 const VisualEditor = dynamic<VisualEditorProps>(
   () => import("@/components/VisualEditor"),
-  { ssr: false },
+  {
+    ssr: false,
+    loading: () => <div className="min-h-[400px] animate-pulse rounded-lg bg-zinc-100" />,
+  },
 );
 
 interface EditorPageProps {
@@ -75,16 +81,32 @@ export default function EditorPage({
 
   const { title, slug, setSlug, status, setStatus, pageBgColor, setPageBgColor, handleTitleChange } =
     usePageMeta({ id, initialTitle, initialSlug, initialStatus, initialPageBgColor });
-  const { saving, saved, saveError, handleSave } = useSavePage({
-    id,
-    title,
-    slug,
-    codeText,
-    pageBgColor,
-    injectCode: injectFields,
-    onStatusChange: setStatus,
-    onSaveSuccess: clearDraft,
-  });
+
+  // ── Dirty / unsaved-changes tracking ───────────────────────────────────────
+  const isDirtyRef = useRef(false);
+  const isFirstCodeRender = useRef(true);
+
+  useEffect(() => {
+    // Skip the initial render — the content isn’t yet a user change.
+    if (isFirstCodeRender.current) { isFirstCodeRender.current = false; return; }
+    isDirtyRef.current = true;
+  }, [codeText]);
+
+  const handleSaveSuccess = useCallback(() => {
+    isDirtyRef.current = false;
+    clearDraft();
+  }, [clearDraft]);
+
+  // Warn before the user navigates away with unsaved changes.
+  useEffect(() => {
+    function handler(e: BeforeUnloadEvent) {
+      if (!isDirtyRef.current) return;
+      e.preventDefault();
+      e.returnValue = "";
+    }
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, []);
 
   const { panelTab, setPanelTab, panelOpen, setPanelOpen } = useEditorPanel(mainMode);
   const { tablet: tabletBp, mobile: mobileBp } = getEditorBreakpoints();
@@ -117,6 +139,16 @@ export default function EditorPage({
   const handleColSelect = useCallback((_blockId: string, colIdx: number | null) => {
     setActiveColIdx(colIdx);
   }, []);
+  const { saving, saved, saveError, handleSave } = useSavePage({
+    id,
+    title,
+    slug,
+    codeText,
+    pageBgColor,
+    injectCode: injectFields,
+    onStatusChange: setStatus,
+    onSaveSuccess: handleSaveSuccess,
+  });
 
   const { isSectionEnabled, toggleSection, controlsDisplayData, handleControlsChange } =
     useResponsiveBlock({

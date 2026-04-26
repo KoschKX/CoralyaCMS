@@ -58,6 +58,11 @@ export const BlockToolbar = memo(function BlockToolbar({
               ? `Select parent (${parentInfo.label})`
               : "Select columns block"
           }
+          aria-label={
+            parentInfo
+              ? `Select parent (${parentInfo.label})`
+              : "Select columns block"
+          }
           onClick={
             parentInfo
               ? parentInfo.onSelect
@@ -78,9 +83,10 @@ export const BlockToolbar = memo(function BlockToolbar({
         className="flex items-stretch overflow-hidden rounded-md border border-zinc-200 bg-white shadow-md"
         style={{ minHeight: 36 }}
       >
-        {/* Block type identifier — non-interactive */}
+        {/* Block type identifier — non-interactive, screen-reader label via aria-label */}
         <button
           title={activeColOnThisBlock ? "Column" : (def?.label ?? block.type)}
+          aria-label={activeColOnThisBlock ? "Column block" : (def?.label ?? block.type)}
           className="flex items-center justify-center w-9 text-lg text-zinc-700 rounded-l-md transition cursor-default"
           tabIndex={-1}
         >

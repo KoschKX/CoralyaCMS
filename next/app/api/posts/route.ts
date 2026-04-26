@@ -2,19 +2,11 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { listPostsMeta, createPost } from "@/lib/posts-db";
 import { CreatePostSchema } from "@/lib/api-schemas";
+import { paginateList } from "@/lib/utils/paginate";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
-  const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") ?? "50", 10)));
-  const all = listPostsMeta();
-  const start = (page - 1) * limit;
-  return NextResponse.json({
-    data: all.slice(start, start + limit),
-    total: all.length,
-    page,
-    limit,
-  });
+  return NextResponse.json(paginateList(listPostsMeta(), searchParams));
 }
 
 export async function POST(req: Request) {

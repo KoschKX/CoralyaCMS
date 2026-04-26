@@ -224,16 +224,10 @@ function BlockItem({
   const isLast = idx === listLength - 1;
   const colBlockParentSelected = isSelected && isColBlock && activeColInfo?.blockId !== block.id;
 
-  let ringClass = "ring-1 ring-transparent";
-  if (isSelected && !isColBlock) {
-    ringClass = "ring-2 ring-blue-500";
-  } else if (colBlockParentSelected) {
-    ringClass = "ring-2 ring-blue-500";
-  } else if (isSelected && isColBlock) {
-    ringClass = "ring-2 ring-blue-200";
-  } else if (descendantSelected) {
-    ringClass = "ring-2 ring-blue-200";
-  }
+  const ringClass =
+    (isSelected && !isColBlock) || colBlockParentSelected ? "ring-2 ring-blue-500"
+    : (isSelected && isColBlock) || descendantSelected    ? "ring-2 ring-blue-200"
+    : "ring-1 ring-transparent";
 
   return (
     <div
