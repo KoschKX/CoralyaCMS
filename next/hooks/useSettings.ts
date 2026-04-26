@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { create } from "zustand";
 import type { SiteSettings } from "@/lib/settings-types";
 
@@ -64,11 +64,13 @@ export function useSettings(): UseSettingsResult {
     _fetch();
   }, [_fetch]);
 
-  function refetch() {
+  // Memoized so consumers can safely put refetch in a dependency array without
+  // triggering infinite loops.
+  const refetch = useCallback(() => {
     // Reset synchronously so _fetched becomes false, then kick off a new fetch.
     _reset();
     useSettingsStore.getState()._fetch();
-  }
+  }, [_reset]);
 
   return { data, error, refetch };
 }

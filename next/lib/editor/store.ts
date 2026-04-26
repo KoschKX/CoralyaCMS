@@ -51,28 +51,28 @@ export interface EditorStore {
 
   // ── Actions ──────────────────────────────────────────────────────────────
   init: (
-    initialBlocks: EditorBlock[],
-    onChange: (code: string, blocks: EditorBlock[]) => void,
-    onSelectBlock: (id: string | null, data: Record<string, unknown>, type: string) => void,
+    initialBlocks: readonly EditorBlock[],
+    onChange: (code: string, blocks: readonly EditorBlock[]) => void,
+    onSelectBlock: (id: string | null, data: Readonly<Record<string, unknown>>, type: string) => void,
     onColSelect?: (blockId: string, colIdx: number | null) => void,
   ) => void;
 
-  publish: (newBlocks: EditorBlock[]) => void;
+  publish: (newBlocks: readonly EditorBlock[]) => void;
   undo: () => void;
   redo: () => void;
 
-  selectBlock: (id: string | null, data: Record<string, unknown>, type: string) => void;
+  selectBlock: (id: string | null, data: Readonly<Record<string, unknown>>, type: string) => void;
   setActiveColInfo: (info: ActiveColInfo | null) => void;
   setAnyPickerOpen: (open: boolean) => void;
 
-  updateBlock: (id: string, newData: Record<string, unknown>) => void;
+  updateBlock: (id: string, newData: Readonly<Record<string, unknown>>) => void;
   deleteBlock: (id: string) => void;
   moveBlock: (id: string, dir: -1 | 1) => void;
   addBlockAfter: (afterId: string | "TOP", type: string) => void;
   makeNewBlock: (type: string) => EditorBlock;
 
   /** Called by the panel to push an update for the currently selected block. */
-  panelUpdateBlock: (id: string, newData: Record<string, unknown>) => void;
+  panelUpdateBlock: (id: string, newData: Readonly<Record<string, unknown>>) => void;
 }
 
 /** Factory so each VisualEditor instance gets its own store. */

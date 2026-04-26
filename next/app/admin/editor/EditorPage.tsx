@@ -156,7 +156,7 @@ export default function EditorPage({
                 maxWidth:
                   viewport === "mobile" ? "390px"
                   : viewport === "tablet" ? "768px"
-                  : undefined,
+                  : "2000px",
               } : undefined}
             >
             <div
