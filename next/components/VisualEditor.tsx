@@ -36,6 +36,12 @@ export interface VisualEditorProps {
   onSelectBlock: (id: string | null, data: Record<string, unknown>, type: string) => void;
   selectedBlockId: string | null;
   registerUpdateHandler: (fn: ((id: string, newData: Record<string, unknown>) => void) | null) => void;
+  /**
+   * Registers an external callback that adds a block after the currently
+   * selected block (or at the end when nothing is selected).
+   * The panel uses this to insert blocks from the left sidebar.
+   */
+  registerAddBlockHandler?: (fn: ((type: string) => void) | null) => void;
   /** Called when a column within a columns block is focused or cleared. */
   onColSelect?: (blockId: string, colIdx: number | null) => void;
   /** Block types to hide from the picker and exclude from rendering. */
@@ -49,6 +55,7 @@ function VisualEditorInner({
   onSelectBlock,
   selectedBlockId,
   registerUpdateHandler,
+  registerAddBlockHandler,
   onColSelect,
   disabledBlocks = [],
 }: VisualEditorProps) {
@@ -94,6 +101,21 @@ function VisualEditorInner({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Keep a ref to current blocks so the add-block handler always sees up-to-date state
+  const blocksRef = useRef<EditorBlock[]>([]);
+
+  // Register the external add-block handler (used by the left-panel block inserter)
+  useEffect(() => {
+    if (!registerAddBlockHandler) return;
+    registerAddBlockHandler((type) => {
+      const bs = blocksRef.current;
+      const afterId = selectedBlockIdRef.current ?? bs[bs.length - 1]?.id ?? "TOP";
+      actions.addBlockAfter(afterId, type);
+    });
+    return () => registerAddBlockHandler(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Keyboard shortcuts for undo / redo + block navigation
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -132,6 +154,9 @@ function VisualEditorInner({
   // Subscribe to store slices — each selector is narrow to minimise re-renders
   const blocks = useEditorStore((s) => s.present);
   const activeColInfo = useEditorStore((s) => s.activeColInfo);
+
+  // Keep blocksRef in sync so the add-block handler always sees current state
+  blocksRef.current = blocks;
 
   // Stable ops object — Zustand actions have stable identity across renders
   const topOps = useMemo(() => ({

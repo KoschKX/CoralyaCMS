@@ -37,6 +37,8 @@ export interface BlockDefinition {
   name: string;
   label: string;
   icon: string;
+  /** Category for grouping in the block inserter panel (e.g. "text", "media", "design", "data", "code"). */
+  category?: string;
   /** When true the editor panel shows the desktop/tablet/mobile viewport picker. */
   supportsBreakpoints?: boolean;
   /** Initial data used when inserting a new block of this type. */

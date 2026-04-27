@@ -24,6 +24,7 @@ const embed: BlockDefinition = {
   name: "embed",
   label: "Embed",
   icon: "◫",
+  category: "media",
   supportsBreakpoints: true,
   defaultData: { embed: "" },
   validate: validateEmbed,

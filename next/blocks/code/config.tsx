@@ -12,6 +12,7 @@ const code: BlockDefinition = {
   name: "code",
   label: "Code",
   icon: "</>",
+  category: "code",
   supportsBreakpoints: true,
   defaultData: { code: "" },
   Layout: CodeLayout,

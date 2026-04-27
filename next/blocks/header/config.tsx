@@ -15,6 +15,7 @@ const header: BlockDefinition = {
   name: "header",
   label: "Heading",
   icon: "heading",
+  category: "text",
   supportsBreakpoints: true,
   defaultData: { text: "New heading", level: 2 },
   Layout: HeaderLayout,

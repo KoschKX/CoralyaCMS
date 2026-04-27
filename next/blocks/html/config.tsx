@@ -13,6 +13,7 @@ const htmlBlock: BlockDefinition = {
   name: "html",
   label: "Raw HTML",
   icon: "</>",
+  category: "code",
   defaultData: { content: "<p>HTML content</p>" },
   Layout: HtmlLayout,
   Editable: HtmlEditable,

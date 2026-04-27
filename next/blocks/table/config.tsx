@@ -13,6 +13,7 @@ const table: BlockDefinition = {
   name: "table",
   label: "Table",
   icon: "⊞",
+  category: "data",
   supportsBreakpoints: true,
   defaultData: { content: [["Heading 1", "Heading 2"], ["Cell 1", "Cell 2"]], withHeadings: true },
   Layout: TableLayout,

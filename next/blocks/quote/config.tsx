@@ -13,6 +13,7 @@ const quote: BlockDefinition = {
   name: "quote",
   label: "Quote",
   icon: "❝",
+  category: "text",
   supportsBreakpoints: true,
   defaultData: { text: "Quote text", caption: "" },
   Layout: QuoteLayout,

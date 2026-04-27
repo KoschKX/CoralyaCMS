@@ -11,6 +11,7 @@ const delimiter: BlockDefinition = {
   name: "delimiter",
   label: "Divider",
   icon: "—",
+  category: "design",
   supportsBreakpoints: true,
   defaultData: {},
   Layout: DelimiterLayout,

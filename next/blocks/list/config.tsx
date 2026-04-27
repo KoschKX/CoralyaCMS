@@ -13,6 +13,7 @@ const list: BlockDefinition = {
   name: "list",
   label: "List",
   icon: "≡",
+  category: "text",
   supportsBreakpoints: true,
   defaultData: { items: ["Item 1", "Item 2"], style: "unordered" },
   Layout: ListLayout,

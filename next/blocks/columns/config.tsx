@@ -29,6 +29,7 @@ const columns: BlockDefinition = {
   name: "columns",
   label: "Columns",
   icon: "⊟",
+  category: "design",
   supportsBreakpoints: true,
   defaultData: { cols: [{ blocks: [], width: "50%" }, { blocks: [], width: "50%" }] },
   isContainer: true,

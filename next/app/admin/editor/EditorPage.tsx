@@ -14,6 +14,7 @@ import EditorToolbar from "@/app/admin/editor/EditorToolbar";
 import PagePanel from "@/app/admin/editor/PagePanel";
 import BlockPanel from "@/app/admin/editor/BlockPanel";
 import InjectCodePanel from "@/app/admin/editor/InjectCodePanel";
+import { BlocksPanel } from "@/components/editor/BlocksPanel";
 import { useSavePage } from "@/app/admin/editor/hooks/useSavePage";
 import { useResponsiveBlock } from "@/app/admin/editor/hooks/useResponsiveBlock";
 import { useCanvasWidth } from "@/app/admin/editor/hooks/useCanvasWidth";
@@ -104,6 +105,17 @@ export default function EditorPage({
     [],
   );
 
+  // ── Left blocks-panel ─────────────────────────────────────────────────────
+  const [blocksPanelOpen, setBlocksPanelOpen] = useState(true);
+  const addBlockHandlerRef = useRef<((type: string) => void) | null>(null);
+  const registerAddBlockHandler = useCallback(
+    (fn: ((type: string) => void) | null) => { addBlockHandlerRef.current = fn; },
+    [],
+  );
+  const handleAddBlockFromPanel = useCallback((type: string) => {
+    addBlockHandlerRef.current?.(type);
+  }, []);
+
   const handleSelectBlock = useCallback(
     (blockId: string | null, data: Record<string, unknown>, type: string) => {
       if (!blockId) { setSelectedBlock(null); return; }
@@ -145,6 +157,8 @@ export default function EditorPage({
         setMainMode={setMainMode}
         panelOpen={panelOpen}
         setPanelOpen={setPanelOpen}
+        blocksPanelOpen={blocksPanelOpen}
+        setBlocksPanelOpen={setBlocksPanelOpen}
         saving={saving}
         saved={saved}
         saveError={saveError}
@@ -155,6 +169,12 @@ export default function EditorPage({
       />
 
       <div className="flex flex-1 overflow-hidden">
+        {/* Left blocks panel */}
+        {mainMode === "visual" && blocksPanelOpen && (
+          <aside className="sticky top-0 h-[calc(100vh-3rem)] w-52 shrink-0 overflow-hidden border-r border-zinc-200 bg-white">
+            <BlocksPanel onAdd={handleAddBlockFromPanel} />
+          </aside>
+        )}
         {/* Editor canvas */}
         <div ref={canvasRef} className="flex-1 overflow-y-auto bg-zinc-100">
           <div className="py-10">
@@ -225,6 +245,7 @@ export default function EditorPage({
                       onSelectBlock={handleSelectBlock}
                       selectedBlockId={selectedBlock?.id ?? null}
                       registerUpdateHandler={registerUpdateHandler}
+                      registerAddBlockHandler={registerAddBlockHandler}
                       onColSelect={handleColSelect}
                       disabledBlocks={disabledBlocks}
                     />

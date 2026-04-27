@@ -1,5 +1,6 @@
 "use client";
 
+import type React from "react";
 import { useRouter } from "next/navigation";
 
 interface EditorToolbarProps {
@@ -7,6 +8,8 @@ interface EditorToolbarProps {
   setMainMode: (mode: "visual" | "code" | "inject") => void;
   panelOpen: boolean;
   setPanelOpen: (fn: (o: boolean) => boolean) => void;
+  blocksPanelOpen: boolean;
+  setBlocksPanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
   saving: boolean;
   saved: boolean;
   saveError: string | null;
@@ -21,6 +24,8 @@ export default function EditorToolbar({
   setMainMode,
   panelOpen,
   setPanelOpen,
+  blocksPanelOpen,
+  setBlocksPanelOpen,
   saving,
   saved,
   saveError,
@@ -36,6 +41,21 @@ export default function EditorToolbar({
         <button onClick={() => router.push("/admin")} className="text-sm text-zinc-500 hover:text-zinc-800 mr-2">
           &larr; Pages
         </button>
+        {/* Toggle left blocks panel — only relevant in visual mode */}
+        {mainMode === "visual" && (
+          <button
+            onClick={() => setBlocksPanelOpen((o) => !o)}
+            aria-label="Toggle blocks panel"
+            aria-pressed={blocksPanelOpen}
+            title="Toggle block inserter"
+            className={`mr-2 rounded-md border px-2.5 py-1.5 text-sm transition ${blocksPanelOpen ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
+          >
+            {/* Grid/blocks icon */}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M3 3h8v8H3zm0 10h8v8H3zm10-10h8v8h-8zm0 10h8v8h-8z"/>
+            </svg>
+          </button>
+        )}
         <div className="flex items-center gap-2 ml-auto">
           {saved && <span className="text-xs font-medium text-emerald-600">Saved &#10003;</span>}
           {slug && status === "published" && (

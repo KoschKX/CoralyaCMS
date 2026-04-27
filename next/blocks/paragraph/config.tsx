@@ -15,6 +15,7 @@ const paragraph: BlockDefinition = {
   name: "paragraph",
   label: "Paragraph",
   icon: "¶",
+  category: "text",
   supportsBreakpoints: true,
   defaultData: { text: "New paragraph" },
   Layout: ParagraphLayout,
