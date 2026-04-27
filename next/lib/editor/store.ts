@@ -62,6 +62,12 @@ export interface EditorStore {
 
   selectBlock: (id: string | null, data: Readonly<Record<string, unknown>>, type: string) => void;
   setActiveColInfo: (info: ActiveColInfo | null) => void;
+  /**
+   * Move block selection by `dir` positions within the flat top-level list.
+   * Negative = up, positive = down. No-ops when already at the boundary or
+   * when no block is currently selected.
+   */
+  navigateBlock: (dir: -1 | 1) => void;
 
   updateBlock: (id: string, newData: Readonly<Record<string, unknown>>) => void;
   deleteBlock: (id: string) => void;
@@ -123,21 +129,22 @@ export function createEditorStore() {
         cb.onSelectBlock = onSelectBlock;
         cb.onColSelect = onColSelect ?? null;
         set((s) => {
-          s.present = initialBlocks;
+          s.present = [...initialBlocks];
           s.past = [];
           s.future = [];
         });
       },
 
       publish(newBlocks) {
+        const mutable = [...newBlocks];
         set((s) => {
           s.past = [...s.past.slice(-MAX_HISTORY), s.present];
-          s.present = newBlocks;
+          s.present = mutable;
           s.future = [];
         });
         // Debounce onChange so rapid block updates (e.g. typing in a text field)
         // don't trigger a full blocksToShortcodes() serialization on every keystroke.
-        scheduleOnChange(newBlocks);
+        scheduleOnChange(mutable);
       },
 
       undo() {
@@ -172,6 +179,16 @@ export function createEditorStore() {
       selectBlock(id, data, type) {
         set((s) => { s.selectedBlockId = id; });
         cb.onSelectBlock?.(id, data, type);
+      },
+
+      navigateBlock(dir) {
+        const { present, selectedBlockId } = get();
+        if (!selectedBlockId) return;
+        const idx = present.findIndex((b) => b.id === selectedBlockId);
+        if (idx === -1) return;
+        const next = present[idx + dir];
+        if (!next) return;
+        get().selectBlock(next.id, next.data as Record<string, unknown>, next.type);
       },
 
       setActiveColInfo(info) {

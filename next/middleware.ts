@@ -18,6 +18,20 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // ── CSRF: Origin header check for state-mutating requests ─────────────────
+  // Browsers always send `Origin` on cross-origin requests (POST/PUT/PATCH/DELETE).
+  // If it is present and does not match our own host, reject — this prevents an
+  // attacker's page from making authenticated requests using the victim's cookie.
+  // Requests without Origin (e.g. cURL, server-to-server) are allowed through;
+  // they cannot carry the HTTP-only session cookie anyway.
+  const mutationMethods = ["POST", "PUT", "PATCH", "DELETE"];
+  if (pathname.startsWith("/api/") && mutationMethods.includes(req.method)) {
+    const origin = req.headers.get("origin");
+    if (origin && origin !== req.nextUrl.origin) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+  }
+
   const token = req.cookies.get(COOKIE_NAME)?.value ?? "";
 
   // ── New multi-user session (contains ".") ──────────────────────────────────

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type React from "react";
-import type { EditorBlock } from "@/lib/pages-db";
+import type { EditorBlock } from "@/lib/types";
 
 export type BlockData = Record<string, unknown>;
 
@@ -85,6 +85,21 @@ export interface BlockDefinition {
    * Called automatically when loading pages whose blocks have a lower version.
    */
   migrate?: (data: BlockData, fromVersion: number) => BlockData;
+  /**
+   * Ordered list of deprecated schema versions, each with an incremental
+   * migration function. Migrations are applied in ascending `version` order,
+   * so each step only needs to handle one version bump.
+   *
+   * Example:
+   *   deprecated: [
+   *     { version: 1, migrate: (d) => ({ ...d, align: d.alignment ?? "left" }) },
+   *     { version: 2, migrate: (d) => ({ ...d, level: d.level ?? 2 }) },
+   *   ]
+   */
+  deprecated?: Array<{
+    version: number;
+    migrate: (data: BlockData) => BlockData;
+  }>;
 
   /**
    * Optional admin settings page for this block type.

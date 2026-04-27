@@ -1,10 +1,10 @@
 "use client";
 
 interface InjectFields {
-  tracking: string;
-  head: string;
-  beforeBody: string;
-  afterBody: string;
+  tracking?: string;
+  head?: string;
+  beforeBody?: string;
+  afterBody?: string;
 }
 
 interface InjectCodePanelProps {
@@ -28,7 +28,7 @@ export default function InjectCodePanel({ fields, onChange, onClose }: InjectCod
           <textarea
             className="w-full border rounded p-2 text-xs font-mono min-h-[60px]"
             placeholder="Paste your tracking code here. This will be added into the header template of your theme. Place code inside <script> tags."
-            value={fields.tracking}
+            value={fields.tracking ?? ""}
             onChange={(e) => onChange({ ...fields, tracking: e.target.value })}
           />
         </div>
@@ -37,7 +37,7 @@ export default function InjectCodePanel({ fields, onChange, onClose }: InjectCod
           <textarea
             className="w-full border rounded p-2 text-xs font-mono min-h-[60px]"
             placeholder="Only accepts JavaScript code wrapped with <script> tags and HTML markup that is valid inside the <head> tag."
-            value={fields.head}
+            value={fields.head ?? ""}
             onChange={(e) => onChange({ ...fields, head: e.target.value })}
           />
         </div>
@@ -46,7 +46,7 @@ export default function InjectCodePanel({ fields, onChange, onClose }: InjectCod
           <textarea
             className="w-full border rounded p-2 text-xs font-mono min-h-[60px]"
             placeholder="Only accepts JavaScript code, wrapped with <script> tags and valid HTML markup inside the <body> tag."
-            value={fields.afterBody}
+            value={fields.afterBody ?? ""}
             onChange={(e) => onChange({ ...fields, afterBody: e.target.value })}
           />
         </div>
@@ -55,7 +55,7 @@ export default function InjectCodePanel({ fields, onChange, onClose }: InjectCod
           <textarea
             className="w-full border rounded p-2 text-xs font-mono min-h-[60px]"
             placeholder="Only accepts JavaScript code and valid HTML markup inside the <body> tag."
-            value={fields.beforeBody}
+            value={fields.beforeBody ?? ""}
             onChange={(e) => onChange({ ...fields, beforeBody: e.target.value })}
           />
         </div>

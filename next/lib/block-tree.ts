@@ -1,4 +1,4 @@
-import type { EditorBlock } from "@/lib/pages-db";
+import type { EditorBlock } from "@/lib/types";
 import { blockMap } from "@/blocks/index";
 
 /**
@@ -125,10 +125,25 @@ export function applyMigrations(blocks: EditorBlock[]): EditorBlock[] {
   return blocks.map((block) => {
     const def = blockMap[block.type];
     let current = block;
-    if (def?.migrate && def.version !== undefined) {
+    if (def && def.version !== undefined) {
       const blockVersion = block.version ?? 1;
       if (blockVersion < def.version) {
-        current = { ...block, data: def.migrate(block.data, blockVersion), version: def.version };
+        let data = block.data;
+        // Apply each deprecated step in ascending version order.
+        // Each step covers one version bump so migrations stay simple.
+        if (def.deprecated) {
+          const steps = [...def.deprecated].sort((a, b) => a.version - b.version);
+          for (const step of steps) {
+            if (blockVersion <= step.version) {
+              data = step.migrate(data);
+            }
+          }
+        }
+        // Fall back to the monolithic migrate() for any remaining gap.
+        if (def.migrate) {
+          data = def.migrate(data, blockVersion);
+        }
+        current = { ...block, data, version: def.version };
       }
     }
     const childArrays = getChildArrays(current);

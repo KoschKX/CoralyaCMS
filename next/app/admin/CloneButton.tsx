@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { Page } from "@/lib/pages-db";
+import type { PageMeta } from "@/lib/pages-db";
 
-export default function CloneButton({ page }: { page: Page }) {
+export default function CloneButton({ page }: { page: PageMeta }) {
   const router = useRouter();
 
   async function handleClone() {

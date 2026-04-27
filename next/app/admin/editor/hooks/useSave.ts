@@ -3,12 +3,20 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { shortcodesToBlocks } from "@/lib/shortcodes";
+import type { EditorBlock } from "@/lib/types";
 
 interface UseSaveOptions {
   id?: string;
   title: string;
   slug: string;
   codeText: string;
+  /**
+   * Pre-computed block tree. When provided, this is sent directly to the API
+   * instead of parsing `codeText` with `shortcodesToBlocks()`.
+   * Pass `liveBlocks` from `useEditorPageState` so visual-mode saves skip the
+   * redundant round-trip parse.
+   */
+  liveBlocks?: EditorBlock[];
   extraPayload: Record<string, unknown>;
   /** Collection endpoint, e.g. "/api/pages" or "/api/posts". */
   collectionEndpoint: string;
@@ -24,6 +32,7 @@ export function useSave({
   title,
   slug,
   codeText,
+  liveBlocks,
   extraPayload,
   collectionEndpoint,
   redirectOnCreate,
@@ -40,7 +49,8 @@ export function useSave({
     setSaved(false);
     setSaveError(null);
     try {
-      const blocks = shortcodesToBlocks(codeText);
+      // Use pre-computed blocks when available (avoids re-parsing in visual mode).
+      const blocks = liveBlocks ?? shortcodesToBlocks(codeText);
       const payload = { title, slug, status: targetStatus, blocks, html: codeText, ...extraPayload };
       if (id) {
         const res = await fetch(`${collectionEndpoint}/${id}`, {

@@ -1,5 +1,6 @@
 import type React from "react";
 import type { addFilter } from "@/lib/filters";
+import type { BlockDefinition } from "@/lib/block-types";
 
 /**
  * A single filter registration declared inside a PluginDefinition.

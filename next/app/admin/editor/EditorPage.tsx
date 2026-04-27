@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useRef, useState, useCallback, useMemo, useEffect } from "react";
+import { useRef, useState, useCallback, useMemo } from "react";
 
 import { useRouter } from "next/navigation";
 import type { EditorBlock } from "@/lib/pages-db";
@@ -20,6 +20,7 @@ import { useCanvasWidth } from "@/app/admin/editor/hooks/useCanvasWidth";
 import { useEditorPanel, type PanelTab } from "@/app/admin/editor/hooks/useEditorPanel";
 import { usePageMeta } from "@/app/admin/editor/hooks/usePageMeta";
 import { useEditorPageState } from "@/app/admin/editor/hooks/useEditorPageState";
+import { useDirtyTracking } from "@/app/admin/editor/hooks/useDirtyTracking";
 import dynamic from "next/dynamic";
 const CodeEditor = dynamic(() => import("@/components/CodeEditor"), {
   ssr: false,
@@ -83,32 +84,9 @@ export default function EditorPage({
     usePageMeta({ id, initialTitle, initialSlug, initialStatus, initialPageBgColor });
 
   // ── Dirty / unsaved-changes tracking ───────────────────────────────────────
-  const isDirtyRef = useRef(false);
-  const isFirstCodeRender = useRef(true);
+  const { handleSaveSuccess } = useDirtyTracking(codeText, clearDraft);
 
-  useEffect(() => {
-    // Skip the initial render — the content isn’t yet a user change.
-    if (isFirstCodeRender.current) { isFirstCodeRender.current = false; return; }
-    isDirtyRef.current = true;
-  }, [codeText]);
-
-  const handleSaveSuccess = useCallback(() => {
-    isDirtyRef.current = false;
-    clearDraft();
-  }, [clearDraft]);
-
-  // Warn before the user navigates away with unsaved changes.
-  useEffect(() => {
-    function handler(e: BeforeUnloadEvent) {
-      if (!isDirtyRef.current) return;
-      e.preventDefault();
-      e.returnValue = "";
-    }
-    window.addEventListener("beforeunload", handler);
-    return () => window.removeEventListener("beforeunload", handler);
-  }, []);
-
-  const { panelTab, setPanelTab, panelOpen, setPanelOpen } = useEditorPanel(mainMode);
+    const { panelTab, setPanelTab, panelOpen, setPanelOpen } = useEditorPanel(mainMode);
   const { tablet: tabletBp, mobile: mobileBp } = getEditorBreakpoints();
   const { canvasRef, viewport, setViewport } = useCanvasWidth(tabletBp, mobileBp, panelOpen);
 
@@ -144,6 +122,7 @@ export default function EditorPage({
     title,
     slug,
     codeText,
+    liveBlocks,
     pageBgColor,
     injectCode: injectFields,
     onStatusChange: setStatus,

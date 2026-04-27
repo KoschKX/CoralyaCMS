@@ -63,6 +63,12 @@ function VisualEditorInner({
   // Get stable action references from the store (actions don't change identity)
   const actions = useEditorActions();
 
+  // Track selectedBlockId in a ref so keydown handler can read it without
+  // re-subscribing to the store on every render.
+  const selectedBlockIdRef = useRef<string | null>(null);
+  const storeSelectedBlockId = useEditorStore((s) => s.selectedBlockId);
+  selectedBlockIdRef.current = storeSelectedBlockId;
+
   // anyPickerOpen is local React state — keeping it out of the global Zustand
   // store prevents all store subscribers from re-rendering when a picker opens.
   const [anyPickerOpen, setAnyPickerOpen] = useState(false);
@@ -74,7 +80,7 @@ function VisualEditorInner({
     isInitialized.current = true;
     actions.init(
       initialBlocks,
-      (code, blocks) => onChangeRef.current(code, blocks),
+      (code, blocks) => onChangeRef.current(code, [...blocks]),
       (id, data, type) => onSelectBlockRef.current(id, data, type),
       (blockId, colIdx) => onColSelectRef.current?.(blockId, colIdx),
     );
@@ -88,17 +94,34 @@ function VisualEditorInner({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Keyboard shortcuts for undo / redo
+  // Keyboard shortcuts for undo / redo + block navigation
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       const mod = e.metaKey || e.ctrlKey;
-      if (!mod) return;
-      if (e.key === "z" && !e.shiftKey) {
-        e.preventDefault();
-        actions.undo();
-      } else if ((e.key === "z" && e.shiftKey) || e.key === "y") {
-        e.preventDefault();
-        actions.redo();
+      if (mod) {
+        if (e.key === "z" && !e.shiftKey) {
+          e.preventDefault();
+          actions.undo();
+        } else if ((e.key === "z" && e.shiftKey) || e.key === "y") {
+          e.preventDefault();
+          actions.redo();
+        }
+        return;
+      }
+      // Arrow-key block navigation — only when a block is selected and no
+      // modifier is held (so browser shortcuts / text input are unaffected).
+      if (!e.shiftKey && !e.altKey) {
+        if (selectedBlockIdRef.current) {
+          if (e.key === "ArrowUp") {
+            e.preventDefault();
+            actions.navigateBlock(-1);
+          } else if (e.key === "ArrowDown") {
+            e.preventDefault();
+            actions.navigateBlock(1);
+          } else if (e.key === "Escape") {
+            actions.selectBlock(null, {}, "");
+          }
+        }
       }
     }
     document.addEventListener("keydown", handleKeyDown);

@@ -42,6 +42,16 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // Turbopack (used by `next dev --turbo`) needs its own SVG rule
+  turbopack: {
+    rules: {
+      "*.svg": {
+        loaders: ["@svgr/webpack"],
+        as: "*.js",
+      },
+    },
+  },
+  // Webpack (used by `next build`) SVG rule
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/i,
