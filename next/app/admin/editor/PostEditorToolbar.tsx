@@ -229,34 +229,25 @@ export default function PostEditorToolbar({
           >
             &#8863;
           </button>
-        </div>
-      </div>
-
-      {/* Floating save buttons */}
-      <div className="fixed bottom-6 right-6 z-30 flex flex-col items-end gap-2">
-        {saveError && (
-          <p
-            role="alert"
-            className="rounded-md bg-red-50 border border-red-200 px-3 py-1.5 text-xs font-medium text-red-700 shadow"
-          >
-            {saveError}
-          </p>
-        )}
-        <div className="flex gap-3">
-          <button
-            onClick={() => onSave("draft")}
-            disabled={saving}
-            className="rounded-md border border-zinc-200 bg-white px-5 py-2 text-base font-medium text-zinc-700 shadow-lg transition hover:bg-zinc-50 disabled:opacity-40"
-          >
-            {saving ? "Saving\u2026" : "Save draft"}
-          </button>
-          <button
-            onClick={() => onSave("published")}
-            disabled={saving}
-            className="rounded-md bg-zinc-900 px-5 py-2 text-base font-medium text-white shadow-lg transition hover:bg-zinc-700 disabled:opacity-40"
-          >
-            {status === "published" ? "Update" : "Publish"}
-          </button>
+          <div className="ml-1.5 flex items-center gap-2 border-l border-zinc-200 pl-2.5">
+            {saveError && (
+              <span role="alert" className="text-xs font-medium text-red-600">{saveError}</span>
+            )}
+            <button
+              onClick={() => onSave("draft")}
+              disabled={saving}
+              className="h-8 rounded border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-40"
+            >
+              {saving ? "Saving\u2026" : "Save draft"}
+            </button>
+            <button
+              onClick={() => onSave("published")}
+              disabled={saving}
+              className="h-8 rounded bg-zinc-900 px-3 text-xs font-medium text-white transition hover:bg-zinc-700 disabled:opacity-40"
+            >
+              {status === "published" ? "Update" : "Publish"}
+            </button>
+          </div>
         </div>
       </div>
     </>

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useRef, useState, useCallback, useMemo } from "react";
+import { useRef, useState, useCallback, useMemo, useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 import type { EditorBlock } from "@/lib/pages-db";
@@ -90,7 +90,8 @@ export default function EditorPage({
 
     const { panelTab, setPanelTab, panelOpen, setPanelOpen } = useEditorPanel(mainMode);
   const { tablet: tabletBp, mobile: mobileBp } = getEditorBreakpoints();
-  const { canvasRef, viewport, setViewport, innerExpandStyle, suppressContainer } = useCanvasWidth(tabletBp, mobileBp, panelOpen);
+
+  const { canvasRef, viewport, setViewport } = useCanvasWidth(tabletBp, mobileBp, panelOpen);
 
   const editorViewportContextValue = useMemo(
     () => ({ viewport }),
@@ -180,7 +181,7 @@ export default function EditorPage({
         {/* Block inserter — inline, pushes canvas when open */}
         <aside
           aria-label="Block inserter"
-          className={`shrink-0 overflow-hidden border-r border-zinc-200 bg-white transition-[width] duration-100 ease-in-out ${
+          className={`shrink-0 overflow-hidden border-r border-zinc-200 bg-white transition-[width] duration-200 ease-in-out ${
             blocksPanelOpen && mainMode === "visual" ? "w-64" : "w-0"
           }`}
         >
@@ -190,28 +191,27 @@ export default function EditorPage({
         </aside>
         {/* Editor canvas */}
         <div ref={canvasRef} className="flex-1 overflow-y-auto bg-zinc-100">
-          <div className="py-10">
+          <div className="">
             {/* When the panel is open, constrain canvas width to the selected
                 viewport breakpoint so responsive CSS fires at the right size.
                 When the panel is closed the ResizeObserver handles this automatically. */}
             <div
-              className="mx-auto transition-[max-width] duration-150"
-              style={{
-                maxWidth: (panelOpen && mainMode === "visual")
-                  ? viewport === "mobile" ? "390px"
-                    : viewport === "tablet" ? "768px"
-                    : "9999px"
-                  : "9999px",
-              }}
+              className="mx-auto transition-[max-width] duration-200 ease-in-out"
+              style={panelOpen && mainMode !== "code" ? {
+                maxWidth:
+                  viewport === "mobile" ? "390px"
+                  : viewport === "tablet" ? "768px"
+                  : "2000px",
+              } : undefined}
             >
             <div
               className="text-zinc-900 bg-white rounded-lg shadow-sm mx-auto"
               style={{
-                ...(mainMode === "code" ? {} : innerExpandStyle),
-                maxWidth: mainMode === "code" ? "none" : (innerExpandStyle.maxWidth ?? "var(--content-max-width, 48rem)"),
+                height: "calc(100vh - 48px)",
+                maxWidth: "var(--content-max-width, 48rem)",
                 padding: "2.5rem var(--content-padding-x, 1.5rem)",
                 background: pageBgColor || "#fff",
-                containerType: (suppressContainer && mainMode !== "code") ? "normal" : "inline-size",
+                containerType: "inline-size",
               }}
             >
               {mainMode === "inject" ? (
@@ -252,6 +252,7 @@ export default function EditorPage({
                       tabletBp={tabletBp}
                       mobileBp={mobileBp}
                       forContainer
+                      forcedViewport={panelOpen ? viewport : undefined}
                     />
                     <VisualEditor
                       initialBlocks={liveBlocks}
@@ -271,12 +272,12 @@ export default function EditorPage({
           </div>
         </div>
 
-        {/* Right panel */}
+        {/* Right panel — animates in/out */}
         <aside
-          aria-label="Block settings"
-          className={`sticky top-0 shrink-0 overflow-hidden border-l border-zinc-200 bg-white transition-[width] duration-100 ease-in-out ${panelOpen ? "w-72" : "w-0"}`}
+          aria-label="Editor settings"
+          className={`shrink-0 overflow-hidden border-l border-zinc-200 bg-white transition-[width] duration-200 ease-in-out ${panelOpen ? "w-72" : "w-0"}`}
         >
-          <div className={`h-[calc(100vh-3rem)] w-72 overflow-y-auto transition-transform duration-100 ease-in-out ${panelOpen ? "translate-x-0" : "translate-x-full"}`}>
+          <div className="sticky top-0 h-[calc(100vh-3rem)] w-72 overflow-y-auto">
             {/* Viewport switcher — always visible at the top of the panel */}
             {mainMode === "visual" && (
               <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-2">

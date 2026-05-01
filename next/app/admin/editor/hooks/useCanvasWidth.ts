@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState, useEffect, useLayoutEffect } from "react";
 import type { Viewport } from "@/components/ui/ViewportContext";
 
 function parseBreakpointPx(bp: string): number {
@@ -8,32 +8,18 @@ function parseBreakpointPx(bp: string): number {
   return parseInt(bp, 10);
 }
 
-function viewportRank(vp: Viewport): number {
-  return vp === "mobile" ? 0 : vp === "tablet" ? 1 : 2;
-}
-
-/** The outer constraint max-width for each viewport (must mirror the style in EditorPage/PostEditorPage). */
-function viewportConstraintWidth(vp: Viewport): string {
-  return vp === "mobile" ? "390px" : vp === "tablet" ? "768px" : "9999px";
-}
-
-type ExpandPhase = "idle" | "outer" | "inner";
-
 /**
- * Manages the editor canvas viewport state.
+ * Manages the editor canvas viewport state with two modes:
  *
- * Responsive styles always respond naturally to the canvas's actual width via
- * @container queries — no forced overrides. Container queries are suppressed
- * only during transitions so intermediate widths don't trigger layout changes.
+ * - Panel **closed**: a ResizeObserver watches the canvas element and
+ *   automatically derives the active viewport from its pixel width vs.
+ *   the configured breakpoints. The user sees the layout the page will
+ *   actually have at that window size.
  *
- * When expanding to a larger viewport, two phases enforce background-first:
- *  "outer" (0–160ms): outer wrapper transitions to new width;
- *    inner card is locked to the old width via innerExpandStyle.
- *  "inner" (160–320ms): inner card transitions to var(--content-max-width).
- *  "idle": no transition; inner card uses its natural max-width.
- *
- * suppressContainer is true during any in-flight transition so @container
- * rules don't fire at intermediate widths.
+ * - Panel **open**: the ResizeObserver is disconnected and the viewport
+ *   is controlled manually via `setViewport` (driven by the panel's
+ *   viewport buttons). The canvas width is constrained to the selected
+ *   breakpoint so responsive CSS fires correctly.
  */
 export function useCanvasWidth(
   tabletBp: string,
@@ -41,79 +27,58 @@ export function useCanvasWidth(
   panelOpen: boolean,
 ) {
   const canvasRef = useRef<HTMLDivElement>(null);
-  const [viewport, setViewportState] = useState<Viewport>("desktop");
-  const viewportRef = useRef<Viewport>("desktop");
-  const panelOpenRef = useRef(panelOpen);
-  panelOpenRef.current = panelOpen;
+  const [viewport, _setViewport] = useState<Viewport>("desktop");
+  const [observerEnabled, setObserverEnabled] = useState(true);
 
-  // ── Panel transition guard ─────────────────────────────────────────────────
-  const [panelTransitioning, setPanelTransitioning] = useState(false);
-  const panelTransTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const transitioningRef = useRef(false); // ref mirror for ResizeObserver callback
+  // Tracks the last viewport the user explicitly chose via the panel buttons.
+  // Distinct from the auto-detected value so we can restore it on panel reopen.
+  const manualViewportRef = useRef<Viewport | null>(null);
 
-  useEffect(() => {
-    transitioningRef.current = true;
-    setPanelTransitioning(true);
-    if (panelTransTimerRef.current) clearTimeout(panelTransTimerRef.current);
-    panelTransTimerRef.current = setTimeout(() => {
-      transitioningRef.current = false;
-      setPanelTransitioning(false);
-    }, 110);
-    return () => { if (panelTransTimerRef.current) clearTimeout(panelTransTimerRef.current); };
+  // Exposed to callers — records the manual selection.
+  const setViewport = (vp: Viewport) => {
+    manualViewportRef.current = vp;
+    _setViewport(vp);
+  };
+
+  // useLayoutEffect: disable synchronously before the first paint of the panel
+  // opening, so the observer never sees the shrinking canvas.
+  // Also restore the last manual selection so the panel shows the right buttons.
+  useLayoutEffect(() => {
+    if (panelOpen) {
+      setObserverEnabled(false);
+      if (manualViewportRef.current !== null) {
+        _setViewport(manualViewportRef.current);
+      }
+    }
   }, [panelOpen]);
 
-  // ── Two-phase expand state ─────────────────────────────────────────────────
-  const [expandPhase, setExpandPhase] = useState<ExpandPhase>("idle");
-  const lockedWidthRef = useRef<string>("9999px");
-  const phaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const setViewport = useCallback((newVp: Viewport) => {
-    const currentVp = viewportRef.current;
-    if (panelOpenRef.current && viewportRank(newVp) > viewportRank(currentVp)) {
-      lockedWidthRef.current = viewportConstraintWidth(currentVp);
-      setExpandPhase("outer");
-      if (phaseTimerRef.current) clearTimeout(phaseTimerRef.current);
-      phaseTimerRef.current = setTimeout(() => {
-        setExpandPhase("inner");
-        phaseTimerRef.current = setTimeout(() => {
-          setExpandPhase("idle");
-        }, 160);
-      }, 160);
-    } else {
-      if (phaseTimerRef.current) clearTimeout(phaseTimerRef.current);
-      setExpandPhase("idle");
-    }
-    viewportRef.current = newVp;
-    setViewportState(newVp);
-  }, []);
-
-  // ── ResizeObserver (panel closed only) ────────────────────────────────────
+  // Re-enable the observer 200ms after the panel closes (after the animation
+  // finishes) so we read the settled canvas width.
   useEffect(() => {
     if (panelOpen) return;
+    const id = setTimeout(() => setObserverEnabled(true), 200);
+    return () => clearTimeout(id);
+  }, [panelOpen]);
+
+  useEffect(() => {
+    if (!observerEnabled) return;
+
     const el = canvasRef.current;
     if (!el) return;
     const tabletPx = parseBreakpointPx(tabletBp);
     const mobilePx = parseBreakpointPx(mobileBp);
+
     const observer = new ResizeObserver(([entry]) => {
-      if (transitioningRef.current) return;
       const w = entry.contentRect.width;
-      const newVp: Viewport = w <= mobilePx ? "mobile" : w <= tabletPx ? "tablet" : "desktop";
-      viewportRef.current = newVp;
-      setViewportState(newVp);
+      // Update viewport from canvas width, but don't touch manualViewportRef —
+      // this is auto-detection only.
+      if (w <= mobilePx) _setViewport("mobile");
+      else if (w <= tabletPx) _setViewport("tablet");
+      else _setViewport("desktop");
     });
     observer.observe(el);
     return () => observer.disconnect();
-  }, [tabletBp, mobileBp, panelOpen]);
+  }, [tabletBp, mobileBp, observerEnabled]);
 
-  // ── Derived values for consumers ──────────────────────────────────────────
-  const innerExpandStyle: { maxWidth?: string; transition?: string } =
-    expandPhase === "outer"
-      ? { maxWidth: lockedWidthRef.current, transition: "none" }
-      : expandPhase === "inner"
-      ? { maxWidth: "var(--content-max-width, 48rem)", transition: "max-width 150ms ease-in-out" }
-      : {};
-
-  const suppressContainer = expandPhase !== "idle" || panelTransitioning;
-
-  return { canvasRef, viewport, setViewport, innerExpandStyle, suppressContainer };
+  return { canvasRef, viewport, setViewport };
 }

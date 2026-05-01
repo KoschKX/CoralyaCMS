@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback, useMemo } from "react";
+import { useRef, useState, useCallback, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { EditorBlock } from "@/lib/posts-db";
 import { ViewportContext } from "@/components/ui/ViewportContext";
@@ -104,7 +104,8 @@ export default function PostEditorPage({
   // useEditorPanel("post") defaults to "post" tab and forces it in code mode.
   const { panelTab, setPanelTab, panelOpen, setPanelOpen } = useEditorPanel(mainMode, "post");
   const { tablet: tabletBp, mobile: mobileBp } = getEditorBreakpoints();
-  const { canvasRef, viewport, setViewport, innerExpandStyle, suppressContainer } = useCanvasWidth(tabletBp, mobileBp, panelOpen);
+
+  const { canvasRef, viewport, setViewport } = useCanvasWidth(tabletBp, mobileBp, panelOpen);
 
   const editorViewportContextValue = useMemo(() => ({ viewport }), [viewport]);
 
@@ -183,7 +184,7 @@ export default function PostEditorPage({
         {/* Block inserter — inline, pushes canvas when open */}
         <aside
           aria-label="Block inserter"
-          className={`shrink-0 overflow-hidden border-r border-zinc-200 bg-white transition-[width] duration-100 ease-in-out ${
+          className={`shrink-0 overflow-hidden border-r border-zinc-200 bg-white transition-[width] duration-200 ease-in-out ${
             blocksPanelOpen && mainMode === "visual" ? "w-64" : "w-0"
           }`}
         >
@@ -197,22 +198,20 @@ export default function PostEditorPage({
             {/* When the panel is open, constrain canvas width to the selected viewport
                 breakpoint so responsive CSS fires at the right size. */}
             <div
-              className="mx-auto transition-[max-width] duration-150"
-              style={{
-                maxWidth: panelOpen
-                  ? viewport === "mobile" ? "390px"
-                    : viewport === "tablet" ? "768px"
-                    : "9999px"
-                  : "9999px",
-              }}
+              className="mx-auto transition-[max-width] duration-200 ease-in-out"
+              style={panelOpen && mainMode !== "code" ? {
+                maxWidth:
+                  viewport === "mobile" ? "390px"
+                  : viewport === "tablet" ? "768px"
+                  : "2000px",
+              } : undefined}
             >
             <div
               className="text-zinc-900 bg-white rounded-lg shadow-sm mx-auto"
               style={{
-                ...innerExpandStyle,
-                maxWidth: innerExpandStyle.maxWidth ?? "var(--content-max-width, 48rem)",
+                maxWidth: "var(--content-max-width, 48rem)",
                 padding: "2.5rem var(--content-padding-x, 1.5rem)",
-                containerType: suppressContainer ? "normal" : "inline-size",
+                containerType: "inline-size",
               }}
             >
               {mainMode === "code" ? (
@@ -239,6 +238,7 @@ export default function PostEditorPage({
                       tabletBp={tabletBp}
                       mobileBp={mobileBp}
                       forContainer
+                      forcedViewport={panelOpen ? viewport : undefined}
                     />
                     <VisualEditor
                       initialBlocks={liveBlocks}
@@ -258,9 +258,12 @@ export default function PostEditorPage({
           </div>
         </div>
 
-        {/* Right panel */}
-        {panelOpen && (
-          <aside className="sticky top-0 h-[calc(100vh-3rem)] w-72 shrink-0 overflow-y-auto border-l border-zinc-200 bg-white">
+        {/* Right panel — animates in/out */}
+        <aside
+          aria-label="Editor settings"
+          className={`shrink-0 overflow-hidden border-l border-zinc-200 bg-white transition-[width] duration-200 ease-in-out ${panelOpen ? "w-72" : "w-0"}`}
+        >
+          <div className="sticky top-0 h-[calc(100vh-3rem)] w-72 overflow-y-auto">
             <div className="flex border-b border-zinc-200" role="tablist" aria-label="Panel sections">
               {(mainMode !== "code" ? ["post", "block"] : ["post"]).map((tab) => (
                 <button
@@ -302,8 +305,8 @@ export default function PostEditorPage({
                 />
               )}
             </div>
-          </aside>
-        )}
+          </div>
+        </aside>
       </div>
     </div>
     </EditorViewportContext.Provider>
