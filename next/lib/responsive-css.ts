@@ -39,19 +39,20 @@ function rulesFor(overrides: Record<string, unknown>): string {
  */
 function colWidthCSS(
   blockId: string,
-  cols: Array<{ width?: string }>,
-  overrides: Record<string, unknown>,
+  cols: Array<{ width?: string; responsive?: Record<string, { width?: string }> }>,
+  viewport: string,
   query: string,
 ): string {
-  const colSel = `[data-block-id="${blockId}"] > .block-columns > .block-columns__col-wrapper`;
-  if (overrides["stack"]) {
-    return `${query} { ${colSel} { width: 100% !important; padding-left: 0 !important; } }\n`;
-  }
+  // Target both live DOM (`[data-block-id] > .block-columns`) and editor DOM
+  // (`[data-block-id] > div > .block-columns`) where BlockItem inserts a wrapper div.
+  const colSelBase = (nth: string) =>
+    `[data-block-id="${blockId}"] > .block-columns > .block-columns__col-wrapper${nth},` +
+    `[data-block-id="${blockId}"] > div > .block-columns > .block-columns__col-wrapper${nth}`;
   let css = "";
   for (let i = 0; i < cols.length; i++) {
-    const w = overrides[`col-${i}-width`];
-    if (w != null && w !== "") {
-      css += `${query} { ${colSel}:nth-child(${i + 1}) { width: ${w} !important; } }\n`;
+    const w = cols[i].responsive?.[viewport]?.width;
+    if (w) {
+      css += `${query} { ${colSelBase(`:nth-child(${i + 1})`)} { width: ${w} !important; } }\n`;
     }
   }
   return css;
@@ -91,14 +92,19 @@ export function buildResponsiveCSS(
           : { ...(responsive?.tablet ?? {}) };
 
       if (block.type === "columns" && Array.isArray(data.cols)) {
-        const colSel = `[data-block-id="${block.id}"] > .block-columns > .block-columns__col-wrapper`;
+        const colSelBase = (nth: string) =>
+          `[data-block-id="${block.id}"] > .block-columns > .block-columns__col-wrapper${nth},` +
+          `[data-block-id="${block.id}"] > div > .block-columns > .block-columns__col-wrapper${nth}`;
+        const colSel = colSelBase("");
         if (cascaded["stack"]) {
           css += `${colSel} { width: 100% !important; padding-left: 0 !important; }\n`;
         } else {
-          (data.cols as Array<{ width?: string }>).forEach((_, i) => {
-            const w = cascaded[`col-${i}-width`];
-            if (w != null && w !== "") {
-              css += `${colSel}:nth-child(${i + 1}) { width: ${w} !important; }\n`;
+          (data.cols as Array<{ width?: string; responsive?: Record<string, { width?: string }> }>).forEach((col, i) => {
+            const w = forcedViewport === "mobile"
+              ? (col.responsive?.mobile?.width ?? col.responsive?.tablet?.width)
+              : col.responsive?.tablet?.width;
+            if (w) {
+              css += `${colSelBase(`:nth-child(${i + 1})`)} { width: ${w} !important; }\n`;
             }
           });
         }
@@ -139,8 +145,11 @@ export function buildResponsiveCSS(
     const responsive = data?.responsive as Record<string, Record<string, unknown>> | undefined;
 
     if (block.type === "columns" && Array.isArray(data.cols)) {
-      const cols = data.cols as Array<{ width?: string }>;
-      const colSel = `[data-block-id="${block.id}"] > .block-columns > .block-columns__col-wrapper`;
+      const cols = data.cols as Array<{ width?: string; responsive?: Record<string, { width?: string }> }>;
+      const colSelBase = (nth: string) =>
+        `[data-block-id="${block.id}"] > .block-columns > .block-columns__col-wrapper${nth},` +
+        `[data-block-id="${block.id}"] > div > .block-columns > .block-columns__col-wrapper${nth}`;
+      const colSel = colSelBase("");
       const tabletOverrides = responsive?.tablet ?? {};
       const mobileOverrides = responsive?.mobile ?? {};
 
@@ -152,13 +161,13 @@ export function buildResponsiveCSS(
       if (tabletOverrides["stack"]) {
         css += `${tabletQuery} { ${colSel} { width: 100% !important; padding-left: 0 !important; } }\n`;
       } else {
-        css += colWidthCSS(block.id, cols, tabletOverrides, tabletQuery);
+        css += colWidthCSS(block.id, cols, "tablet", tabletQuery);
       }
       // Mobile
       if (mobileOverrides["stack"]) {
         css += `${mobileQuery} { ${colSel} { width: 100% !important; padding-left: 0 !important; } }\n`;
       } else {
-        css += colWidthCSS(block.id, cols, mobileOverrides, mobileQuery);
+        css += colWidthCSS(block.id, cols, "mobile", mobileQuery);
       }
     }
 

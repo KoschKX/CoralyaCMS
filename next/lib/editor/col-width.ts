@@ -37,15 +37,12 @@ export type FractionPreset = (typeof FRACTION_PRESETS)[number];
  * fallback (e.g. "1fr" for CSS generation, or a percentage for inline style).
  */
 export function resolveColWidth(
-  col: { width?: string },
-  colIdx: number,
-  responsive: ResponsiveOverrides | undefined,
+  col: { width?: string; responsive?: Record<string, { width?: string }> },
   viewport: string,
 ): string | undefined {
-  if (viewport !== "desktop" && responsive?.[viewport]) {
-    const key = `col-${colIdx}-width`;
-    const override = responsive[viewport][key];
-    if (override != null) return (override as string) || undefined;
+  if (viewport !== "desktop") {
+    const override = col.responsive?.[viewport]?.width;
+    if (override != null) return override || undefined;
   }
   return col.width || undefined;
 }
@@ -59,19 +56,18 @@ export function resolveColWidth(
  * Used by EditableBlock (columns branch) for inline `width` style.
  */
 export function resolveColWidthForDisplay(
-  col: { width?: string },
-  colIdx: number,
-  responsive: ResponsiveOverrides | undefined,
+  col: { width?: string; responsive?: Record<string, { width?: string }> },
+  blockResponsive: ResponsiveOverrides | undefined,
   viewport: string,
   totalCols: number,
   desktopStack: boolean,
 ): string {
   let isStacked: boolean;
-  if (viewport !== "desktop" && responsive?.[viewport] && "stack" in responsive[viewport]) {
-    isStacked = !!responsive[viewport]["stack"];
+  if (viewport !== "desktop" && blockResponsive?.[viewport] && "stack" in blockResponsive[viewport]) {
+    isStacked = !!blockResponsive[viewport]["stack"];
   } else {
     isStacked = desktopStack;
   }
   if (isStacked) return "100%";
-  return resolveColWidth(col, colIdx, responsive, viewport) ?? `${100 / (totalCols || 1)}%`;
+  return resolveColWidth(col, viewport) ?? `${100 / (totalCols || 1)}%`;
 }

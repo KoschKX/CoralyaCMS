@@ -223,17 +223,18 @@ function buildBlocks(
         if (t.type === "close" && t.name === "columns") { pos++; break; }
         if (t.type === "open" && t.name === "column") {
           const width = t.attrs.width as string | undefined;
-          // Responsive width overrides for this column
-          let colResponsive: Record<string, string> = {};
-          Object.keys(t.attrs).forEach((k) => {
-            if (/^width_(desktop|tablet|mobile)$/.test(k)) {
-              const bp = k.split("_")[1];
-              colResponsive[bp] = t.attrs[k] as string;
-            }
-          });
+          // Per-column responsive overrides stored as JSON
+          let colResponsive: Record<string, { width?: string }> | undefined;
+          if (t.attrs.responsive) {
+            try {
+              colResponsive = typeof t.attrs.responsive === "string"
+                ? JSON.parse(t.attrs.responsive as string)
+                : (t.attrs.responsive as Record<string, { width?: string }>);
+            } catch {}
+          }
           pos++;
           const inner = buildBlocks(tokens, pos, "column", counter);
-          cols.push({ ...(width ? { width } : {}), ...(Object.keys(colResponsive).length ? { responsive: colResponsive } : {}), blocks: inner.blocks });
+          cols.push({ ...(width ? { width } : {}), ...(colResponsive ? { responsive: colResponsive } : {}), blocks: inner.blocks });
           pos = inner.pos;
         } else { pos++; }
       }

@@ -4,7 +4,7 @@ import ColumnsLayout from "./layout";
 import ColumnsPanelControls from "./PanelControls";
 import { ColumnsEditable } from "./editable";
 
-type ColEntry = { blocks: EditorBlock[]; width?: string; responsive?: Record<string, string> };
+type ColEntry = { blocks: EditorBlock[]; width?: string; responsive?: Record<string, { width?: string }> };
 
 const INDENT = "  ";
 
@@ -48,16 +48,11 @@ const columns: BlockDefinition = {
     const responsiveAttr = data.responsive ? ` ${serializeAttr("responsive", data.responsive)}` : "";
     const inner = cols.map((col) => {
       const widthAttr = col.width ? ` ${serializeAttr("width", col.width)}` : "";
-      const responsiveAttrs = col.responsive
-        ? Object.entries(col.responsive)
-            .filter(([, val]) => val)
-            .map(([bp, val]) => ` width_${bp}='${val}'`)
-            .join("")
-        : "";
+      const responsiveAttrCol = col.responsive ? ` ${serializeAttr("responsive", col.responsive)}` : "";
       const colInner = blocksToShortcodes(col.blocks ?? [], depth + 2);
       return colInner
-        ? `${childPad}[column${widthAttr}${responsiveAttrs}]\n${colInner}\n${childPad}[/column]`
-        : `${childPad}[column${widthAttr}${responsiveAttrs}][/column]`;
+        ? `${childPad}[column${widthAttr}${responsiveAttrCol}]\n${colInner}\n${childPad}[/column]`
+        : `${childPad}[column${widthAttr}${responsiveAttrCol}][/column]`;
     }).join("\n");
     return `${pad}[columns${responsiveAttr}]\n${inner}\n${pad}[/columns]`;
   },

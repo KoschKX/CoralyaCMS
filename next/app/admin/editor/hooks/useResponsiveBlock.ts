@@ -50,7 +50,9 @@ export function useResponsiveBlock({
   function handleControlsChange(newData: Record<string, unknown>) {
     if (!selectedBlock) return;
     let finalData: Record<string, unknown>;
-    if (viewport === "desktop") {
+    if (viewport === "desktop" || "cols" in newData) {
+      // Full block data replacement: desktop always, or when columns PanelControls
+      // updates cols (which now carry their own per-column responsive widths).
       finalData = { ...selectedBlock.data, ...newData };
     } else {
       const current = selectedBlock.data;

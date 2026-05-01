@@ -6,16 +6,22 @@ import { ViewportContext } from "./ViewportContext";
 export function PanelSection({
   title,
   fields = [],
+  isEnabledOverride,
+  onToggleOverride,
   children,
 }: {
   title: string;
   /** Data keys this section controls — used to clear overrides when switch turns off. */
   fields?: string[];
+  /** Optional: override the enabled state instead of reading from ViewportContext. */
+  isEnabledOverride?: boolean;
+  /** Optional: override the toggle handler instead of using ViewportContext.toggleSection. */
+  onToggleOverride?: () => void;
   children: ReactNode;
 }) {
   const { viewport, isSectionEnabled, toggleSection } = useContext(ViewportContext);
   const isResponsiveMode = viewport !== "desktop";
-  const isEnabled = isSectionEnabled(fields);
+  const isEnabled = isEnabledOverride !== undefined ? isEnabledOverride : isSectionEnabled(fields);
 
   // Only animate the toggle when the user actually clicks it, not when the
   // viewport selector changes (which would animate off→off or on→off spuriously).
@@ -37,7 +43,7 @@ export function PanelSection({
           aria-hidden={!isResponsiveMode}
           tabIndex={isResponsiveMode ? 0 : -1}
           aria-label={isEnabled ? `Remove ${title} override at this breakpoint` : `Override ${title} at this breakpoint`}
-          onClick={() => isResponsiveMode && toggleSection(title, fields)}
+          onClick={() => isResponsiveMode && (onToggleOverride ? onToggleOverride() : toggleSection(title, fields))}
           title={isEnabled ? "Remove breakpoint override" : "Override at this breakpoint"}
           className={`relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer items-center rounded-full focus:outline-none ${
             animate ? "transition-colors duration-150" : ""

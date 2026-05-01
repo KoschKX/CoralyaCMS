@@ -16,7 +16,7 @@ import { useEditorViewport } from "@/components/editor/EditorHooks";
 interface ColViewportToolbarProps {
   blockId: string;
   ci: number;
-  cols: Array<{ blocks: EditorBlock[]; width?: string }>;
+  cols: Array<{ blocks: EditorBlock[]; width?: string; responsive?: Record<string, { width?: string }> }>;
   colData: Record<string, unknown>;
   colResp: Record<string, Record<string, unknown>>;
   ops: BlockOps;
@@ -30,8 +30,7 @@ interface ColViewportToolbarProps {
 function ColViewportToolbar({ blockId, ci, cols, colData, colResp, ops, setActiveColInfo }: ColViewportToolbarProps) {
   const editorViewport = useEditorViewport();
   const col = cols[ci];
-  const vpWidthKey = `col-${ci}-width`;
-  const effectiveColWidth = resolveColWidth(col ?? {}, ci, colResp, editorViewport);
+  const effectiveColWidth = resolveColWidth(col ?? {}, editorViewport);
   return (
     <div
       className="absolute bottom-full right-0 z-20 mb-1.5"
@@ -65,8 +64,13 @@ function ColViewportToolbar({ blockId, ci, cols, colData, colResp, ops, setActiv
             if (editorViewport === "desktop") {
               ops.update(blockId, { ...colData, cols: cols.map((c, i) => i === ci ? { ...c, width: w || undefined } : c) });
             } else {
-              const vpOverrides = { ...((colResp[editorViewport] as Record<string, unknown>) ?? {}), [vpWidthKey]: w || null };
-              ops.update(blockId, { ...colData, responsive: { ...colResp, [editorViewport]: vpOverrides } });
+              const newCols = cols.map((c, i) => {
+                if (i !== ci) return c;
+                const resp = { ...(c.responsive ?? {}) };
+                resp[editorViewport] = { ...(resp[editorViewport] ?? {}), width: w || undefined };
+                return { ...c, responsive: resp };
+              });
+              ops.update(blockId, { ...colData, cols: newCols });
             }
           }}
         />
@@ -298,7 +302,7 @@ function BlockItem({
             {/* Col toolbar pill — right */}
             {block.type === "columns" && activeColInfo?.blockId === block.id && (() => {
               const ci = activeColInfo.colIdx;
-              const cols = ((block.data as Record<string, unknown>).cols as Array<{ blocks: EditorBlock[]; width?: string }>) ?? [];
+              const cols = ((block.data as Record<string, unknown>).cols as Array<{ blocks: EditorBlock[]; width?: string; responsive?: Record<string, { width?: string }> }>) ?? [];
               const colData = block.data as Record<string, unknown>;
               const colResp = (colData.responsive as Record<string, Record<string, unknown>>) ?? {};
               return (

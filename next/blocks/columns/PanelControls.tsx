@@ -6,19 +6,16 @@ import { ViewportContext } from "@/components/ui/ViewportContext";
 import type { EditorBlock } from "@/lib/pages-db";
 import { FRACTION_PRESETS } from "./fraction-presets";
 
-// In tablet/mobile mode, controlsDisplayData() in EditorPage merges responsive[viewport]
-// onto the top-level data, so col-N-width keys appear directly on data. We read from
-// there first, then fall back to the default cols[N].width.
-function getColWidth(data: Record<string, unknown>, colIdx: number, viewport: string) {
-  const key = `col-${colIdx}-width`;
-  if (viewport !== "desktop" && key in data && data[key] != null && data[key] !== "") {
-    return data[key] as string;
-  }
-  const cols = (data.cols as Col[]) ?? [];
-  return cols[colIdx]?.width ?? "";
-}
+type ColResponsive = Record<string, { width?: string }>;
+type Col = { blocks: EditorBlock[]; width?: string; responsive?: ColResponsive };
 
-type Col = { blocks: EditorBlock[]; width?: string };
+function getColWidth(col: Col, viewport: string): string {
+  if (viewport !== "desktop") {
+    const override = col.responsive?.[viewport]?.width;
+    if (override != null && override !== "") return override;
+  }
+  return col.width ?? "";
+}
 
 interface Props {
   data: Record<string, unknown>;
@@ -30,20 +27,23 @@ export default function ColumnsPanelControls({ data, onChange }: Props) {
   const cols = (data.cols as Col[]) ?? [];
   const selectedColIdx = typeof data.__selectedColIdx === "number" ? data.__selectedColIdx : null;
   const [customWidths, setCustomWidths] = useState<string[]>(
-    cols.map((_, i) => getColWidth(data, i, viewport))
+    cols.map((col) => getColWidth(col, viewport))
   );
 
   function setWidth(colIdx: number, w: string) {
     if (viewport === "desktop") {
-      // On desktop: update default width inside cols
       const newCols = cols.map((c, ci) =>
         ci === colIdx ? { ...c, width: w || undefined } : c
       );
       onChange({ ...data, cols: newCols });
     } else {
-      // On tablet/mobile: emit ONLY the specific key so handleControlsChange
-      // stores just this override under responsive[viewport], leaving cols untouched
-      onChange({ [`col-${colIdx}-width`]: w || null });
+      const newCols = cols.map((c, ci) => {
+        if (ci !== colIdx) return c;
+        const resp = { ...(c.responsive ?? {}) };
+        resp[viewport] = { ...(resp[viewport] ?? {}), width: w || undefined };
+        return { ...c, responsive: resp };
+      });
+      onChange({ ...data, cols: newCols });
     }
   }
 
@@ -93,11 +93,30 @@ export default function ColumnsPanelControls({ data, onChange }: Props) {
 
       {selectedColIdx !== null && (() => {
         const colIdx = selectedColIdx;
+        const col = cols[colIdx];
+        const currentWidth = col ? getColWidth(col, viewport) : "";
+        const isWidthEnabled = !col ? true : !!col.responsive?.[viewport]?.width;
+        function toggleColWidth() {
+          if (!col) return;
+          const newCols = cols.map((c, ci) => {
+            if (ci !== colIdx) return c;
+            const resp = { ...(c.responsive ?? {}) };
+            if (resp[viewport]?.width) {
+              const { width: _w, ...rest } = resp[viewport];
+              resp[viewport] = rest;
+            } else {
+              resp[viewport] = { ...(resp[viewport] ?? {}), width: c.width ?? "" };
+            }
+            return { ...c, responsive: resp };
+          });
+          onChange({ ...data, cols: newCols });
+        }
         return (
           <PanelSection
             key={colIdx}
             title={`Column ${colIdx + 1}`}
-            fields={[`col-${colIdx}-width`]}
+            isEnabledOverride={isWidthEnabled}
+            onToggleOverride={toggleColWidth}
           >
             <div className="space-y-2">
               <div className="flex flex-wrap gap-1">
@@ -113,7 +132,7 @@ export default function ColumnsPanelControls({ data, onChange }: Props) {
                       });
                     }}
                     className={`rounded border px-2 py-0.5 text-xs transition ${
-                      getColWidth(data, colIdx, viewport) === p.value
+                      currentWidth === p.value
                         ? "border-zinc-900 bg-zinc-900 text-white"
                         : "border-zinc-200 text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50"
                     }`}
@@ -125,7 +144,7 @@ export default function ColumnsPanelControls({ data, onChange }: Props) {
               <div className="flex gap-1">
                 <input
                   type="text"
-                  value={customWidths[colIdx] ?? getColWidth(data, colIdx, viewport) ?? ""}
+                  value={customWidths[colIdx] ?? currentWidth ?? ""}
                   onChange={(e) =>
                     setCustomWidths((prev) => {
                       const next = [...prev];
