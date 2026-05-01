@@ -60,22 +60,44 @@ export function BlockPicker({
     return allBlocks.filter((d) => d.label.toLowerCase().includes(q) || d.name.toLowerCase().includes(q));
   }, [search, allBlocks]);
 
-  // Group by category
+  // Group by category — only computed when not searching (groups are hidden during search)
   const groups = useMemo(() => {
-    if (search.trim()) return null; // flat list when searching
+    if (search.trim()) return null;
     const map = new Map<string, typeof allBlocks>();
     for (const cat of CATEGORIES) map.set(cat.id, []);
     map.set("other", []);
     for (const def of allBlocks) {
-      const key = (def as { category?: string }).category ?? "other";
-      if (!map.has(key)) map.set("other", [...(map.get("other") ?? [])]);
-      const bucket = map.get(key) ?? map.get("other")!;
-      if (map.has(key)) { bucket.push(def); } else { map.get("other")!.push(def); }
+      const key = (def as { category?: string }).category;
+      const bucket = (key && map.has(key)) ? map.get(key)! : map.get("other")!;
+      bucket.push(def);
     }
     return [...CATEGORIES, { id: "other", label: "Other" }]
       .map((cat) => ({ ...cat, blocks: map.get(cat.id) ?? [] }))
       .filter((g) => g.blocks.length > 0);
   }, [search, allBlocks]);
+
+  // Focus trap: Tab/Shift+Tab cycles within the modal while it is open.
+  useEffect(() => {
+    const modal = ref.current;
+    if (!modal) return;
+    const sel = 'button, input, [href], [tabindex]:not([tabindex="-1"])';
+    function trapFocus(e: KeyboardEvent) {
+      if (e.key !== "Tab") return;
+      const focusable = Array.from(modal!.querySelectorAll<HTMLElement>(sel)).filter(
+        (el) => !el.hasAttribute("disabled"),
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
+    document.addEventListener("keydown", trapFocus);
+    return () => document.removeEventListener("keydown", trapFocus);
+  }, []);
 
   return (
     <div

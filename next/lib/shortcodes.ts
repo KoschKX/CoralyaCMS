@@ -247,12 +247,17 @@ function buildBlocks(
     if (tok.type === "self") {
       const def = blockMap[tok.name];
       if (def) {
+        const valid = !def.validate || def.validate(tok.attrs);
+        if (!valid && process.env.NODE_ENV !== "production") {
+          console.warn(
+            `[shortcodes] Block "${tok.name}" failed validation — falling back to defaultData.`,
+            tok.attrs,
+          );
+        }
         // If the block defines a validator, run it. Fall back to defaultData when
         // the parsed attributes fail validation so the editor never renders a block
         // in a known-corrupt state.
-        const data = !def.validate || def.validate(tok.attrs)
-          ? tok.attrs
-          : { ...(def.defaultData ?? {}) };
+        const data = valid ? tok.attrs : { ...(def.defaultData ?? {}) };
         blocks.push({ id: `sc-${counter.n++}`, type: tok.name, data });
       }
       // Unknown token types are silently dropped — they have no registered Layout

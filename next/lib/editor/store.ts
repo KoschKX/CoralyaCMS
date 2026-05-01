@@ -45,10 +45,6 @@ export interface EditorStore {
   selectedBlockId: string | null;
   activeColInfo: ActiveColInfo | null;
 
-  // ── Derived helper ───────────────────────────────────────────────────────
-  /** Returns current blocks (alias for `present`). */
-  blocks: () => EditorBlock[];
-
   // ── Actions ──────────────────────────────────────────────────────────────
   init: (
     initialBlocks: readonly EditorBlock[],
@@ -76,6 +72,8 @@ export interface EditorStore {
   addBlockAfter: (afterId: string | "TOP", type: string) => void;
   /** Like addBlockAfter but searches the entire block tree (works inside columns). */
   deepAddBlockAfter: (afterId: string | "TOP", type: string) => void;
+  /** Insert a block after the currently-selected block, or append when nothing is selected. */
+  addBlockAfterSelected: (type: string) => void;
   makeNewBlock: (type: string) => EditorBlock;
 
   /** Called by the panel to push an update for the currently selected block. */
@@ -122,10 +120,6 @@ export function createEditorStore() {
 
       selectedBlockId: null,
       activeColInfo: null,
-
-      blocks() {
-        return get().present;
-      },
 
       init(initialBlocks, onChange, onSelectBlock, onColSelect) {
         cb.onChange = onChange;
@@ -249,6 +243,12 @@ export function createEditorStore() {
         const newBlock = get().makeNewBlock(type);
         get().publish(deepInsertBlockAfter(get().present, afterId, newBlock));
         get().selectBlock(newBlock.id, newBlock.data as Record<string, unknown>, type);
+      },
+
+      addBlockAfterSelected(type) {
+        const { present, selectedBlockId } = get();
+        const afterId = selectedBlockId ?? present[present.length - 1]?.id ?? "TOP";
+        get().addBlockAfter(afterId, type);
       },
 
       panelUpdateBlock(id, newData) {

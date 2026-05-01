@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useRef, useState, useCallback, useMemo, useEffect } from "react";
+import React, { useRef, useState, useCallback, useMemo, useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 import type { EditorBlock } from "@/lib/pages-db";
@@ -278,44 +278,10 @@ export default function EditorPage({
           className={`shrink-0 overflow-hidden border-l border-zinc-200 bg-white transition-[width] duration-200 ease-in-out ${panelOpen ? "w-72" : "w-0"}`}
         >
           <div className="sticky top-0 h-[calc(100vh-3rem)] w-72 overflow-y-auto">
-            {/* Viewport switcher — always visible at the top of the panel */}
             {mainMode === "visual" && (
-              <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-2">
-                <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Preview</span>
-                <div className="flex items-center gap-0.5" role="group" aria-label="Preview viewport">
-                  {([
-                    { vp: "desktop" as const, label: "Desktop", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> },
-                    { vp: "tablet"  as const, label: "Tablet",  icon: <svg width="13" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/></svg> },
-                    { vp: "mobile"  as const, label: "Mobile",  icon: <svg width="10" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/></svg> },
-                  ]).map(({ vp, label, icon }) => (
-                    <button
-                      key={vp}
-                      onClick={() => setViewport(vp)}
-                      aria-label={`${label} viewport`}
-                      aria-pressed={viewport === vp}
-                      className={`flex h-7 w-7 items-center justify-center rounded transition ${
-                        viewport === vp ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100"
-                      }`}
-                    >
-                      {icon}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <ViewportSwitcher viewport={viewport} setViewport={setViewport} />
             )}
-            <div className="flex border-b border-zinc-200" role="tablist" aria-label="Panel sections">
-              {(mainMode === "visual" ? ["page", "block"] : ["page"]).map((tab) => (
-                <button
-                  key={tab}
-                  role="tab"
-                  aria-selected={panelTab === tab}
-                  onClick={() => setPanelTab(tab as PanelTab)}
-                  className={`flex-1 py-2.5 text-xs font-semibold capitalize tracking-wide transition ${panelTab === tab ? "border-b-2 border-zinc-900 text-zinc-900" : "text-zinc-400 hover:text-zinc-700"}`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
+            <PanelTabs mainMode={mainMode} panelTab={panelTab} setPanelTab={setPanelTab} />
             <div className="space-y-6 px-4 py-5" role="tabpanel">
               {panelTab === "page" && (
                 <PagePanel
@@ -348,3 +314,92 @@ export default function EditorPage({
   );
 }
 
+// ── Local subcomponents ───────────────────────────────────────────────────────
+
+type Viewport = "desktop" | "tablet" | "mobile";
+
+const VIEWPORT_BUTTONS: { vp: Viewport; label: string; icon: React.ReactNode }[] = [
+  {
+    vp: "desktop",
+    label: "Desktop",
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+    ),
+  },
+  {
+    vp: "tablet",
+    label: "Tablet",
+    icon: (
+      <svg width="13" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/>
+      </svg>
+    ),
+  },
+  {
+    vp: "mobile",
+    label: "Mobile",
+    icon: (
+      <svg width="10" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/>
+      </svg>
+    ),
+  },
+];
+
+function ViewportSwitcher({
+  viewport,
+  setViewport,
+}: {
+  viewport: Viewport;
+  setViewport: (vp: Viewport) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-2">
+      <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Preview</span>
+      <div className="flex items-center gap-0.5" role="group" aria-label="Preview viewport">
+        {VIEWPORT_BUTTONS.map(({ vp, label, icon }) => (
+          <button
+            key={vp}
+            onClick={() => setViewport(vp)}
+            aria-label={`${label} viewport`}
+            aria-pressed={viewport === vp}
+            className={`flex h-7 w-7 items-center justify-center rounded transition ${
+              viewport === vp ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100"
+            }`}
+          >
+            {icon}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PanelTabs({
+  mainMode,
+  panelTab,
+  setPanelTab,
+}: {
+  mainMode: "visual" | "code" | "inject";
+  panelTab: PanelTab;
+  setPanelTab: (tab: PanelTab) => void;
+}) {
+  const tabs = mainMode === "visual" ? (["page", "block"] as PanelTab[]) : (["page"] as PanelTab[]);
+  return (
+    <div className="flex border-b border-zinc-200" role="tablist" aria-label="Panel sections">
+      {tabs.map((tab) => (
+        <button
+          key={tab}
+          role="tab"
+          aria-selected={panelTab === tab}
+          onClick={() => setPanelTab(tab)}
+          className={`flex-1 py-2.5 text-xs font-semibold capitalize tracking-wide transition ${panelTab === tab ? "border-b-2 border-zinc-900 text-zinc-900" : "text-zinc-400 hover:text-zinc-700"}`}
+        >
+          {tab}
+        </button>
+      ))}
+    </div>
+  );
+}

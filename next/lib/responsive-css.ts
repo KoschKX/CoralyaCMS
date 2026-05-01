@@ -1,5 +1,4 @@
 import type { EditorBlock } from "@/lib/pages-db";
-import { resolveColWidth } from "@/lib/editor/col-width";
 import { blockMap } from "@/blocks/index";
 
 /**
@@ -33,15 +32,29 @@ function rulesFor(overrides: Record<string, unknown>): string {
   ].filter(Boolean).join(" ");
 }
 
-function gridTemplateColumnsCSS(
+/**
+ * Generate per-column-wrapper width CSS rules for the flex-based ColumnsLayout.
+ * Targets .block-columns__col-wrapper:nth-child(N) with width overrides.
+ * For stacking, sets all wrappers to 100% width.
+ */
+function colWidthCSS(
+  blockId: string,
   cols: Array<{ width?: string }>,
-  responsive: Record<string, Record<string, unknown>> | undefined,
-  breakpoint: string,
-): string | null {
-  if (!Array.isArray(cols)) return null;
-  const widths = cols.map((col, i) => resolveColWidth(col, i, responsive, breakpoint) ?? "1fr");
-  if (widths.every((w) => w === "1fr")) return null;
-  return `grid-template-columns: ${widths.join(" ")} !important;`;
+  overrides: Record<string, unknown>,
+  query: string,
+): string {
+  const colSel = `[data-block-id="${blockId}"] > .block-columns > .block-columns__col-wrapper`;
+  if (overrides["stack"]) {
+    return `${query} { ${colSel} { width: 100% !important; padding-left: 0 !important; } }\n`;
+  }
+  let css = "";
+  for (let i = 0; i < cols.length; i++) {
+    const w = overrides[`col-${i}-width`];
+    if (w != null && w !== "") {
+      css += `${query} { ${colSel}:nth-child(${i + 1}) { width: ${w} !important; } }\n`;
+    }
+  }
+  return css;
 }
 
 /** Recursively build @media override CSS for blocks that have data.responsive set.
@@ -78,15 +91,17 @@ export function buildResponsiveCSS(
           : { ...(responsive?.tablet ?? {}) };
 
       if (block.type === "columns" && Array.isArray(data.cols)) {
-        const sel = `[data-block-id="${block.id}"] > .block-columns`;
-        // For columns grid, use the cascaded viewport (prefer exact, fall back to tablet)
-        const effectiveVp =
-          forcedViewport === "mobile" && responsive?.mobile && "cols" in responsive.mobile
-            ? "mobile"
-            : "tablet";
-        const grid = gridTemplateColumnsCSS(data.cols, responsive, effectiveVp);
-        if (grid) css += `${sel} { ${grid} }\n`;
-        if (cascaded["stack"]) css += `${sel} { grid-template-columns: 1fr !important; }\n`;
+        const colSel = `[data-block-id="${block.id}"] > .block-columns > .block-columns__col-wrapper`;
+        if (cascaded["stack"]) {
+          css += `${colSel} { width: 100% !important; padding-left: 0 !important; }\n`;
+        } else {
+          (data.cols as Array<{ width?: string }>).forEach((_, i) => {
+            const w = cascaded[`col-${i}-width`];
+            if (w != null && w !== "") {
+              css += `${colSel}:nth-child(${i + 1}) { width: ${w} !important; }\n`;
+            }
+          });
+        }
       }
 
       if (Object.keys(cascaded).length > 0) {
@@ -124,24 +139,27 @@ export function buildResponsiveCSS(
     const responsive = data?.responsive as Record<string, Record<string, unknown>> | undefined;
 
     if (block.type === "columns" && Array.isArray(data.cols)) {
-      const sel = `[data-block-id="${block.id}"] > .block-columns`;
-      // Desktop (default): handled by inline style, but add for SSR fallback
-      const desktopGrid = gridTemplateColumnsCSS(data.cols, responsive, "desktop");
-      if (desktopGrid) css += `${sel} { ${desktopGrid} }\n`;
-      // Tablet
-      const tabletGrid = gridTemplateColumnsCSS(data.cols, responsive, "tablet");
-      if (tabletGrid) css += `${tabletQuery} { ${sel} { ${tabletGrid} } }\n`;
-      // Mobile
-      const mobileGrid = gridTemplateColumnsCSS(data.cols, responsive, "mobile");
-      if (mobileGrid) css += `${mobileQuery} { ${sel} { ${mobileGrid} } }\n`;
+      const cols = data.cols as Array<{ width?: string }>;
+      const colSel = `[data-block-id="${block.id}"] > .block-columns > .block-columns__col-wrapper`;
+      const tabletOverrides = responsive?.tablet ?? {};
+      const mobileOverrides = responsive?.mobile ?? {};
 
-      // Stack columns: override grid-template-columns to a single column track
-      // (ColumnsLayout uses inline gridTemplateColumns; !important overrides it)
-      const tabletStack = responsive?.tablet && "stack" in responsive.tablet ? responsive.tablet.stack : undefined;
-      const mobileStack = responsive?.mobile && "stack" in responsive.mobile ? responsive.mobile.stack : undefined;
-      if (data.stack) css += `${sel} { grid-template-columns: 1fr !important; }\n`;
-      if (tabletStack) css += `${tabletQuery} { ${sel} { grid-template-columns: 1fr !important; } }\n`;
-      if (mobileStack) css += `${mobileQuery} { ${sel} { grid-template-columns: 1fr !important; } }\n`;
+      // Desktop stacking (uncommon, but supported)
+      if (data.stack) {
+        css += `${colSel} { width: 100% !important; padding-left: 0 !important; }\n`;
+      }
+      // Tablet: stack takes priority over per-column widths
+      if (tabletOverrides["stack"]) {
+        css += `${tabletQuery} { ${colSel} { width: 100% !important; padding-left: 0 !important; } }\n`;
+      } else {
+        css += colWidthCSS(block.id, cols, tabletOverrides, tabletQuery);
+      }
+      // Mobile
+      if (mobileOverrides["stack"]) {
+        css += `${mobileQuery} { ${colSel} { width: 100% !important; padding-left: 0 !important; } }\n`;
+      } else {
+        css += colWidthCSS(block.id, cols, mobileOverrides, mobileQuery);
+      }
     }
 
     if (responsive) {

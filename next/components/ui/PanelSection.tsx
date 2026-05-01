@@ -29,9 +29,13 @@ export function PanelSection({
         <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400">
           {title}
         </p>
+        {/* Toggle is only meaningful (and visible) at non-desktop breakpoints.
+            At desktop, aria-hidden prevents screen readers from announcing it. */}
         <button
           role="switch"
           aria-checked={isEnabled}
+          aria-hidden={!isResponsiveMode}
+          tabIndex={isResponsiveMode ? 0 : -1}
           aria-label={isEnabled ? `Remove ${title} override at this breakpoint` : `Override ${title} at this breakpoint`}
           onClick={() => isResponsiveMode && toggleSection(title, fields)}
           title={isEnabled ? "Remove breakpoint override" : "Override at this breakpoint"}
@@ -48,7 +52,12 @@ export function PanelSection({
           />
         </button>
       </div>
-      <div className={isResponsiveMode && !isEnabled ? "pointer-events-none select-none opacity-35" : ""}>
+      {/* inert prevents keyboard focus and AT interaction with disabled controls.
+          opacity-35 provides a visual disabled cue. */}
+      <div
+        className={isResponsiveMode && !isEnabled ? "pointer-events-none select-none opacity-35" : ""}
+        {...(isResponsiveMode && !isEnabled ? { inert: true } : {})}
+      >
         {children}
       </div>
     </div>
