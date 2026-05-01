@@ -15,6 +15,7 @@ const SETTINGS_LINKS = [
 const CONTENT_LINKS = [
   { href: "/admin",       icon: "/icons/pages.svg",     label: "Pages" },
   { href: "/admin/posts", icon: "/icons/post-list.svg", label: "Posts" },
+  { href: "/admin/media", icon: "/icons/media.svg",     label: "Media Library" },
 ];
 
 interface EditorNavDrawerProps {

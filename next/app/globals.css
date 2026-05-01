@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+/* Media library tile — selected state */
+.media-tile-selected {
+  border-color: #3b82f6;
+  background: #ffffff;
+}
+
+.media-tile-selected-inner {
+  transform: scale(0.85);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

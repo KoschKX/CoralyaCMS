@@ -33,6 +33,16 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           <SidebarContentNav />
 
           <p className="mb-1 mt-5 px-2 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+            Media
+          </p>
+          <Link
+            href="/admin/media"
+            className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
+          >
+            <span className="w-5 h-5 inline-flex items-center justify-center"><img src="/icons/media.svg" alt="" className="w-5 h-5" /></span> Media Library
+          </Link>
+
+          <p className="mb-1 mt-5 px-2 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
             Settings
           </p>
           {[

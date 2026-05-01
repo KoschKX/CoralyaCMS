@@ -30,6 +30,7 @@ import table     from "./table/config";
 import embed     from "./embed/config";
 import columns   from "./columns/config";
 import html      from "./html/config";
+import image     from "./image/config";
 
 import {
   registerBlock,
@@ -40,7 +41,7 @@ import {
   getPluginIcon,
 } from "@/lib/plugin-registry";
 
-for (const block of [paragraph, header, list, code, quote, delimiter, table, embed, columns, html]) {
+for (const block of [paragraph, header, list, code, quote, delimiter, table, embed, columns, html, image]) {
   registerBlock(block);
 }
 

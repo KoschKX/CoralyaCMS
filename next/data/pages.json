@@ -84,7 +84,7 @@
     "status": "published",
     "blocks": [
       {
-        "id": "sc-5",
+        "id": "sc-6",
         "type": "columns",
         "data": {
           "cols": [
@@ -141,6 +141,16 @@
                   "data": {
                     "text": "New paragraph"
                   }
+                },
+                {
+                  "id": "sc-3",
+                  "type": "image",
+                  "data": {
+                    "src": "/media/1777671604459-character_maker.png",
+                    "alt": "",
+                    "caption": "",
+                    "align": "left"
+                  }
                 }
               ]
             },
@@ -148,7 +158,7 @@
               "width": "33.333%",
               "blocks": [
                 {
-                  "id": "sc-3",
+                  "id": "sc-4",
                   "type": "paragraph",
                   "data": {
                     "text": "New paragraph",
@@ -167,7 +177,7 @@
               "width": "33.333%",
               "blocks": [
                 {
-                  "id": "sc-4",
+                  "id": "sc-5",
                   "type": "paragraph",
                   "data": {
                     "text": "New paragraph",
@@ -188,7 +198,7 @@
         }
       },
       {
-        "id": "sc-6",
+        "id": "sc-7",
         "type": "list",
         "data": {
           "style": "unordered",
@@ -199,10 +209,10 @@
         }
       }
     ],
-    "html": "[columns responsive='{\"tablet\":{\"stack\":null},\"mobile\":{\"stack\":true}}']\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraphs\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"},\"mobile\":{}}']\n  [/column]\n  [column width=\"33.333%\" responsive='{\"tablet\":{\"width\":\"100%\"}}']\n    [header text=\"New heading\" level=\"2\" align=\"center\" color=\"#dc2626\" responsive='{\"tablet\":{\"color\":\"#16a34a\"},\"mobile\":{\"align\":\"center\",\"color\":\"#9333ea\"}}']\n    [paragraph text=\"New paragraph\"]\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"}}']\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\"]\n  [/column]\n[/columns]\n\n[list style=\"unordered\" items='&#91;\"Item 1\",\"Item 2\"&#93;']",
+    "html": "[columns responsive='{\"tablet\":{\"stack\":null},\"mobile\":{\"stack\":true}}']\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraphs\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"},\"mobile\":{}}']\n  [/column]\n  [column width=\"33.333%\" responsive='{\"tablet\":{\"width\":\"100%\"}}']\n    [header text=\"New heading\" level=\"2\" align=\"center\" color=\"#dc2626\" responsive='{\"tablet\":{\"color\":\"#16a34a\"},\"mobile\":{\"align\":\"center\",\"color\":\"#9333ea\"}}']\n    [paragraph text=\"New paragraph\"]\n    [image src=\"/media/1777671604459-character_maker.png\" alt=\"\" caption=\"\" align=\"left\"]\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"}}']\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\"]\n  [/column]\n[/columns]\n\n[list style=\"unordered\" items='&#91;\"Item 1\",\"Item 2\"&#93;']",
     "pageBgColor": "#ffffff",
     "createdAt": "2026-03-25T19:58:40.950Z",
-    "updatedAt": "2026-05-01T16:00:55.750Z",
+    "updatedAt": "2026-05-01T23:34:13.179Z",
     "injectCode": {
       "tracking": "",
       "head": "",

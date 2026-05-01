@@ -74,6 +74,8 @@ export const config = {
     "/api/pages/:path*",
     "/api/settings/:path*",
     "/api/plugins/:path*",
+    "/api/media",
+    "/api/media/:path*",
     // Users API is protected so role checks can read headers set above
     "/api/admin/users",
     "/api/admin/users/:path*",

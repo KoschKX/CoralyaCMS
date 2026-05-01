@@ -28,6 +28,7 @@ import TableLayout     from "./table/layout";
 import EmbedLayout     from "./embed/layout";
 import ColumnsLayout   from "./columns/layout";
 import HtmlLayout      from "./html/layout";
+import ImageLayout     from "./image/layout";
 
 export interface PublicBlockDef {
   Layout: (props: BlockLayoutProps) => ReactNode;
@@ -45,6 +46,7 @@ export const publicBlockMap: Record<string, PublicBlockDef> = {
   table:     { Layout: TableLayout },
   embed:     { Layout: EmbedLayout },
   html:      { Layout: HtmlLayout },
+  image:     { Layout: ImageLayout },
   columns: {
     Layout: ColumnsLayout,
     isContainer: true,

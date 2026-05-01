@@ -24,5 +24,6 @@ export const ICON_COMPONENTS: Record<string, React.FC<React.SVGProps<SVGSVGEleme
   columns: ColumnsIcon,
   column: ColumnIcon,
   embed: MediaIcon,
+  image: MediaIcon,
   html: HtmlIcon,
 };
