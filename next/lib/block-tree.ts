@@ -86,6 +86,42 @@ export function insertBlockAfter(
   return [...blocks.slice(0, idx + 1), newBlock, ...blocks.slice(idx + 1)];
 }
 
+/**
+ * Recursively insert newBlock after the block with afterId anywhere in the tree.
+ * Falls back to appending at the top level if afterId is not found.
+ */
+export function deepInsertBlockAfter(
+  blocks: EditorBlock[],
+  afterId: string | "TOP",
+  newBlock: EditorBlock,
+): EditorBlock[] {
+  if (afterId === "TOP") return [newBlock, ...blocks];
+  // Try top-level first
+  const idx = blocks.findIndex((b) => b.id === afterId);
+  if (idx >= 0) {
+    return [...blocks.slice(0, idx + 1), newBlock, ...blocks.slice(idx + 1)];
+  }
+  // Recurse into containers
+  return blocks.map((b) => {
+    const childArrays = getChildArrays(b);
+    if (childArrays === null) return b;
+    let found = false;
+    const updated = childArrays.map((arr) => {
+      if (found) return arr;
+      const innerIdx = arr.findIndex((c) => c.id === afterId);
+      if (innerIdx >= 0) {
+        found = true;
+        return [...arr.slice(0, innerIdx + 1), newBlock, ...arr.slice(innerIdx + 1)];
+      }
+      // Recurse deeper
+      const deeper = deepInsertBlockAfter(arr, afterId, newBlock);
+      if (deeper !== arr) { found = true; return deeper; }
+      return arr;
+    });
+    return found ? applyChildArrays(b, updated) : b;
+  });
+}
+
 /** Recursively delete a block anywhere in the tree by id. */
 export function deepDeleteBlock(blocks: EditorBlock[], id: string): EditorBlock[] {
   return walkBlocks(blocks, (b) => (b.id === id ? null : b));

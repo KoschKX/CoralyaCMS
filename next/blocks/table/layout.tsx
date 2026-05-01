@@ -1,14 +1,17 @@
 import "./styles.css";
+import type { EditorBlock } from "@/lib/pages-db";
 import type { BlockLayoutProps } from "@/lib/block-types";
 
-export default function TableLayout({ data, blockId }: BlockLayoutProps & { blockId: string }) {
-  const rows = (data.content as string[][]) ?? [];
+type CellEntry = { blocks: EditorBlock[] };
+
+export default function TableLayout({ data, blockId, renderBlocks }: BlockLayoutProps & { blockId: string }) {
+  const cells = (data.cells as CellEntry[][]) ?? [];
   const withHeadings = data.withHeadings as boolean;
   return (
     <div data-block-id={blockId} className={`block-table overflow-x-auto block-${blockId}`}>
       <table className="w-full border-collapse text-sm">
         <tbody>
-          {rows.map((row, ri) => (
+          {cells.map((row, ri) => (
             <tr
               key={ri}
               className={
@@ -19,12 +22,12 @@ export default function TableLayout({ data, blockId }: BlockLayoutProps & { bloc
             >
               {row.map((cell, ci) =>
                 ri === 0 && withHeadings ? (
-                  <th key={ci} className="border border-zinc-200 px-3 py-2 text-left">
-                    {cell}
+                  <th key={ci} className="border border-zinc-200 px-3 py-2 text-left align-top">
+                    {renderBlocks ? renderBlocks(cell.blocks ?? []) : null}
                   </th>
                 ) : (
-                  <td key={ci} className="border border-zinc-200 px-3 py-2">
-                    {cell}
+                  <td key={ci} className="border border-zinc-200 px-3 py-2 align-top">
+                    {renderBlocks ? renderBlocks(cell.blocks ?? []) : null}
                   </td>
                 ),
               )}

@@ -161,31 +161,32 @@ export function BlocksPanel({ onAdd }: BlocksPanelProps) {
       <div className="flex-1 overflow-y-auto">
         {searchResults !== null ? (
           // Flat search results
-          <div className="px-2 py-2">
+          <div className="p-2">
             {searchResults.length === 0 ? (
               <p className="px-2 py-4 text-center text-xs text-zinc-400">No blocks match &ldquo;{search}&rdquo;</p>
             ) : (
-              searchResults.map((def) => (
-                <BlockButton key={def.name} def={def} onAdd={onAdd} />
-              ))
+              <div className="grid grid-cols-3 gap-1">
+                {searchResults.map((def) => (
+                  <BlockTile key={def.name} def={def} onAdd={onAdd} />
+                ))}
+              </div>
             )}
           </div>
         ) : (
-          // Categorized view
-          <div>
+          // Categorized grid view
+          <div className="p-2">
             {grouped.map((cat) => (
-              <div key={cat.id}>
+              <div key={cat.id} className="mb-3 last:mb-0">
                 {/* Category header */}
                 <button
                   onClick={() => toggleCategory(cat.id)}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left transition hover:bg-zinc-50"
+                  className="mb-1.5 flex w-full items-center gap-1.5 px-1 text-left"
                   aria-expanded={!collapsed[cat.id]}
                 >
-                  <span className="text-zinc-400">{cat.icon}</span>
-                  <span className="flex-1 text-[11px] font-semibold uppercase tracking-widest text-zinc-500">{cat.label}</span>
+                  <span className="flex-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-400">{cat.label}</span>
                   <svg
-                    className={`shrink-0 text-zinc-400 transition-transform ${collapsed[cat.id] ? "-rotate-90" : ""}`}
-                    width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    className={`shrink-0 text-zinc-300 transition-transform ${collapsed[cat.id] ? "-rotate-90" : ""}`}
+                    width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
                   >
                     <path d="m6 9 6 6 6-6"/>
@@ -194,9 +195,9 @@ export function BlocksPanel({ onAdd }: BlocksPanelProps) {
 
                 {/* Category blocks */}
                 {!collapsed[cat.id] && (
-                  <div className="px-2 pb-1">
+                  <div className="grid grid-cols-3 gap-1">
                     {cat.blocks.map((def) => (
-                      <BlockButton key={def.name} def={def} onAdd={onAdd} />
+                      <BlockTile key={def.name} def={def} onAdd={onAdd} />
                     ))}
                   </div>
                 )}
@@ -209,7 +210,7 @@ export function BlocksPanel({ onAdd }: BlocksPanelProps) {
   );
 }
 
-function BlockButton({
+function BlockTile({
   def,
   onAdd,
 }: {
@@ -218,14 +219,19 @@ function BlockButton({
 }) {
   return (
     <button
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData("application/x-coralya-block", def.name);
+        e.dataTransfer.effectAllowed = "copy";
+      }}
       onClick={() => onAdd(def.name)}
-      className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left transition hover:bg-zinc-100 focus:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+      className="flex flex-col items-center gap-1.5 rounded-md p-2 text-center transition hover:bg-zinc-100 focus:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 cursor-grab active:cursor-grabbing"
       title={`Insert ${def.label}`}
     >
-      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded border border-zinc-200 bg-white">
-        <BlockIcon name={def.name} label={def.label} size={17} />
+      <span className="flex h-10 w-10 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600">
+        <BlockIcon name={def.name} label={def.label} size={20} />
       </span>
-      <span className="truncate text-xs font-medium text-zinc-700">{def.label}</span>
+      <span className="w-full line-clamp-2 text-[11px] leading-tight text-zinc-700">{def.label}</span>
     </button>
   );
 }

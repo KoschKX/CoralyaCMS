@@ -9,6 +9,7 @@ import { ColToolbar } from "@/components/editor/ColToolbar";
 import { EditableBlock } from "@/components/editor/EditableBlock";
 import { AddZone } from "@/components/editor/BlockPickerAndAddZone";
 import { BlockToolbar } from "@/components/editor/BlockToolbar";
+import { ContainerDropZone } from "@/components/editor/ContainerDropZone";
 import { useBlockEditor, type BlockOps } from "@/components/editor/BlockEditorContext";
 import { useEditorViewport } from "@/components/editor/EditorHooks";
 
@@ -161,9 +162,10 @@ function BlockItem({
 
   const isSelected = block.id === selectedBlockId;
   const isColBlock = block.type === "columns";
+  const isContainerBlock = !!(def?.isContainer);
   const descendantSelected =
     !isSelected && !!selectedBlockId && isDescendant(block, selectedBlockId);
-  const showOverlay = !isSelected && !descendantSelected && !isColBlock;
+  const showOverlay = !isSelected && !descendantSelected && !isContainerBlock;
 
   // Only recreated when selection or stable actions change — not on every block.data update.
   const renderChildBlocks = useCallback((
@@ -177,8 +179,11 @@ function BlockItem({
     // children to re-render unnecessarily.
     const { id: blockId, data: blockData, type: blockType } = blockRef.current;
     const colOps = makeColOps(colBlocks, onUpdateAll, selectedBlockIdRef.current, onSelectBlock, makeNewBlock);
+    const parentLabel = blockType === "table" && colIdx !== undefined
+      ? `Cell ${colIdx + 1}`
+      : `Column ${colIdx !== undefined ? colIdx + 1 : ""}`;
     return (
-      <>
+      <ContainerDropZone onAdd={(afterId, type) => colOps.addAfter(afterId, type)}>
         {colBlocks.length === 0 ? (
           <AddZone
             onAdd={(type) => colOps.addAfter("TOP", type)}
@@ -197,8 +202,8 @@ function BlockItem({
                 ops={colOps}
                 isInColumn
                 parentInfo={{
-                  type: "column",
-                  label: `Column ${colIdx !== undefined ? colIdx + 1 : ""}`,
+                  type: blockType,
+                  label: parentLabel,
                   onSelect: () => {
                     if (colIdx !== undefined) {
                       setActiveColInfo({ blockId, colIdx });
@@ -214,7 +219,7 @@ function BlockItem({
             ))}
           </>
         )}
-      </>
+      </ContainerDropZone>
     );
   // block.id / block.data / block.type intentionally omitted — read from blockRef.current.
   // selectedBlockId intentionally omitted — read from selectedBlockIdRef.current.
@@ -222,11 +227,11 @@ function BlockItem({
   }, [onSelectBlock, makeNewBlock, setAnyPickerOpen, setActiveColInfo, onColSelect]);
 
   const isLast = idx === listLength - 1;
-  const colBlockParentSelected = isSelected && isColBlock && activeColInfo?.blockId !== block.id;
+  const colBlockParentSelected = isSelected && isContainerBlock && activeColInfo?.blockId !== block.id;
 
   const ringClass =
-    (isSelected && !isColBlock) || colBlockParentSelected ? "ring-2 ring-blue-500"
-    : (isSelected && isColBlock) || descendantSelected    ? "ring-2 ring-blue-200"
+    (isSelected && !isContainerBlock) || colBlockParentSelected ? "ring-2 ring-blue-500"
+    : (isSelected && isContainerBlock) || descendantSelected    ? "ring-2 ring-blue-200"
     : "ring-1 ring-transparent";
 
   return (
@@ -237,7 +242,7 @@ function BlockItem({
       style={{ paddingBottom: isUnavailable ? 0 : "var(--block-spacing, 1.5rem)" }}
       onClick={(e) => {
         if (isSelected) { e.stopPropagation(); return; }
-        if (isColBlock) { e.stopPropagation(); onSelectBlock(block.id, block.data as Record<string, unknown>, block.type); }
+        if (isContainerBlock) { e.stopPropagation(); onSelectBlock(block.id, block.data as Record<string, unknown>, block.type); }
       }}
     >
       <div className="group/block relative">
@@ -246,7 +251,7 @@ function BlockItem({
           onUpdate={(newData) => ops.update(block.id, newData)}
           isSelected={isSelected}
           onSelect={() => {
-            if (block.type !== "columns") setActiveColInfo(null);
+            if (!isContainerBlock) setActiveColInfo(null);
             onSelectBlock(block.id, block.data as Record<string, unknown>, block.type);
           }}
           activeColIdx={activeColInfo?.blockId === block.id ? activeColInfo.colIdx : null}
@@ -259,7 +264,7 @@ function BlockItem({
               onColSelect?.(block.id, null);
             }
           }}
-          renderChildBlocks={block.type === "columns" ? renderChildBlocks : undefined}
+          renderChildBlocks={isContainerBlock ? renderChildBlocks : undefined}
         />
 
         {showOverlay && (
@@ -267,7 +272,7 @@ function BlockItem({
             className="absolute inset-0 z-10 cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
-              if (block.type !== "columns") setActiveColInfo(null);
+              if (!isContainerBlock) setActiveColInfo(null);
               onSelectBlock(block.id, block.data as Record<string, unknown>, block.type);
             }}
           />

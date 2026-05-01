@@ -1,13 +1,20 @@
 import { PanelSection } from "@/components/ui/PanelSection";
-import type { BlockDefinition } from "@/lib/block-types";
+import type { BlockDefinition, BlockData } from "@/lib/block-types";
+import type { EditorBlock } from "@/lib/pages-db";
 import TableLayout from "./layout";
 import { TableEditable } from "./editable";
 
+type CellEntry = { blocks: EditorBlock[] };
+
 /**
- * Table block — a grid of editable cells with an optional heading row.
+ * Table block — a grid of cells, each holding child blocks.
+ * Implements isContainer so the block-tree utilities recurse into cells.
  *
  * @example data
- * { content: [["Col A", "Col B"], ["Cell 1", "Cell 2"]], withHeadings: true }
+ * {
+ *   cells: [[{ blocks: [] }, { blocks: [] }], [{ blocks: [] }, { blocks: [] }]],
+ *   withHeadings: true
+ * }
  */
 const table: BlockDefinition = {
   name: "table",
@@ -15,7 +22,26 @@ const table: BlockDefinition = {
   icon: "⊞",
   category: "data",
   supportsBreakpoints: true,
-  defaultData: { content: [["Heading 1", "Heading 2"], ["Cell 1", "Cell 2"]], withHeadings: true },
+  isContainer: true,
+  defaultData: {
+    cells: [
+      [{ blocks: [] }, { blocks: [] }],
+      [{ blocks: [] }, { blocks: [] }],
+    ],
+    withHeadings: true,
+  },
+  getChildBlocks: (data: BlockData) =>
+    ((data.cells as CellEntry[][]) ?? []).flat().map((cell) => cell.blocks ?? []),
+  setChildBlocks: (data: BlockData, arrays: EditorBlock[][]) => {
+    const cells = (data.cells as CellEntry[][]) ?? [];
+    const colCount = cells[0]?.length ?? 0;
+    return {
+      ...data,
+      cells: cells.map((row, ri) =>
+        row.map((cell, ci) => ({ ...cell, blocks: arrays[ri * colCount + ci] ?? [] })),
+      ),
+    };
+  },
   Layout: TableLayout,
   Editable: TableEditable,
   PanelControls({ data, onChange }) {

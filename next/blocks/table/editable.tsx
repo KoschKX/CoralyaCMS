@@ -1,46 +1,51 @@
 "use client";
 
-import { CE } from "@/components/editor/ContentEditable";
+import type { EditorBlock } from "@/lib/pages-db";
 import type { EditableProps } from "@/lib/block-types";
 
-function updateCell(rows: string[][], ri: number, ci: number, val: string): string[][] {
-  return rows.map((r, rowIdx) =>
-    rowIdx === ri ? r.map((c, colIdx) => (colIdx === ci ? val : c)) : r,
-  );
-}
+type CellEntry = { blocks: EditorBlock[] };
 
-export function TableEditable({ data, onUpdate }: EditableProps) {
-  const rows = (data.content as string[][]) ?? [[""]];
+export function TableEditable({ data, onUpdate, renderChildBlocks }: EditableProps) {
+  const cells = (data.cells as CellEntry[][]) ?? [[]];
   const withHeadings = !!(data.withHeadings);
+  const colCount = cells[0]?.length ?? 0;
+
+  function updateCells(newCells: CellEntry[][]) {
+    onUpdate({ ...data, cells: newCells });
+  }
 
   return (
     <div className="block-table overflow-x-auto">
       <table className="w-full border-collapse text-sm">
         <tbody>
-          {rows.map((row, ri) => (
+          {cells.map((row, ri) => (
             <tr
               key={ri}
               className={ri === 0 && withHeadings ? "bg-zinc-100 font-semibold" : "even:bg-zinc-50"}
             >
-              {row.map((cell, ci) =>
-                ri === 0 && withHeadings ? (
-                  <CE
+              {row.map((cell, ci) => {
+                const Tag = ri === 0 && withHeadings ? "th" : "td";
+                const flatIdx = ri * colCount + ci;
+                return (
+                  <Tag
                     key={ci}
-                    as="th"
-                    html={cell}
-                    onSave={(val) => onUpdate({ ...data, content: updateCell(rows, ri, ci, val) })}
-                    className="border border-zinc-200 px-3 py-2 text-left focus:outline-none focus:bg-blue-50"
-                  />
-                ) : (
-                  <CE
-                    key={ci}
-                    as="td"
-                    html={cell}
-                    onSave={(val) => onUpdate({ ...data, content: updateCell(rows, ri, ci, val) })}
-                    className="border border-zinc-200 px-3 py-2 focus:outline-none focus:bg-blue-50"
-                  />
-                ),
-              )}
+                    className="border border-zinc-200 px-3 py-2 align-top"
+                  >
+                    {renderChildBlocks?.(
+                      cell.blocks ?? [],
+                      (newBlocks) =>
+                        updateCells(
+                          cells.map((r, rri) =>
+                            r.map((c, cci) =>
+                              rri === ri && cci === ci ? { ...c, blocks: newBlocks } : c,
+                            ),
+                          ),
+                        ),
+                      flatIdx,
+                    )}
+                  </Tag>
+                );
+              })}
             </tr>
           ))}
         </tbody>
@@ -48,16 +53,22 @@ export function TableEditable({ data, onUpdate }: EditableProps) {
       <div className="mt-1 flex gap-3 text-xs text-zinc-400">
         <button
           className="hover:text-zinc-700"
-          onClick={() => {
-            const w = rows[0]?.length ?? 1;
-            onUpdate({ ...data, content: [...rows, Array(w).fill("")] });
-          }}
+          onClick={() =>
+            updateCells([
+              ...cells,
+              Array(colCount)
+                .fill(null)
+                .map(() => ({ blocks: [] as EditorBlock[] })),
+            ])
+          }
         >
           + row
         </button>
         <button
           className="hover:text-zinc-700"
-          onClick={() => onUpdate({ ...data, content: rows.map((r) => [...r, ""]) })}
+          onClick={() =>
+            updateCells(cells.map((row) => [...row, { blocks: [] as EditorBlock[] }]))
+          }
         >
           + col
         </button>

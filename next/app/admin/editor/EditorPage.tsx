@@ -15,6 +15,7 @@ import PagePanel from "@/app/admin/editor/PagePanel";
 import BlockPanel from "@/app/admin/editor/BlockPanel";
 import InjectCodePanel from "@/app/admin/editor/InjectCodePanel";
 import { BlocksPanel } from "@/components/editor/BlocksPanel";
+import { EditorNavDrawer } from "@/components/editor/EditorNavDrawer";
 import { useSavePage } from "@/app/admin/editor/hooks/useSavePage";
 import { useResponsiveBlock } from "@/app/admin/editor/hooks/useResponsiveBlock";
 import { useCanvasWidth } from "@/app/admin/editor/hooks/useCanvasWidth";
@@ -89,7 +90,7 @@ export default function EditorPage({
 
     const { panelTab, setPanelTab, panelOpen, setPanelOpen } = useEditorPanel(mainMode);
   const { tablet: tabletBp, mobile: mobileBp } = getEditorBreakpoints();
-  const { canvasRef, viewport, setViewport } = useCanvasWidth(tabletBp, mobileBp, panelOpen);
+  const { canvasRef, viewport, setViewport, innerExpandStyle, suppressContainer } = useCanvasWidth(tabletBp, mobileBp, panelOpen);
 
   const editorViewportContextValue = useMemo(
     () => ({ viewport }),
@@ -105,8 +106,10 @@ export default function EditorPage({
     [],
   );
 
-  // ── Left blocks-panel ─────────────────────────────────────────────────────
-  const [blocksPanelOpen, setBlocksPanelOpen] = useState(true);
+  // ── Fly-out drawer state ──────────────────────────────────────────────────
+  const [blocksPanelOpen, setBlocksPanelOpen] = useState(false);
+  const [navPanelOpen, setNavPanelOpen] = useState(false);
+
   const addBlockHandlerRef = useRef<((type: string) => void) | null>(null);
   const registerAddBlockHandler = useCallback(
     (fn: ((type: string) => void) | null) => { addBlockHandlerRef.current = fn; },
@@ -159,6 +162,8 @@ export default function EditorPage({
         setPanelOpen={setPanelOpen}
         blocksPanelOpen={blocksPanelOpen}
         setBlocksPanelOpen={setBlocksPanelOpen}
+        navPanelOpen={navPanelOpen}
+        setNavPanelOpen={setNavPanelOpen}
         saving={saving}
         saved={saved}
         saveError={saveError}
@@ -168,13 +173,21 @@ export default function EditorPage({
         router={router}
       />
 
+      {/* ── Fly-out: admin nav drawer ───────────────────────────────────── */}
+      <EditorNavDrawer open={navPanelOpen} onClose={() => setNavPanelOpen(false)} />
+
       <div className="flex flex-1 overflow-hidden">
-        {/* Left blocks panel */}
-        {mainMode === "visual" && blocksPanelOpen && (
-          <aside className="sticky top-0 h-[calc(100vh-3rem)] w-52 shrink-0 overflow-hidden border-r border-zinc-200 bg-white">
-            <BlocksPanel onAdd={handleAddBlockFromPanel} />
-          </aside>
-        )}
+        {/* Block inserter — inline, pushes canvas when open */}
+        <aside
+          aria-label="Block inserter"
+          className={`shrink-0 overflow-hidden border-r border-zinc-200 bg-white transition-[width] duration-100 ease-in-out ${
+            blocksPanelOpen && mainMode === "visual" ? "w-64" : "w-0"
+          }`}
+        >
+          <div className="w-64">
+            <BlocksPanel onAdd={(type) => { handleAddBlockFromPanel(type); setBlocksPanelOpen(false); }} />
+          </div>
+        </aside>
         {/* Editor canvas */}
         <div ref={canvasRef} className="flex-1 overflow-y-auto bg-zinc-100">
           <div className="py-10">
@@ -182,21 +195,23 @@ export default function EditorPage({
                 viewport breakpoint so responsive CSS fires at the right size.
                 When the panel is closed the ResizeObserver handles this automatically. */}
             <div
-              className="mx-auto transition-[max-width] duration-300"
-              style={panelOpen ? {
-                maxWidth:
-                  viewport === "mobile" ? "390px"
-                  : viewport === "tablet" ? "768px"
-                  : "2000px",
-              } : undefined}
+              className="mx-auto transition-[max-width] duration-150"
+              style={{
+                maxWidth: (panelOpen && mainMode === "visual")
+                  ? viewport === "mobile" ? "390px"
+                    : viewport === "tablet" ? "768px"
+                    : "9999px"
+                  : "9999px",
+              }}
             >
             <div
               className="text-zinc-900 bg-white rounded-lg shadow-sm mx-auto"
               style={{
-                maxWidth: "var(--content-max-width, 48rem)",
+                ...(mainMode === "code" ? {} : innerExpandStyle),
+                maxWidth: mainMode === "code" ? "none" : (innerExpandStyle.maxWidth ?? "var(--content-max-width, 48rem)"),
                 padding: "2.5rem var(--content-padding-x, 1.5rem)",
                 background: pageBgColor || "#fff",
-                containerType: "inline-size",
+                containerType: (suppressContainer && mainMode !== "code") ? "normal" : "inline-size",
               }}
             >
               {mainMode === "inject" ? (
@@ -237,7 +252,6 @@ export default function EditorPage({
                       tabletBp={tabletBp}
                       mobileBp={mobileBp}
                       forContainer
-                      forcedViewport={panelOpen ? viewport : undefined}
                     />
                     <VisualEditor
                       initialBlocks={liveBlocks}
@@ -258,8 +272,11 @@ export default function EditorPage({
         </div>
 
         {/* Right panel */}
-        {panelOpen && (
-          <aside className="sticky top-0 h-[calc(100vh-3rem)] w-72 shrink-0 overflow-y-auto border-l border-zinc-200 bg-white">
+        <aside
+          aria-label="Block settings"
+          className={`sticky top-0 shrink-0 overflow-hidden border-l border-zinc-200 bg-white transition-[width] duration-100 ease-in-out ${panelOpen ? "w-72" : "w-0"}`}
+        >
+          <div className={`h-[calc(100vh-3rem)] w-72 overflow-y-auto transition-transform duration-100 ease-in-out ${panelOpen ? "translate-x-0" : "translate-x-full"}`}>
             {/* Viewport switcher — always visible at the top of the panel */}
             {mainMode === "visual" && (
               <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-2">
@@ -322,8 +339,8 @@ export default function EditorPage({
                 />
               )}
             </div>
-          </aside>
-        )}
+          </div>
+        </aside>
       </div>
     </div>
     </EditorViewportContext.Provider>

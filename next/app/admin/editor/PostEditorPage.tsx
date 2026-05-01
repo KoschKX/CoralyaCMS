@@ -10,6 +10,8 @@ import { getEditorBreakpoints } from "@/lib/editor-breakpoints";
 import BlockPanel from "@/app/admin/editor/BlockPanel";
 import PostPanel from "@/app/admin/editor/PostPanel";
 import PostEditorToolbar from "@/app/admin/editor/PostEditorToolbar";
+import { BlocksPanel } from "@/components/editor/BlocksPanel";
+import { EditorNavDrawer } from "@/components/editor/EditorNavDrawer";
 import { useSavePost } from "@/app/admin/editor/hooks/useSavePost";
 import { useResponsiveBlock } from "@/app/admin/editor/hooks/useResponsiveBlock";
 import { useCanvasWidth } from "@/app/admin/editor/hooks/useCanvasWidth";
@@ -102,7 +104,7 @@ export default function PostEditorPage({
   // useEditorPanel("post") defaults to "post" tab and forces it in code mode.
   const { panelTab, setPanelTab, panelOpen, setPanelOpen } = useEditorPanel(mainMode, "post");
   const { tablet: tabletBp, mobile: mobileBp } = getEditorBreakpoints();
-  const { canvasRef, viewport, setViewport } = useCanvasWidth(tabletBp, mobileBp, panelOpen);
+  const { canvasRef, viewport, setViewport, innerExpandStyle, suppressContainer } = useCanvasWidth(tabletBp, mobileBp, panelOpen);
 
   const editorViewportContextValue = useMemo(() => ({ viewport }), [viewport]);
 
@@ -113,6 +115,19 @@ export default function PostEditorPage({
     },
     [],
   );
+
+  // ── Fly-out drawer state ──────────────────────────────────────────────────
+  const [blocksPanelOpen, setBlocksPanelOpen] = useState(false);
+  const [navPanelOpen, setNavPanelOpen] = useState(false);
+
+  const addBlockHandlerRef = useRef<((type: string) => void) | null>(null);
+  const registerAddBlockHandler = useCallback(
+    (fn: ((type: string) => void) | null) => { addBlockHandlerRef.current = fn; },
+    [],
+  );
+  const handleAddBlockFromPanel = useCallback((type: string) => {
+    addBlockHandlerRef.current?.(type);
+  }, []);
 
   // React state setters are guaranteed stable by React — listed here for
   // documentation clarity rather than correctness.
@@ -148,6 +163,10 @@ export default function PostEditorPage({
         setViewport={setViewport}
         panelOpen={panelOpen}
         setPanelOpen={setPanelOpen}
+        blocksPanelOpen={blocksPanelOpen}
+        setBlocksPanelOpen={setBlocksPanelOpen}
+        navPanelOpen={navPanelOpen}
+        setNavPanelOpen={setNavPanelOpen}
         saving={saving}
         saved={saved}
         saveError={saveError}
@@ -157,27 +176,43 @@ export default function PostEditorPage({
         router={router}
       />
 
+      {/* ── Fly-out: admin nav drawer ───────────────────────────────────── */}
+      <EditorNavDrawer open={navPanelOpen} onClose={() => setNavPanelOpen(false)} />
+
       <div className="flex flex-1 overflow-hidden">
+        {/* Block inserter — inline, pushes canvas when open */}
+        <aside
+          aria-label="Block inserter"
+          className={`shrink-0 overflow-hidden border-r border-zinc-200 bg-white transition-[width] duration-100 ease-in-out ${
+            blocksPanelOpen && mainMode === "visual" ? "w-64" : "w-0"
+          }`}
+        >
+          <div className="w-64">
+            <BlocksPanel onAdd={(type) => { handleAddBlockFromPanel(type); setBlocksPanelOpen(false); }} />
+          </div>
+        </aside>
         {/* Editor canvas */}
         <div ref={canvasRef} className="flex-1 overflow-y-auto bg-zinc-100">
           <div className="py-10">
             {/* When the panel is open, constrain canvas width to the selected viewport
                 breakpoint so responsive CSS fires at the right size. */}
             <div
-              className="mx-auto transition-[max-width] duration-300"
-              style={panelOpen ? {
-                maxWidth:
-                  viewport === "mobile" ? "390px"
-                  : viewport === "tablet" ? "768px"
-                  : "2000px",
-              } : undefined}
+              className="mx-auto transition-[max-width] duration-150"
+              style={{
+                maxWidth: panelOpen
+                  ? viewport === "mobile" ? "390px"
+                    : viewport === "tablet" ? "768px"
+                    : "9999px"
+                  : "9999px",
+              }}
             >
             <div
               className="text-zinc-900 bg-white rounded-lg shadow-sm mx-auto"
               style={{
-                maxWidth: "var(--content-max-width, 48rem)",
+                ...innerExpandStyle,
+                maxWidth: innerExpandStyle.maxWidth ?? "var(--content-max-width, 48rem)",
                 padding: "2.5rem var(--content-padding-x, 1.5rem)",
-                containerType: "inline-size",
+                containerType: suppressContainer ? "normal" : "inline-size",
               }}
             >
               {mainMode === "code" ? (
@@ -204,7 +239,6 @@ export default function PostEditorPage({
                       tabletBp={tabletBp}
                       mobileBp={mobileBp}
                       forContainer
-                      forcedViewport={panelOpen ? viewport : undefined}
                     />
                     <VisualEditor
                       initialBlocks={liveBlocks}
@@ -212,6 +246,7 @@ export default function PostEditorPage({
                       onSelectBlock={handleSelectBlock}
                       selectedBlockId={selectedBlock?.id ?? null}
                       registerUpdateHandler={registerUpdateHandler}
+                      registerAddBlockHandler={registerAddBlockHandler}
                       onColSelect={handleColSelect}
                       disabledBlocks={disabledBlocks}
                     />

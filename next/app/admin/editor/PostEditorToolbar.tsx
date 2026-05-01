@@ -1,5 +1,6 @@
 "use client";
 
+import type React from "react";
 import { useRouter } from "next/navigation";
 import type { Viewport } from "@/components/ui/ViewportContext";
 
@@ -10,6 +11,10 @@ interface PostEditorToolbarProps {
   setViewport: (vp: Viewport) => void;
   panelOpen: boolean;
   setPanelOpen: (fn: (o: boolean) => boolean) => void;
+  blocksPanelOpen: boolean;
+  setBlocksPanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  navPanelOpen: boolean;
+  setNavPanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
   saving: boolean;
   saved: boolean;
   saveError: string | null;
@@ -105,6 +110,10 @@ export default function PostEditorToolbar({
   setViewport,
   panelOpen,
   setPanelOpen,
+  blocksPanelOpen,
+  setBlocksPanelOpen,
+  navPanelOpen,
+  setNavPanelOpen,
   saving,
   saved,
   saveError,
@@ -116,21 +125,46 @@ export default function PostEditorToolbar({
   return (
     <>
       {/* Top toolbar */}
-      <div className="sticky top-0 z-20 flex h-12 items-center border-b border-zinc-200 bg-white px-4">
+      <div className="sticky top-0 z-20 flex h-12 items-center border-b border-zinc-200 bg-white px-2">
+        {/* Hamburger — opens the admin nav drawer */}
         <button
-          onClick={() => router.push("/admin/posts")}
-          className="text-sm text-zinc-500 hover:text-zinc-800 mr-2"
+          onClick={() => setNavPanelOpen((o) => !o)}
+          aria-label="Toggle admin navigation"
+          aria-pressed={navPanelOpen}
+          title="Admin menu"
+          className={`flex h-8 w-8 items-center justify-center rounded border transition ${
+            navPanelOpen ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
+          }`}
         >
-          &larr; Posts
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
         </button>
 
-        <ViewportButtons
-          mainMode={mainMode}
-          viewport={viewport}
-          setViewport={setViewport}
-        />
+        {/* Block inserter toggle — only in visual mode */}
+        {mainMode === "visual" && (
+          <button
+            onClick={() => setBlocksPanelOpen((o) => !o)}
+            aria-label="Toggle block inserter"
+            aria-pressed={blocksPanelOpen}
+            title="Insert block"
+            className={`ml-1 flex h-8 w-8 items-center justify-center rounded transition ${
+              blocksPanelOpen ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
+            }`}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+          </button>
+        )}
 
-        <div className="flex items-center gap-2 ml-auto">
+        <ViewportButtons mainMode={mainMode} viewport={viewport} setViewport={setViewport} />
+
+        <div className="flex items-center gap-1.5 ml-auto">
           {saved && (
             <span className="text-xs font-medium text-emerald-600">
               Saved &#10003;
@@ -142,8 +176,7 @@ export default function PostEditorToolbar({
               target="_blank"
               rel="noopener noreferrer"
               title="View post"
-              className="ml-1 rounded-md border px-2.5 py-1.5 text-sm font-medium transition border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 flex items-center"
-              style={{ lineHeight: 0 }}
+              className="flex h-8 w-8 items-center justify-center rounded border border-zinc-200 text-zinc-600 transition hover:bg-zinc-50"
             >
               <img src="/icons/external-link.svg" alt="View" className="w-4 h-4" />
             </a>
@@ -152,7 +185,7 @@ export default function PostEditorToolbar({
             onClick={() => setMainMode(mainMode === "code" ? "visual" : "code")}
             aria-label={mainMode === "code" ? "Back to visual editor" : "Code view"}
             aria-pressed={mainMode === "code"}
-            className={`rounded-md border px-2.5 py-1.5 text-sm font-mono transition ${
+            className={`flex h-8 w-8 items-center justify-center rounded border transition ${
               mainMode === "code"
                 ? "border-zinc-900 bg-zinc-900 text-white"
                 : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
@@ -188,7 +221,7 @@ export default function PostEditorToolbar({
             onClick={() => setPanelOpen((o) => !o)}
             aria-label="Toggle settings panel"
             aria-pressed={panelOpen}
-            className={`ml-1 rounded-md border px-2.5 py-1.5 text-sm transition ${
+            className={`flex h-8 w-8 items-center justify-center rounded border transition ${
               panelOpen
                 ? "border-zinc-900 bg-zinc-900 text-white"
                 : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"

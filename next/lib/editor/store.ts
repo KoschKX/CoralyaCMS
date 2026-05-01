@@ -24,6 +24,7 @@ import {
   deepMoveBlock,
   findBlockById,
   insertBlockAfter,
+  deepInsertBlockAfter,
 } from "@/lib/block-tree";
 import { blocksToShortcodes } from "@/lib/shortcodes";
 
@@ -73,6 +74,8 @@ export interface EditorStore {
   deleteBlock: (id: string) => void;
   moveBlock: (id: string, dir: -1 | 1) => void;
   addBlockAfter: (afterId: string | "TOP", type: string) => void;
+  /** Like addBlockAfter but searches the entire block tree (works inside columns). */
+  deepAddBlockAfter: (afterId: string | "TOP", type: string) => void;
   makeNewBlock: (type: string) => EditorBlock;
 
   /** Called by the panel to push an update for the currently selected block. */
@@ -239,6 +242,12 @@ export function createEditorStore() {
       addBlockAfter(afterId, type) {
         const newBlock = get().makeNewBlock(type);
         get().publish(insertBlockAfter(get().present, afterId, newBlock));
+        get().selectBlock(newBlock.id, newBlock.data as Record<string, unknown>, type);
+      },
+
+      deepAddBlockAfter(afterId, type) {
+        const newBlock = get().makeNewBlock(type);
+        get().publish(deepInsertBlockAfter(get().present, afterId, newBlock));
         get().selectBlock(newBlock.id, newBlock.data as Record<string, unknown>, type);
       },
 

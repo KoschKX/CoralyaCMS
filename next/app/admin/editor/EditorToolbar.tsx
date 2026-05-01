@@ -10,6 +10,8 @@ interface EditorToolbarProps {
   setPanelOpen: (fn: (o: boolean) => boolean) => void;
   blocksPanelOpen: boolean;
   setBlocksPanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  navPanelOpen: boolean;
+  setNavPanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
   saving: boolean;
   saved: boolean;
   saveError: string | null;
@@ -26,6 +28,8 @@ export default function EditorToolbar({
   setPanelOpen,
   blocksPanelOpen,
   setBlocksPanelOpen,
+  navPanelOpen,
+  setNavPanelOpen,
   saving,
   saved,
   saveError,
@@ -37,26 +41,45 @@ export default function EditorToolbar({
   return (
     <>
       {/* Top toolbar */}
-      <div className="sticky top-0 z-20 flex h-12 items-center border-b border-zinc-200 bg-white px-4">
-        <button onClick={() => router.push("/admin")} className="text-sm text-zinc-500 hover:text-zinc-800 mr-2">
-          &larr; Pages
+      <div className="sticky top-0 z-20 flex h-12 items-center border-b border-zinc-200 bg-white px-2">
+        {/* Hamburger — opens the admin nav drawer */}
+        <button
+          onClick={() => setNavPanelOpen((o) => !o)}
+          aria-label="Toggle admin navigation"
+          aria-pressed={navPanelOpen}
+          title="Admin menu"
+          className={`flex h-8 w-8 items-center justify-center rounded border transition ${
+            navPanelOpen ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
+          }`}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
         </button>
-        {/* Toggle left blocks panel — only relevant in visual mode */}
+
+        {/* Block inserter toggle — only in visual mode */}
         {mainMode === "visual" && (
           <button
             onClick={() => setBlocksPanelOpen((o) => !o)}
-            aria-label="Toggle blocks panel"
+            aria-label="Toggle block inserter"
             aria-pressed={blocksPanelOpen}
-            title="Toggle block inserter"
-            className={`mr-2 rounded-md border px-2.5 py-1.5 text-sm transition ${blocksPanelOpen ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
+            title="Insert block"
+            className={`ml-1 flex h-8 w-8 items-center justify-center rounded border transition ${
+              blocksPanelOpen ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
+            }`}
           >
-            {/* Grid/blocks icon */}
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M3 3h8v8H3zm0 10h8v8H3zm10-10h8v8h-8zm0 10h8v8h-8z"/>
+            {/* Plus-in-square icon */}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
             </svg>
           </button>
         )}
-        <div className="flex items-center gap-2 ml-auto">
+
+        <div className="flex items-center gap-1.5 ml-auto">
           {saved && <span className="text-xs font-medium text-emerald-600">Saved &#10003;</span>}
           {slug && status === "published" && (
             <a
@@ -64,8 +87,7 @@ export default function EditorToolbar({
               target="_blank"
               rel="noopener noreferrer"
               title="View page"
-              className="ml-1 rounded-md border px-2.5 py-1.5 text-sm font-medium transition border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 flex items-center"
-              style={{ lineHeight: 0 }}
+              className="flex h-8 w-8 items-center justify-center rounded border border-zinc-200 text-zinc-600 transition hover:bg-zinc-50"
             >
               <img src="/icons/external-link.svg" alt="View" className="w-4 h-4" />
             </a>
@@ -74,22 +96,22 @@ export default function EditorToolbar({
             onClick={() => setMainMode(mainMode === "inject" ? "visual" : "inject")}
             aria-label="Code injection"
             aria-pressed={mainMode === "inject"}
-            className={`rounded-md border px-2.5 py-1.5 text-sm transition border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 flex items-center justify-center ${mainMode === "inject" ? "border-zinc-900 bg-zinc-900 text-white" : ""}`}
+            className={`flex h-8 w-8 items-center justify-center rounded border transition ${mainMode === "inject" ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 9h8M8 15h8"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 9h8M8 15h8"/></svg>
           </button>
           <button
             onClick={() => setMainMode(mainMode === "code" ? "visual" : "code")}
             aria-label={mainMode === "code" ? "Back to visual editor" : "Code view"}
             aria-pressed={mainMode === "code"}
-            className={`rounded-md border px-2.5 py-1.5 text-sm font-mono transition ${mainMode === "code" ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
+            className={`flex h-8 w-8 items-center justify-center rounded border transition ${mainMode === "code" ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
           >
             {mainMode === "code" ? (
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="currentColor">
                 <path d="M3 6h11v1.5H3V6Zm3.5 5.5h11V13h-11v-1.5ZM21 17H10v1.5h11V17Z" />
               </svg>
             ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="currentColor">
                 <path d="M20.8 10.7l-4.3-4.3-1.1 1.1 4.3 4.3c.1.1.1.3 0 .4l-4.3 4.3 1.1 1.1 4.3-4.3c.7-.8.7-1.9 0-2.6zM4.2 11.8l4.3-4.3-1-1-4.3 4.3c-.7.7-.7 1.8 0 2.5l4.3 4.3 1.1-1.1-4.3-4.3c-.2-.1-.2-.3-.1-.4z"/>
               </svg>
             )}
@@ -98,7 +120,7 @@ export default function EditorToolbar({
             onClick={() => setPanelOpen((o) => !o)}
             aria-label="Toggle settings panel"
             aria-pressed={panelOpen}
-            className={`ml-1 rounded-md border px-2.5 py-1.5 text-sm transition ${panelOpen ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
+            className={`flex h-8 w-8 items-center justify-center rounded border transition ${panelOpen ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
           >
             &#8863;
           </button>

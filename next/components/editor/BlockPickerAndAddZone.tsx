@@ -1,10 +1,19 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useContext } from "react";
+import { useState, useEffect, useRef, useCallback, useContext, useMemo } from "react";
 import { blockRegistry } from "@/blocks/index";
 import { applyBlockPickerBlocks } from "@/filters/block-picker";
 import { BlockEditorContext } from "@/components/editor/BlockEditorContext";
 import { BlockIcon } from "@/components/BlockIcon";
+
+// ── Category order (matches BlocksPanel) ───────────────────────────────────────
+const CATEGORIES = [
+  { id: "text",   label: "Text" },
+  { id: "media",  label: "Media" },
+  { id: "design", label: "Design" },
+  { id: "data",   label: "Data" },
+  { id: "code",   label: "Code" },
+];
 
 export function BlockPicker({
   onSelect,
@@ -15,14 +24,17 @@ export function BlockPicker({
 }) {
   const ctx = useContext(BlockEditorContext);
   const disabledBlocks = ctx?.disabledBlocks ?? [];
-  // Apply the block.picker.blocks filter so plugins can hide, reorder, or
-  // inject blocks into the picker without modifying the global registry.
   const filtered = applyBlockPickerBlocks(blockRegistry);
-  const visibleBlocks = disabledBlocks.length
+  const allBlocks = disabledBlocks.length
     ? filtered.filter((def) => !disabledBlocks.includes(def.name))
     : filtered;
 
+  const [search, setSearch] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
   const ref = useRef<HTMLDivElement>(null);
+
+  // Focus search on mount
+  useEffect(() => { searchRef.current?.focus(); }, []);
 
   // Close on outside click
   useEffect(() => {
@@ -42,27 +54,28 @@ export function BlockPicker({
     return () => document.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  // Focus the first button on mount
-  useEffect(() => {
-    const first = ref.current?.querySelector<HTMLElement>("button");
-    first?.focus();
-  }, []);
+  const visibleBlocks = useMemo(() => {
+    if (!search.trim()) return allBlocks;
+    const q = search.toLowerCase();
+    return allBlocks.filter((d) => d.label.toLowerCase().includes(q) || d.name.toLowerCase().includes(q));
+  }, [search, allBlocks]);
 
-  // Trap focus within the picker
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key !== "Tab") return;
-    const focusable = Array.from(
-      ref.current?.querySelectorAll<HTMLElement>("button") ?? [],
-    );
-    if (focusable.length === 0) return;
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (e.shiftKey) {
-      if (document.activeElement === first) { e.preventDefault(); last.focus(); }
-    } else {
-      if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+  // Group by category
+  const groups = useMemo(() => {
+    if (search.trim()) return null; // flat list when searching
+    const map = new Map<string, typeof allBlocks>();
+    for (const cat of CATEGORIES) map.set(cat.id, []);
+    map.set("other", []);
+    for (const def of allBlocks) {
+      const key = (def as { category?: string }).category ?? "other";
+      if (!map.has(key)) map.set("other", [...(map.get("other") ?? [])]);
+      const bucket = map.get(key) ?? map.get("other")!;
+      if (map.has(key)) { bucket.push(def); } else { map.get("other")!.push(def); }
     }
-  }, []);
+    return [...CATEGORIES, { id: "other", label: "Other" }]
+      .map((cat) => ({ ...cat, blocks: map.get(cat.id) ?? [] }))
+      .filter((g) => g.blocks.length > 0);
+  }, [search, allBlocks]);
 
   return (
     <div
@@ -70,24 +83,65 @@ export function BlockPicker({
       role="dialog"
       aria-modal="true"
       aria-label="Insert block"
-      onKeyDown={handleKeyDown}
-      className="absolute z-40 mt-1 w-52 rounded-lg border border-zinc-200 bg-white shadow-lg"
+      className="z-40 w-72 rounded-lg border border-zinc-200 bg-white shadow-xl"
     >
-      <div className="p-1">
-        {visibleBlocks.map((def) => (
-          <button
-            key={def.name}
-            onClick={() => onSelect(def.name)}
-            className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm transition hover:bg-zinc-50 focus:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded border border-zinc-200 font-mono text-[11px] text-zinc-500">
-              <BlockIcon name={def.name} label={def.label} size={20} />
-            </span>
-            <span className="text-zinc-800">{def.label}</span>
-          </button>
-        ))}
+      {/* Search */}
+      <div className="border-b border-zinc-100 p-2">
+        <div className="relative">
+          <svg className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input
+            ref={searchRef}
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search blocks…"
+            className="w-full rounded-md border border-zinc-200 bg-zinc-50 py-1.5 pl-7 pr-3 text-xs placeholder:text-zinc-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-400"
+          />
+        </div>
+      </div>
+
+      {/* Block grid */}
+      <div className="max-h-72 overflow-y-auto p-2">
+        {search.trim() ? (
+          visibleBlocks.length === 0 ? (
+            <p className="py-4 text-center text-xs text-zinc-400">No blocks found</p>
+          ) : (
+            <div className="grid grid-cols-3 gap-1">
+              {visibleBlocks.map((def) => (
+                <BlockTile key={def.name} def={def} onSelect={onSelect} />
+              ))}
+            </div>
+          )
+        ) : (
+          groups?.map((group) => (
+            <div key={group.id} className="mb-2 last:mb-0">
+              <p className="mb-1 px-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-400">{group.label}</p>
+              <div className="grid grid-cols-3 gap-1">
+                {group.blocks.map((def) => (
+                  <BlockTile key={def.name} def={def} onSelect={onSelect} />
+                ))}
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
+  );
+}
+
+function BlockTile({ def, onSelect }: { def: { name: string; label: string }; onSelect: (type: string) => void }) {
+  return (
+    <button
+      onClick={() => onSelect(def.name)}
+      className="flex flex-col items-center gap-1.5 rounded-md p-2 text-center transition hover:bg-zinc-100 focus:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      <span className="flex h-10 w-10 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600">
+        <BlockIcon name={def.name} label={def.label} size={20} />
+      </span>
+      <span className="w-full line-clamp-2 text-[11px] leading-tight text-zinc-700">{def.label}</span>
+    </button>
   );
 }
 
@@ -98,7 +152,7 @@ export function AddZone({
   onOpenChange,
 }: {
   onAdd: (type: string) => void;
-  variant?: "inline" | "footer" | "col-empty" | "col-last";
+  variant?: "inline" | "col-empty" | "col-last";
   isSelected?: boolean;
   onOpenChange?: (open: boolean) => void;
 }) {
@@ -133,28 +187,6 @@ export function AddZone({
         </button>
         {open && (
           <div className="absolute top-full left-1/2 -translate-x-1/2 z-30 mt-1">
-            <BlockPicker onSelect={select} onClose={close} />
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  if (variant === "footer") {
-    return (
-      <div className="relative">
-        <button
-          ref={triggerRef}
-          onClick={toggle}
-          aria-label="Add block"
-          aria-expanded={open}
-          className="flex w-full items-center gap-2 px-1 py-2 text-sm text-zinc-400 hover:text-zinc-600 transition"
-        >
-          <span className="flex h-6 w-6 items-center justify-center rounded border border-zinc-300 bg-white text-zinc-400 text-sm leading-none hover:border-zinc-500 hover:text-zinc-600" aria-hidden="true">+</span>
-          <span>Type / to choose a block</span>
-        </button>
-        {open && (
-          <div className="absolute top-full left-0 z-30">
             <BlockPicker onSelect={select} onClose={close} />
           </div>
         )}
