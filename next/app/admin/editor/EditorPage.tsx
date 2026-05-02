@@ -139,6 +139,7 @@ export default function EditorPage({
     slug,
     codeText,
     liveBlocks,
+    mainMode,
     pageBgColor,
     injectCode: injectFields,
     onStatusChange: setStatus,

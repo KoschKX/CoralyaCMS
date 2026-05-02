@@ -93,6 +93,7 @@ export default function PostEditorPage({
     slug,
     codeText,
     liveBlocks,
+    mainMode,
     excerpt,
     tags,
     categories,

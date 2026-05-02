@@ -10,6 +10,7 @@ interface UseSavePageOptions {
   slug: string;
   codeText: string;
   liveBlocks?: EditorBlock[];
+  mainMode?: "visual" | "code" | "inject";
   pageBgColor: string;
   injectCode?: InjectCode;
   onStatusChange: (s: "draft" | "published") => void;
@@ -17,13 +18,14 @@ interface UseSavePageOptions {
   onSaveSuccess?: () => void;
 }
 
-export function useSavePage({ id, title, slug, codeText, liveBlocks, pageBgColor, injectCode, onStatusChange, onSaveSuccess }: UseSavePageOptions) {
+export function useSavePage({ id, title, slug, codeText, liveBlocks, mainMode, pageBgColor, injectCode, onStatusChange, onSaveSuccess }: UseSavePageOptions) {
   return useSave({
     id,
     title,
     slug,
     codeText,
     liveBlocks,
+    mainMode,
     extraPayload: { pageBgColor, injectCode },
     collectionEndpoint: "/api/pages",
     redirectOnCreate: (newId) => `/admin/editor/${newId}`,

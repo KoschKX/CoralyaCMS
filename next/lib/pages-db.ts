@@ -10,8 +10,11 @@ import { createWriteQueue } from "@/lib/utils/write-queue";
 
 const DATA_FILE = path.join(process.cwd(), "data", "pages.json");
 
-/** Module-level cache — invalidated on every write so reads are always consistent. */
-let pagesCache: Page[] | null = null;
+// No in-memory cache: Next.js/Turbopack runs API routes and page renderers
+// in separate worker contexts that each have their own module instance.
+// A module-level cache in one worker is invisible to the other, so writes
+// from the API worker would never be seen by the page-render worker.
+// Always reading from disk is correct and fast enough for small JSON files.
 
 /**
  * Write-queue mutex: all mutating operations are serialised so concurrent API
@@ -20,19 +23,17 @@ let pagesCache: Page[] | null = null;
 const serialise = createWriteQueue();
 
 function readAll(): Page[] {
-  if (pagesCache !== null) return pagesCache;
-  if (!fs.existsSync(DATA_FILE)) return (pagesCache = []);
+  if (!fs.existsSync(DATA_FILE)) return [];
   try {
     const raw = JSON.parse(fs.readFileSync(DATA_FILE, "utf-8"));
     if (!Array.isArray(raw)) {
       console.error("[pages-db] pages.json is not an array — resetting to empty.");
-      return (pagesCache = []);
+      return [];
     }
-    pagesCache = raw as Page[];
-    return pagesCache;
+    return raw as Page[];
   } catch (err) {
     console.error("[pages-db] Failed to parse pages.json:", err);
-    return (pagesCache = []);
+    return [];
   }
 }
 
@@ -42,7 +43,6 @@ function writeAll(pages: Page[]): void {
   const tmp = DATA_FILE + ".tmp";
   fs.writeFileSync(tmp, JSON.stringify(pages, null, 2));
   fs.renameSync(tmp, DATA_FILE);
-  pagesCache = pages;
 }
 
 export function listPages(): Page[] {

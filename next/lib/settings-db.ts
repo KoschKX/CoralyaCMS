@@ -14,18 +14,18 @@ const SETTINGS_FILE = path.join(process.cwd(), "data", "settings.json");
 
 const defaults: SiteSettings = DEFAULT_SETTINGS;
 
-/** Module-level cache — invalidated on every write so reads are always consistent. */
-let settingsCache: SiteSettings | null = null;
+// No in-memory cache: Next.js/Turbopack runs API routes and page renderers
+// in separate worker contexts that each have their own module instance.
+// Always reading from disk ensures all workers see the latest saved settings.
 
 /** Write-queue mutex — serialises concurrent settings saves. */
 const serialise = createWriteQueue();
 
 export function getSettings(): SiteSettings {
-  if (settingsCache !== null) return settingsCache;
-  if (!fs.existsSync(SETTINGS_FILE)) return (settingsCache = structuredClone(defaults));
+  if (!fs.existsSync(SETTINGS_FILE)) return structuredClone(defaults);
   try {
     const saved = JSON.parse(fs.readFileSync(SETTINGS_FILE, "utf-8")) as Partial<SiteSettings>;
-    settingsCache = {
+    return {
       ...defaults,
       ...saved,
       // Deep-merge nested objects so new fields added to defaults are never missing
@@ -41,9 +41,8 @@ export function getSettings(): SiteSettings {
         breakpoints: { ...defaults.layout.breakpoints, ...saved.layout?.breakpoints },
       },
     };
-    return settingsCache;
   } catch {
-    return (settingsCache = structuredClone(defaults));
+    return structuredClone(defaults);
   }
 }
 
@@ -55,7 +54,6 @@ export function saveSettings(settings: Partial<SiteSettings>): Promise<SiteSetti
     const tmp = SETTINGS_FILE + ".tmp";
     fs.writeFileSync(tmp, JSON.stringify(updated, null, 2));
     fs.renameSync(tmp, SETTINGS_FILE);
-    settingsCache = updated;
     return updated;
   });
 }

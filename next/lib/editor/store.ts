@@ -253,8 +253,19 @@ export function createEditorStore() {
 
       panelUpdateBlock(id, newData) {
         const updated = deepUpdateBlock(get().present, id, newData);
-        get().publish(updated);
-        const found = findBlockById(updated, id);
+        // Fire onChange immediately — same pattern as undo/redo — so React
+        // state (visualBlocks, codeText) is in sync before the user saves.
+        // Using publish() would debounce 150ms, which is fine for rapid
+        // typing but not for discrete panel actions like image selection.
+        cancelPublishDebounce();
+        const mutable = [...updated];
+        set((s) => {
+          s.past = [...s.past.slice(-MAX_HISTORY), s.present];
+          s.present = mutable;
+          s.future = [];
+        });
+        cb.onChange?.(blocksToShortcodes(mutable), mutable);
+        const found = findBlockById(mutable, id);
         cb.onSelectBlock?.(id, newData, found?.type ?? "");
       },
     })),

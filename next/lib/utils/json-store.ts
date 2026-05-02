@@ -12,16 +12,18 @@ import fs from "fs";
 import path from "path";
 
 export function createJsonStore<T>(filePath: string) {
-  let cache: T[] | null = null;
+  // No in-memory cache: Next.js/Turbopack runs API routes and page renderers
+  // in separate worker contexts that each have their own module instance.
+  // A module-level cache in one worker is invisible to the other, so writes
+  // from the API worker would never be seen by the page-render worker.
+  // Always reading from disk is correct and fast enough for small JSON files.
 
   function readAll(): T[] {
-    if (cache !== null) return cache;
-    if (!fs.existsSync(filePath)) return (cache = []);
+    if (!fs.existsSync(filePath)) return [];
     try {
-      cache = JSON.parse(fs.readFileSync(filePath, "utf-8")) as T[];
-      return cache;
+      return JSON.parse(fs.readFileSync(filePath, "utf-8")) as T[];
     } catch {
-      return (cache = []);
+      return [];
     }
   }
 
@@ -30,13 +32,10 @@ export function createJsonStore<T>(filePath: string) {
     const tmp = filePath + ".tmp";
     fs.writeFileSync(tmp, JSON.stringify(items, null, 2));
     fs.renameSync(tmp, filePath);
-    cache = items;
   }
 
-  /** Force the next readAll() to re-read from disk. */
-  function invalidate(): void {
-    cache = null;
-  }
+  /** No-op: kept for API compatibility. */
+  function invalidate(): void {}
 
   return { readAll, writeAll, invalidate };
 }

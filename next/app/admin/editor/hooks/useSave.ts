@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { shortcodesToBlocks } from "@/lib/shortcodes";
+import { shortcodesToBlocks, blocksToShortcodes } from "@/lib/shortcodes";
 import type { EditorBlock } from "@/lib/types";
 
 interface UseSaveOptions {
@@ -17,6 +17,12 @@ interface UseSaveOptions {
    * redundant round-trip parse.
    */
   liveBlocks?: EditorBlock[];
+  /**
+   * Current editor mode. In visual mode the html field is derived from
+   * liveBlocks; in code/inject modes codeText is used directly so the user's
+   * raw edits are never transformed by a shortcode round-trip.
+   */
+  mainMode?: "visual" | "code" | "inject";
   extraPayload: Record<string, unknown>;
   /** Collection endpoint, e.g. "/api/pages" or "/api/posts". */
   collectionEndpoint: string;
@@ -33,6 +39,7 @@ export function useSave({
   slug,
   codeText,
   liveBlocks,
+  mainMode,
   extraPayload,
   collectionEndpoint,
   redirectOnCreate,
@@ -51,7 +58,14 @@ export function useSave({
     try {
       // Use pre-computed blocks when available (avoids re-parsing in visual mode).
       const blocks = liveBlocks ?? shortcodesToBlocks(codeText);
-      const payload = { title, slug, status: targetStatus, blocks, html: codeText, ...extraPayload };
+      // In visual mode: derive html from the live block tree so panel edits
+      // (e.g. image changes) are captured even if codeText is a stale draft.
+      // In code/inject modes: use codeText directly — the user typed it and
+      // a shortcode round-trip could silently transform or lose content.
+      const html = mainMode !== "visual"
+        ? codeText
+        : (liveBlocks ? blocksToShortcodes(liveBlocks) : codeText);
+      const payload = { title, slug, status: targetStatus, blocks, html, ...extraPayload };
       if (id) {
         const res = await fetch(`${collectionEndpoint}/${id}`, {
           method: "PUT",

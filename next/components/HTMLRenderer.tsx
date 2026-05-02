@@ -13,7 +13,7 @@
  * Plain text / raw HTML between shortcodes is rendered verbatim.
  */
 
-import { type ReactNode, useMemo } from "react";
+import type { ReactNode } from "react";
 import { blockMap } from "@/blocks/index";
 import { tokenise, buildBlocks } from "@/lib/shortcodes";
 import type { EditorBlock } from "@/lib/pages-db";
@@ -66,10 +66,7 @@ function RenderBlocks({
 }
 
 export default function HTMLRenderer({ html, disabledBlocks = [] }: Props) {
-  const blocks = useMemo(() => {
-    const tokens = tokenise(html);
-    return buildBlocks(tokens, 0).blocks;
-  }, [html]);
+  const blocks = buildBlocks(tokenise(html), 0).blocks;
   return <RenderBlocks blocks={blocks} disabledBlocks={disabledBlocks} />;
 }
 
