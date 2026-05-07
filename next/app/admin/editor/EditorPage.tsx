@@ -208,7 +208,7 @@ export default function EditorPage({
             <div
               className="text-zinc-900 bg-white rounded-lg shadow-sm mx-auto"
               style={{
-                height: "calc(100vh - 48px)",
+                minHeight: "calc(100vh - 48px)",
                 maxWidth: "var(--content-max-width, 48rem)",
                 padding: "2.5rem var(--content-padding-x, 1.5rem)",
                 background: pageBgColor || "#fff",
