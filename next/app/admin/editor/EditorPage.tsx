@@ -191,30 +191,16 @@ export default function EditorPage({
           </div>
         </aside>
         {/* Editor canvas */}
-        <div ref={canvasRef} className="flex-1 overflow-y-auto bg-zinc-100">
-          <div className="min-h-full bg-white">
-            {/* When the panel is open, constrain canvas width to the selected
-                viewport breakpoint so responsive CSS fires at the right size.
-                When the panel is closed the ResizeObserver handles this automatically. */}
-            <div
-              className="mx-auto"
-              style={panelOpen && mainMode !== "code" ? {
-                maxWidth:
-                  viewport === "mobile" ? "390px"
-                  : viewport === "tablet" ? "768px"
-                  : "100%",
-              } : { maxWidth: "100%" }}
-            >
-            <div
-              className="text-zinc-900 bg-white rounded-lg shadow-sm mx-auto"
-              style={{
-                minHeight: "calc(100vh - 48px)",
-                maxWidth: "var(--content-max-width, 48rem)",
-                padding: "2.5rem var(--content-padding-x, 1.5rem)",
-                background: pageBgColor || "#fff",
-                containerType: "inline-size",
-              }}
-            >
+        <div ref={canvasRef} className="flex-1 overflow-y-auto bg-white">
+          <div
+            className="text-zinc-900"
+            style={{
+              minHeight: "calc(100vh - 48px)",
+              padding: "2.5rem var(--content-padding-x, 1.5rem)",
+              background: pageBgColor || "#fff",
+              containerType: "inline-size",
+            }}
+          >
               {mainMode === "inject" ? (
                 <InjectCodePanel
                   fields={injectFields}
@@ -268,8 +254,6 @@ export default function EditorPage({
                   </ViewportContext.Provider>
                 </>
               )}
-            </div>
-            </div>
           </div>
         </div>
 
