@@ -192,7 +192,7 @@ export default function EditorPage({
         </aside>
         {/* Editor canvas */}
         <div ref={canvasRef} className="flex-1 overflow-y-auto bg-zinc-100">
-          <div className="">
+          <div className="min-h-full bg-white">
             {/* When the panel is open, constrain canvas width to the selected
                 viewport breakpoint so responsive CSS fires at the right size.
                 When the panel is closed the ResizeObserver handles this automatically. */}

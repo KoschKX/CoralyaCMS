@@ -195,7 +195,7 @@ export default function PostEditorPage({
         </aside>
         {/* Editor canvas */}
         <div ref={canvasRef} className="flex-1 overflow-y-auto bg-zinc-100">
-          <div className="py-10">
+          <div className="min-h-full bg-white py-10">
             {/* When the panel is open, constrain canvas width to the selected viewport
                 breakpoint so responsive CSS fires at the right size. */}
             <div
