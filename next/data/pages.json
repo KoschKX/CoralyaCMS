@@ -112,7 +112,7 @@
               "width": "33.333%",
               "responsive": {
                 "tablet": {
-                  "width": "100%"
+                  "width": "33.333%"
                 }
               },
               "blocks": [
@@ -139,7 +139,8 @@
                   "id": "sc-2",
                   "type": "paragraph",
                   "data": {
-                    "text": "New paragraph"
+                    "text": "New paragraph",
+                    "align": "center"
                   }
                 },
                 {
@@ -194,7 +195,9 @@
             "mobile": {
               "stack": true
             }
-          }
+          },
+          "stack": null,
+          "__selectedColIdx": 1
         }
       },
       {
@@ -209,10 +212,10 @@
         }
       }
     ],
-    "html": "[columns responsive='{\"tablet\":{\"stack\":null},\"mobile\":{\"stack\":true}}']\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraphs\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"},\"mobile\":{}}']\n  [/column]\n  [column width=\"33.333%\" responsive='{\"tablet\":{\"width\":\"100%\"}}']\n    [header text=\"New heading\" level=\"2\" align=\"center\" color=\"#dc2626\" responsive='{\"tablet\":{\"color\":\"#16a34a\"},\"mobile\":{\"align\":\"center\",\"color\":\"#9333ea\"}}']\n    [paragraph text=\"New paragraph\"]\n    [image src=\"/media/1777671588524-crabtropics.png\" alt=\"\" caption=\"\" align=\"center\"]\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"}}']\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\"]\n  [/column]\n[/columns]\n\n[list style=\"unordered\" items='&#91;\"Item 1\",\"Item 2\"&#93;']",
+    "html": "[columns responsive='{\"tablet\":{\"stack\":null},\"mobile\":{\"stack\":true}}']\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraphs\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"},\"mobile\":{}}']\n  [/column]\n  [column width=\"33.333%\" responsive='{\"tablet\":{\"width\":\"33.333%\"}}']\n    [header text=\"New heading\" level=\"2\" align=\"center\" color=\"#dc2626\" responsive='{\"tablet\":{\"color\":\"#16a34a\"},\"mobile\":{\"align\":\"center\",\"color\":\"#9333ea\"}}']\n    [paragraph text=\"New paragraph\" align=\"center\"]\n    [image src=\"/media/1777671588524-crabtropics.png\" alt=\"\" caption=\"\" align=\"center\"]\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"}}']\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\"]\n  [/column]\n[/columns]\n\n[list style=\"unordered\" items='&#91;\"Item 1\",\"Item 2\"&#93;']",
     "pageBgColor": "#ffffff",
     "createdAt": "2026-03-25T19:58:40.950Z",
-    "updatedAt": "2026-05-07T19:43:09.621Z",
+    "updatedAt": "2026-05-07T20:39:19.727Z",
     "injectCode": {
       "tracking": "",
       "head": "",
