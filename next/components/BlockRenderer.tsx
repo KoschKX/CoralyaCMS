@@ -2,6 +2,7 @@ import { memo, useMemo } from "react";
 import type { EditorBlock } from "@/lib/pages-db";
 import { publicBlockMap } from "@/blocks/layout-registry";
 import { parseShortcode } from "@/lib/shortcodes";
+import { getBlockWrapperProps } from "@/lib/block-advanced-css";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 interface Props {
@@ -101,9 +102,15 @@ function BlockRenderer({ blocks, disabledBlocks = [] }: Props) {
           const def = publicBlockMap[entry.resolvedType];
           if (!def) return null;
 
+          const { style: wrapperStyle, extraClass, id: wrapperId } = getBlockWrapperProps(entry.resolvedData);
           return (
             <ErrorBoundary key={entry.id}>
-              <div data-block-id={entry.id}>
+              <div
+                data-block-id={entry.id}
+                id={wrapperId}
+                className={extraClass || undefined}
+                style={Object.keys(wrapperStyle).length ? wrapperStyle : undefined}
+              >
                 <def.Layout
                   data={entry.resolvedData}
                   blockId={entry.id}

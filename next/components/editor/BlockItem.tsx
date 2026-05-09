@@ -12,6 +12,8 @@ import { BlockToolbar } from "@/components/editor/BlockToolbar";
 import { ContainerDropZone } from "@/components/editor/ContainerDropZone";
 import { useBlockEditor, type BlockOps } from "@/components/editor/BlockEditorContext";
 import { useEditorViewport } from "@/components/editor/EditorHooks";
+import { getBlockWrapperProps } from "@/lib/block-advanced-css";
+import { mergeViewportOverrides } from "@/lib/responsive-css";
 
 interface ColViewportToolbarProps {
   blockId: string;
@@ -233,6 +235,10 @@ function BlockItem({
   const isLast = idx === listLength - 1;
   const colBlockParentSelected = isSelected && isContainerBlock && activeColInfo?.blockId !== block.id;
 
+  const editorViewport = useEditorViewport();
+  const wrapperDisplayData = mergeViewportOverrides(block.data as Record<string, unknown>, editorViewport);
+  const { style: wrapperStyle, extraClass: wrapperExtraClass, id: wrapperId } = getBlockWrapperProps(wrapperDisplayData);
+
   const ringClass =
     (isSelected && !isContainerBlock) || colBlockParentSelected ? "ring-2 ring-blue-500"
     : (isSelected && isContainerBlock) || descendantSelected    ? "ring-2 ring-blue-200"
@@ -249,7 +255,11 @@ function BlockItem({
         if (isContainerBlock) { e.stopPropagation(); onSelectBlock(block.id, block.data as Record<string, unknown>, block.type); }
       }}
     >
-      <div className="group/block relative">
+      <div
+        className={`group/block relative${wrapperExtraClass ? ` ${wrapperExtraClass}` : ""}`}
+        id={wrapperId}
+        style={Object.keys(wrapperStyle).length ? wrapperStyle : undefined}
+      >
         <EditableBlock
           block={block}
           onUpdate={(newData) => ops.update(block.id, newData)}

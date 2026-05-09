@@ -2,6 +2,7 @@
 
 import { blockMap } from "@/blocks/index";
 import { ViewportContext, type Viewport } from "@/components/ui/ViewportContext";
+import { BlockAdvancedControls } from "@/components/ui/BlockAdvancedControls";
 import type { SelectedBlock } from "@/lib/types";
 
 interface BlockPanelProps {
@@ -12,6 +13,7 @@ interface BlockPanelProps {
   toggleSection: (title: string, fields: string[]) => void;
   controlsDisplayData: (data: Record<string, unknown>) => Record<string, unknown>;
   onControlsChange: (newData: Record<string, unknown>) => void;
+  onBaseControlsChange: (newData: Record<string, unknown>) => void;
   activeColIdx: number | null;
 }
 
@@ -49,6 +51,7 @@ export default function BlockPanel({
   toggleSection,
   controlsDisplayData,
   onControlsChange,
+  onBaseControlsChange,
   activeColIdx,
 }: BlockPanelProps) {
   if (!selectedBlock) {
@@ -58,6 +61,7 @@ export default function BlockPanel({
   const supportsBreakpoints = !!blockMap[selectedBlock.name]?.supportsBreakpoints;
   const activeViewport: Viewport = supportsBreakpoints ? viewport : "desktop";
   const Controls = blockMap[selectedBlock.name]?.PanelControls;
+  const displayData = controlsDisplayData(selectedBlock.data);
 
   return (
     <>
@@ -66,24 +70,24 @@ export default function BlockPanel({
           {selectedBlock.name}
         </span>
       </div>
-      {Controls ? (
-        <ViewportContext.Provider value={{ viewport: activeViewport, isSectionEnabled, toggleSection }}>
-          <p className={`-mt-1 text-[10px] transition-opacity ${supportsBreakpoints && activeViewport !== "desktop" ? "text-zinc-400 opacity-100" : "select-none opacity-0"}`}>
-            Viewport: <strong>{activeViewport}</strong>. Toggle switches to override at this breakpoint.
-          </p>
+      <ViewportContext.Provider value={{ viewport: activeViewport, isSectionEnabled, toggleSection }}>
+        {Controls && (
           <Controls
             data={{
-              ...controlsDisplayData(selectedBlock.data),
+              ...displayData,
               ...(selectedBlock.name === "columns" && activeColIdx !== null
                 ? { __selectedColIdx: activeColIdx }
                 : {}),
             }}
             onChange={onControlsChange}
           />
-        </ViewportContext.Provider>
-      ) : (
-        <p className="text-xs text-zinc-400">No extra settings for this block type.</p>
-      )}
+        )}
+        <BlockAdvancedControls
+          data={displayData}
+          onChange={onControlsChange}
+          onBaseChange={onBaseControlsChange}
+        />
+      </ViewportContext.Provider>
     </>
   );
 }

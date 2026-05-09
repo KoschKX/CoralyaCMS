@@ -147,7 +147,7 @@ export default function PostEditorPage({
     setActiveColIdx(colIdx);
   }, []);
 
-  const { isSectionEnabled, toggleSection, controlsDisplayData, handleControlsChange } =
+  const { isSectionEnabled, toggleSection, controlsDisplayData, handleControlsChange, handleBaseControlsChange } =
     useResponsiveBlock({
       selectedBlock,
       viewport,
@@ -302,6 +302,7 @@ export default function PostEditorPage({
                   toggleSection={toggleSection}
                   controlsDisplayData={controlsDisplayData}
                   onControlsChange={handleControlsChange}
+                  onBaseControlsChange={handleBaseControlsChange}
                   activeColIdx={activeColIdx}
                 />
               )}

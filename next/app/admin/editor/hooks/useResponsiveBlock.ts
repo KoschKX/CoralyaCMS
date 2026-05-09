@@ -65,5 +65,15 @@ export function useResponsiveBlock({
     setSelectedBlock((prev) => prev && { ...prev, data: finalData });
   }
 
-  return { isSectionEnabled, toggleSection, controlsDisplayData, handleControlsChange };
+  /** Like handleControlsChange but always merges at the top-level (desktop/base),
+   * regardless of the active viewport. Used for fields that are never
+   * viewport-specific (e.g. CSS id/class in the Advanced section). */
+  function handleBaseControlsChange(newData: Record<string, unknown>) {
+    if (!selectedBlock) return;
+    const finalData = { ...selectedBlock.data, ...newData };
+    updateBlock(selectedBlock.id, finalData);
+    setSelectedBlock((prev) => prev && { ...prev, data: finalData });
+  }
+
+  return { isSectionEnabled, toggleSection, controlsDisplayData, handleControlsChange, handleBaseControlsChange };
 }
