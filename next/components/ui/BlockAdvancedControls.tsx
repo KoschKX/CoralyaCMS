@@ -328,11 +328,14 @@ function BgColorSwatches({
   onChange: (v: string) => void;
   inheritedColor?: string | null;
 }) {
-  const isCustom = current !== "" && !palette.some((c) => c.value === current);
+  // "transparent" is the sentinel used on responsive breakpoints to explicitly clear an
+  // inherited color. Treat it the same as "" (no color) for display purposes.
+  const normalised = current === "transparent" ? "" : current;
+  const isCustom = normalised !== "" && !palette.some((c) => c.value === normalised);
   return (
     <div className="flex flex-wrap gap-1.5">
       {palette.map(({ label, value }) => {
-        const isSelected = current === value;
+        const isSelected = normalised === value;
         const isBlue = inheritedColor !== null && value === inheritedColor;
         return (
           <button
@@ -361,19 +364,19 @@ function BgColorSwatches({
       <label
         title="Custom colour"
         className={`relative flex h-6 w-6 cursor-pointer items-center justify-center overflow-hidden rounded-full transition ${
-          isCustom && !(inheritedColor !== null && current === inheritedColor) ? "scale-110 border-2 border-zinc-900" : "hover:opacity-80"
+          isCustom && !(inheritedColor !== null && normalised === inheritedColor) ? "scale-110 border-2 border-zinc-900" : "hover:opacity-80"
         }`}
         style={{
           background: isCustom
-            ? current
+            ? normalised
             : "conic-gradient(red,yellow,lime,cyan,blue,magenta,red)",
-          outline: isCustom && inheritedColor !== null && current === inheritedColor ? "2px dashed #60a5fa" : undefined,
-          outlineOffset: isCustom && inheritedColor !== null && current === inheritedColor ? "2px" : undefined,
+          outline: isCustom && inheritedColor !== null && normalised === inheritedColor ? "2px dashed #60a5fa" : undefined,
+          outlineOffset: isCustom && inheritedColor !== null && normalised === inheritedColor ? "2px" : undefined,
         }}
       >
         <input
           type="color"
-          value={isCustom ? current : "#000000"}
+          value={isCustom ? normalised : "#000000"}
           onChange={(e) => onChange(e.target.value)}
           className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
         />
