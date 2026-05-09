@@ -124,12 +124,21 @@ export function buildResponsiveCSS(
         if (cascaded["stack"]) {
           css += `${colSel} { width: 100% !important; padding-left: 0 !important; }\n`;
         } else {
-          (data.cols as Array<{ width?: string; responsive?: Record<string, { width?: string }> }>).forEach((col, i) => {
+          (data.cols as Array<{ width?: string; responsive?: Record<string, Record<string, unknown>> }>).forEach((col, i) => {
             const w = forcedViewport === "mobile"
               ? (col.responsive?.mobile?.width ?? col.responsive?.tablet?.width)
               : col.responsive?.tablet?.width;
             if (w) {
               css += `${colSelBase(`:nth-child(${i + 1})`)} { width: ${w} !important; }\n`;
+            }
+            // Per-column advanced CSS overrides (background, spacing, border, etc.)
+            const colCascaded: Record<string, unknown> =
+              forcedViewport === "mobile"
+                ? { ...(col.responsive?.tablet ?? {}), ...(col.responsive?.mobile ?? {}) }
+                : { ...(col.responsive?.tablet ?? {}) };
+            const colWrapperRules = wrapperRulesFor(colCascaded);
+            if (colWrapperRules) {
+              css += `${colSelBase(`:nth-child(${i + 1})`)} { ${colWrapperRules} }\n`;
             }
           });
         }
@@ -174,7 +183,7 @@ export function buildResponsiveCSS(
     const responsive = data?.responsive as Record<string, Record<string, unknown>> | undefined;
 
     if (block.type === "columns" && Array.isArray(data.cols)) {
-      const cols = data.cols as Array<{ width?: string; responsive?: Record<string, { width?: string }> }>;
+      const cols = data.cols as Array<{ width?: string; responsive?: Record<string, Record<string, unknown>> }>;
       const colSelBase = (nth: string) =>
         `[data-block-id="${block.id}"] > .block-columns > .block-columns__col-wrapper${nth},` +
         `[data-block-id="${block.id}"] > div > .block-columns > .block-columns__col-wrapper${nth}`;
@@ -198,6 +207,15 @@ export function buildResponsiveCSS(
       } else {
         css += colWidthCSS(block.id, cols, "mobile", mobileQuery);
       }
+
+      // Per-column advanced CSS overrides (background, spacing, border, etc.) at each breakpoint
+      cols.forEach((col, i) => {
+        const colResponsive = col.responsive as Record<string, Record<string, unknown>> | undefined;
+        const tabletColRules = colResponsive?.tablet ? wrapperRulesFor(colResponsive.tablet) : "";
+        const mobileColRules = colResponsive?.mobile ? wrapperRulesFor(colResponsive.mobile) : "";
+        if (tabletColRules) css += `${tabletQuery} { ${colSelBase(`:nth-child(${i + 1})`)} { ${tabletColRules} } }\n`;
+        if (mobileColRules) css += `${mobileQuery} { ${colSelBase(`:nth-child(${i + 1})`)} { ${mobileColRules} } }\n`;
+      });
     }
 
     if (responsive) {

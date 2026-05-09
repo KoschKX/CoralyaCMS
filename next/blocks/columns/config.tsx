@@ -4,7 +4,18 @@ import ColumnsLayout from "./layout";
 import ColumnsPanelControls from "./PanelControls";
 import { ColumnsEditable } from "./editable";
 
-type ColEntry = { blocks: EditorBlock[]; width?: string; responsive?: Record<string, { width?: string }> };
+type ColEntry = {
+  blocks: EditorBlock[];
+  width?: string;
+  responsive?: Record<string, Record<string, unknown>>;
+  background?: Record<string, unknown>;
+  spacing?: Record<string, unknown>;
+  border?: Record<string, unknown>;
+  display?: Record<string, unknown>;
+  advanced?: Record<string, unknown>;
+};
+
+const COL_ADVANCED_KEYS = ["background", "spacing", "border", "display", "advanced"] as const;
 
 const INDENT = "  ";
 
@@ -47,12 +58,18 @@ const columns: BlockDefinition = {
     const cols = (data.cols as ColEntry[]) ?? [];
     const responsiveAttr = data.responsive ? ` ${serializeAttr("responsive", data.responsive)}` : "";
     const inner = cols.map((col) => {
+      const colData = col as Record<string, unknown>;
       const widthAttr = col.width ? ` ${serializeAttr("width", col.width)}` : "";
       const responsiveAttrCol = col.responsive ? ` ${serializeAttr("responsive", col.responsive)}` : "";
+      const advancedAttrs = COL_ADVANCED_KEYS
+        .filter((k) => colData[k] !== undefined)
+        .map((k) => ` ${serializeAttr(k, colData[k])}`)
+        .join("");
       const colInner = blocksToShortcodes(col.blocks ?? [], depth + 2);
+      const colAttrs = `${widthAttr}${responsiveAttrCol}${advancedAttrs}`;
       return colInner
-        ? `${childPad}[column${widthAttr}${responsiveAttrCol}]\n${colInner}\n${childPad}[/column]`
-        : `${childPad}[column${widthAttr}${responsiveAttrCol}][/column]`;
+        ? `${childPad}[column${colAttrs}]\n${colInner}\n${childPad}[/column]`
+        : `${childPad}[column${colAttrs}][/column]`;
     }).join("\n");
     return `${pad}[columns${responsiveAttr}]\n${inner}\n${pad}[/columns]`;
   },

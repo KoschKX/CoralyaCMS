@@ -3,6 +3,8 @@
 import type { EditorBlock } from "@/lib/pages-db";
 import type { EditableProps } from "@/lib/block-types";
 import { getBlockWrapperProps } from "@/lib/block-advanced-css";
+import { mergeViewportOverrides } from "@/lib/responsive-css";
+import { useEditorViewport } from "@/components/editor/EditorHooks";
 
 export function ColumnsEditable({
   data,
@@ -13,6 +15,7 @@ export function ColumnsEditable({
   renderChildBlocks,
 }: EditableProps) {
   const cols = (data.cols as Array<{ blocks: EditorBlock[]; width?: string; responsive?: Record<string, { width?: string }> }>) ?? [];
+  const editorViewport = useEditorViewport();
 
   return (
     <div
@@ -23,8 +26,9 @@ export function ColumnsEditable({
         const isColSelected = (activeColIdx ?? null) === colIdx;
         const colClass = `block-columns__col-wrapper${isColSelected ? " is-selected" : ""}`;
         const paddingLeft = cols.length > 1 && colIdx === 0 ? "0" : "0.75rem";
-        const width = col.width || `${100 / (cols.length || 1)}%`;
-        const { style: colStyle, extraClass: colExtraClass } = getBlockWrapperProps(col as Record<string, unknown>);
+        const mergedCol = mergeViewportOverrides(col as Record<string, unknown>, editorViewport);
+        const width = (mergedCol.width as string | undefined) || `${100 / (cols.length || 1)}%`;
+        const { style: colStyle, extraClass: colExtraClass } = getBlockWrapperProps(mergedCol);
 
         return (
           <div

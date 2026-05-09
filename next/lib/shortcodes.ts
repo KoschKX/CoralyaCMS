@@ -38,6 +38,7 @@ function unescapeBrackets(s: string): string {
  * Exported so block definitions can use it inside their `serializeShortcode` hook.
  */
 export function serializeAttr(key: string, v: unknown): string {
+  if (v === undefined || v === null) return "";
   if (typeof v === "string") {
     const encoded = escapeBrackets(v).replace(/"/g, "&quot;");
     return `${key}="${encoded}"`;
@@ -206,7 +207,7 @@ function buildBlocks(
 
     if (tok.type === "open" && tok.name === "columns") {
       pos++;
-      const cols: Array<{ blocks: EditorBlock[]; width?: string }> = [];
+      const cols: Array<Record<string, unknown>> = [];
       let responsive: Record<string, Record<string, unknown>> | undefined = undefined;
 
       // Read responsive attribute from columns block
@@ -224,17 +225,28 @@ function buildBlocks(
         if (t.type === "open" && t.name === "column") {
           const width = t.attrs.width as string | undefined;
           // Per-column responsive overrides stored as JSON
-          let colResponsive: Record<string, { width?: string }> | undefined;
+          let colResponsive: Record<string, Record<string, unknown>> | undefined;
           if (t.attrs.responsive) {
             try {
               colResponsive = typeof t.attrs.responsive === "string"
                 ? JSON.parse(t.attrs.responsive as string)
-                : (t.attrs.responsive as Record<string, { width?: string }>);
+                : (t.attrs.responsive as Record<string, Record<string, unknown>>);
             } catch {}
+          }
+          // Per-column advanced CSS properties
+          const COL_ADVANCED_KEYS = ["background", "spacing", "border", "display", "advanced"] as const;
+          const colAdvanced: Record<string, unknown> = {};
+          for (const key of COL_ADVANCED_KEYS) {
+            if (t.attrs[key] !== undefined) colAdvanced[key] = t.attrs[key];
           }
           pos++;
           const inner = buildBlocks(tokens, pos, "column", counter);
-          cols.push({ ...(width ? { width } : {}), ...(colResponsive ? { responsive: colResponsive } : {}), blocks: inner.blocks });
+          cols.push({
+            ...(width ? { width } : {}),
+            ...(colResponsive ? { responsive: colResponsive } : {}),
+            ...colAdvanced,
+            blocks: inner.blocks,
+          });
           pos = inner.pos;
         } else { pos++; }
       }
@@ -304,8 +316,9 @@ function blockToShortcode(type: string, data: Record<string, unknown>, depth = 0
 
   // All properties — scalar and complex — are serialised
   const attrs = Object.entries(data)
-    .filter(([k]) => k !== "id")
+    .filter(([k, v]) => k !== "id" && v !== undefined && v !== null)
     .map(([k, v]) => serializeAttr(k, v))
+    .filter(Boolean)
     .join(" ");
   return attrs ? `${pad}[${type} ${attrs}]` : `${pad}[${type}]`;
 }
