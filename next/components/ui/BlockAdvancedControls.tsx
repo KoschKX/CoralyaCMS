@@ -193,7 +193,11 @@ function BgImageControls({
         <BgColorSwatches
           current={background.bgColor ?? ""}
           palette={palette}
-          onChange={(v) => onChange({ bgColor: v || undefined })}
+          onChange={(v) => onChange({
+            // On responsive viewports with an inherited color, write "transparent"
+            // explicitly so the live-page CSS can override the parent's color.
+            bgColor: v === "" && isResponsive && !!inheritedColor ? "transparent" : (v || undefined),
+          })}
           inheritedColor={inheritedColor}
         />
       </div>
