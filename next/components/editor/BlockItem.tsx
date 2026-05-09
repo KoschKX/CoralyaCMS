@@ -12,8 +12,6 @@ import { BlockToolbar } from "@/components/editor/BlockToolbar";
 import { ContainerDropZone } from "@/components/editor/ContainerDropZone";
 import { useBlockEditor, type BlockOps } from "@/components/editor/BlockEditorContext";
 import { useEditorViewport } from "@/components/editor/EditorHooks";
-import { getBlockWrapperProps } from "@/lib/block-advanced-css";
-import { mergeViewportOverrides } from "@/lib/responsive-css";
 
 interface ColViewportToolbarProps {
   blockId: string;
@@ -240,16 +238,10 @@ function BlockItem({
     : (isSelected && isContainerBlock) || descendantSelected    ? "ring-2 ring-blue-200"
     : "ring-1 ring-transparent";
 
-  const editorViewport = useEditorViewport();
-  const viewportData = mergeViewportOverrides(block.data as Record<string, unknown>, editorViewport);
-  const { style: advStyle, extraClass: advClass, id: advId } = getBlockWrapperProps(viewportData);
-  const hasAdv = Object.keys(advStyle).length > 0 || advClass || advId;
-
   return (
     <div
       key={block.id}
       data-block-id={block.id}
-      id={advId}
       className={`relative transition ${ringClass}`}
       style={{ paddingBottom: isUnavailable ? 0 : "var(--block-spacing, 1.5rem)" }}
       onClick={(e) => {
@@ -257,11 +249,6 @@ function BlockItem({
         if (isContainerBlock) { e.stopPropagation(); onSelectBlock(block.id, block.data as Record<string, unknown>, block.type); }
       }}
     >
-      {/* Advanced CSS inner wrapper — carries background, padding, border, etc. */}
-      <div
-        className={advClass || undefined}
-        style={hasAdv ? advStyle : undefined}
-      >
       <div className="group/block relative">
         <EditableBlock
           block={block}
@@ -333,7 +320,6 @@ function BlockItem({
             })()}
           </>
         )}
-      </div>
       </div>
 
       {(!isLast || isInColumn || isSelected) && (

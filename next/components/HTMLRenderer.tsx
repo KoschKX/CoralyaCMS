@@ -16,7 +16,6 @@
 import type { ReactNode } from "react";
 import { blockMap } from "@/blocks/index";
 import { tokenise, buildBlocks } from "@/lib/shortcodes";
-import { getBlockWrapperProps } from "@/lib/block-advanced-css";
 import type { EditorBlock } from "@/lib/pages-db";
 
 interface Props {
@@ -46,15 +45,8 @@ function RenderBlocks({
             </span>
           );
         }
-        const { style, extraClass, id } = getBlockWrapperProps(block.data as Record<string, unknown>);
         return (
-          <div
-            key={block.id}
-            data-block-id={block.id}
-            id={id}
-            className={extraClass || undefined}
-            style={Object.keys(style).length ? style : undefined}
-          >
+          <div key={block.id} data-block-id={block.id}>
             <def.Layout
               data={block.data as Record<string, unknown>}
               blockId={block.id}
