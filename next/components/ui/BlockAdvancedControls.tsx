@@ -8,6 +8,7 @@ import { getBackgroundData, getSpacingData, getBorderData, getAdvancedData, getD
 import type { PaletteColor } from "@/lib/color-palette";
 import { COLOR_PALETTE } from "@/lib/color-palette";
 import { useSettings } from "@/hooks/useSettings";
+import { MediaPickerDialog } from "@/components/MediaPickerDialog";
 
 // ── Internal helpers ─────────────────────────────────────────────────────────
 
@@ -151,6 +152,166 @@ function FourSideInputs({
   );
 }
 
+/** Combined background colour + image controls. */
+function BgImageControls({
+  background,
+  inherited,
+  inheritedColor,
+  inheritedBgImage = "",
+  isResponsive = false,
+  palette,
+  onChange,
+}: {
+  background: BackgroundBlockData;
+  inherited: boolean;
+  inheritedColor: string | null;
+  inheritedBgImage?: string;
+  isResponsive?: boolean;
+  palette: PaletteColor[];
+  onChange: (patch: Partial<BackgroundBlockData>) => void;
+}) {
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  // bgImage "none" = explicit override to hide the inherited image at this breakpoint.
+  const explicitNone = background.bgImage === "none";
+  // "Own" image = this viewport has explicitly set a different URL than the parent.
+  // On responsive viewports, we compare against inheritedBgImage because the display
+  // data is fully merged (desktop values appear in background even with no override).
+  const hasOwnImage =
+    !!background.bgImage &&
+    background.bgImage !== "none" &&
+    (!isResponsive || background.bgImage !== inheritedBgImage);
+  // Image is inherited if there's a parent image and no own override at this viewport.
+  const imageIsInherited = !hasOwnImage && !explicitNone && !!inheritedBgImage;
+  // The effective image shown in the editor (own overrides inherited)
+  const effectiveImage = hasOwnImage ? background.bgImage! : (!explicitNone ? inheritedBgImage : "");
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <Label>Background Colour</Label>
+        <BgColorSwatches
+          current={background.bgColor ?? ""}
+          palette={palette}
+          onChange={(v) => onChange({ bgColor: v || undefined })}
+          inheritedColor={inheritedColor}
+        />
+      </div>
+      <div>
+        <Label>Background Image</Label>
+        <div className="flex items-center gap-2">
+          {/* Always show thumbnail slot — filled when there's an image, empty grey box otherwise */}
+          <div
+            className={`h-10 w-14 flex-shrink-0 rounded border bg-zinc-100 ${
+              effectiveImage
+                ? imageIsInherited
+                  ? "border-dashed border-blue-300 opacity-60"
+                  : "border-zinc-200"
+                : "border-zinc-200"
+            }`}
+            style={effectiveImage ? { backgroundImage: `url(${effectiveImage})`, backgroundSize: "cover", backgroundPosition: "center" } : {}}
+          />
+          <button
+            onClick={() => setPickerOpen(true)}
+            className={`rounded border px-2 py-1 text-[11px] transition ${
+              imageIsInherited
+                ? "border-dashed border-blue-300 text-blue-400"
+                : "border-zinc-200 text-zinc-600 hover:border-zinc-400"
+            }`}
+          >
+            {hasOwnImage ? "Change image" : "Choose image"}
+          </button>
+          {/* Remove own override → fall back to inherited */}
+          {hasOwnImage && (
+            <button
+              onClick={() => onChange({ bgImage: undefined, bgSize: undefined, bgPosition: undefined, bgRepeat: undefined })}
+              className="rounded border border-zinc-200 px-2 py-1 text-[11px] text-zinc-400 transition hover:border-zinc-400 hover:text-zinc-600"
+              title="Remove image"
+            >
+              ✕
+            </button>
+          )}
+          {/* When inherited image exists and no own override, allow explicitly hiding it */}
+          {imageIsInherited && (
+            <button
+              onClick={() => onChange({ bgImage: "none" })}
+              className="rounded border border-zinc-200 px-2 py-1 text-[11px] text-zinc-400 transition hover:border-zinc-400 hover:text-zinc-600"
+              title="Hide inherited image at this breakpoint"
+            >
+              Hide
+            </button>
+          )}
+          {/* Re-inherit: clear the explicit "none" override */}
+          {explicitNone && (
+            <button
+              onClick={() => onChange({ bgImage: undefined })}
+              className="rounded border border-dashed border-blue-300 px-2 py-1 text-[11px] text-blue-400 transition hover:border-blue-400"
+            >
+              Re-inherit
+            </button>
+          )}
+        </div>
+        <MediaPickerDialog
+          open={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          onSelect={(url) => { onChange({ bgImage: url }); setPickerOpen(false); }}
+        />
+      </div>
+      {hasOwnImage && (
+        <>
+          <div>
+            <MiniLabel>Size</MiniLabel>
+            <Dropdown
+              value={background.bgSize ?? "cover"}
+              onChange={(v) => onChange({ bgSize: v || undefined })}
+              options={[
+                { value: "cover",   label: "Cover" },
+                { value: "contain", label: "Contain" },
+                { value: "auto",    label: "Auto" },
+                { value: "100% 100%", label: "Stretch" },
+              ]}
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <MiniLabel>Position</MiniLabel>
+            <Dropdown
+              value={background.bgPosition ?? "center"}
+              onChange={(v) => onChange({ bgPosition: v || undefined })}
+              options={[
+                { value: "center",       label: "Center" },
+                { value: "top",          label: "Top" },
+                { value: "bottom",       label: "Bottom" },
+                { value: "left",         label: "Left" },
+                { value: "right",        label: "Right" },
+                { value: "top left",     label: "Top left" },
+                { value: "top right",    label: "Top right" },
+                { value: "bottom left",  label: "Bottom left" },
+                { value: "bottom right", label: "Bottom right" },
+              ]}
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <MiniLabel>Repeat</MiniLabel>
+            <Dropdown
+              value={background.bgRepeat ?? "no-repeat"}
+              onChange={(v) => onChange({ bgRepeat: v || undefined })}
+              options={[
+                { value: "no-repeat", label: "No repeat" },
+                { value: "repeat",    label: "Repeat" },
+                { value: "repeat-x",  label: "Repeat X" },
+                { value: "repeat-y",  label: "Repeat Y" },
+              ]}
+              className="mt-1"
+            />
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 /** Colour swatch row — same style as ColorPicker. */
 function BgColorSwatches({
   current,
@@ -290,6 +451,7 @@ export function BlockAdvancedControls({
   const borderInherited = isResponsive && !isFieldOverridden("border");
   const inheritedBg = (inheritedData.background as Record<string, unknown>) ?? {};
   const inheritedBgColor = isResponsive ? ((inheritedBg.bgColor as string) ?? "") : null;
+  const inheritedBgImage = isResponsive ? ((inheritedBg.bgImage as string) ?? "") : "";
   const borderInputCls = (hasValue: boolean) =>
     `rounded border px-1.5 py-1 text-[11px] text-zinc-700 focus:outline-none ${
       borderInherited && !hasValue
@@ -306,11 +468,26 @@ export function BlockAdvancedControls({
 
   /** Patch background and emit. */
   function updateBackground(patch: Partial<BackgroundBlockData>) {
-    const next = { ...background, ...patch };
-    for (const k of Object.keys(patch) as (keyof BackgroundBlockData)[]) {
-      if (!patch[k]) delete next[k];
+    // When on a responsive viewport, build the write base from only the "own" keys
+    // (values that differ from the parent viewport) to avoid carrying inherited
+    // values into the override and unintentionally locking them.
+    const ownBase: Partial<BackgroundBlockData> = {};
+    if (isResponsive) {
+      for (const k of Object.keys(background) as (keyof BackgroundBlockData)[]) {
+        const v = background[k];
+        if (v !== (inheritedBg as Record<string, unknown>)[k]) ownBase[k] = v;
+      }
+    } else {
+      Object.assign(ownBase, background);
     }
-    onChange({ background: Object.keys(next).length ? next : undefined });
+    const next = { ...ownBase, ...patch } as Partial<BackgroundBlockData>;
+    for (const k of Object.keys(patch) as (keyof BackgroundBlockData)[]) {
+      // "none" is a valid sentinel (explicit override to no-image), keep it.
+      // Only delete keys that are truly cleared (undefined or empty string).
+      const v = patch[k];
+      if (v === undefined || v === "") delete next[k];
+    }
+    onChange({ background: Object.keys(next).length ? (next as BackgroundBlockData) : undefined });
   }
 
   /** Patch spacing and emit. */
@@ -353,15 +530,15 @@ export function BlockAdvancedControls({
     <div className="space-y-0">
       {/* ── Background ──────────────────────────────── */}
       <Section title="Background" defaultOpen={false}>
-        <div>
-          <Label>Background Colour</Label>
-          <BgColorSwatches
-            current={background.bgColor ?? ""}
-            palette={palette}
-            onChange={(v) => updateBackground({ bgColor: v || undefined })}
-            inheritedColor={inheritedBgColor}
-          />
-        </div>
+        <BgImageControls
+          background={background}
+          inherited={bgInherited}
+          inheritedColor={inheritedBgColor}
+          inheritedBgImage={inheritedBgImage}
+          isResponsive={isResponsive}
+          palette={palette}
+          onChange={updateBackground}
+        />
       </Section>
 
       {/* ── Spacing ─────────────────────────────────── */}

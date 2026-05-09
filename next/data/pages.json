@@ -118,7 +118,8 @@
                 }
               },
               "background": {
-                "bgColor": "#16a34a"
+                "bgColor": "#16a34a",
+                "bgImage": "/media/1777671596630-friends_portraits.png"
               },
               "blocks": [
                 {
@@ -187,7 +188,8 @@
                 }
               },
               "background": {
-                "bgColor": "#dc2626"
+                "bgColor": "#dc2626",
+                "bgImage": "/media/1777671596630-friends_portraits.png"
               },
               "blocks": [
                 {
@@ -200,15 +202,12 @@
                     "fontsize": "base",
                     "responsive": {
                       "tablet": {
-                        "color": "#ea580c",
+                        "color": "#09090b",
                         "spacing": {
                           "pt": "0em",
                           "pr": "0em",
                           "pb": "0em",
                           "pl": "0em"
-                        },
-                        "background": {
-                          "bgColor": "#16a34a"
                         }
                       },
                       "mobile": {}
@@ -249,10 +248,10 @@
         }
       }
     ],
-    "html": "[columns responsive='{\"tablet\":{\"stack\":true},\"mobile\":{\"stack\":true}}']\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraphs\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"},\"mobile\":{}}']\n  [/column]\n  [column width=\"33.333%\" responsive='{\"tablet\":{\"background\":{\"bgColor\":\"#ca8a04\"}}}' background='{\"bgColor\":\"#16a34a\"}']\n    [header text=\"New heading\" level=\"2\" align=\"center\" color=\"#dc2626\" responsive='{\"tablet\":{\"color\":\"#dc2626\",\"align\":\"center\",\"level\":2},\"mobile\":{\"align\":\"center\",\"color\":\"#9333ea\"}}']\n    [paragraph text=\"New paragraph\" align=\"center\" responsive='{\"tablet\":{\"align\":\"center\"}}']\n    [image src=\"/media/1777671588524-crabtropics.png\" alt=\"\" caption=\"\" align=\"center\" background='{\"bgColor\":\"#16a34a\"}' responsive='{\"tablet\":{\"background\":{\"bgColor\":\"#ea580c\"}}}']\n  [/column]\n  [column width=\"33.333%\" responsive='{\"tablet\":{\"background\":{\"bgColor\":\"#ea580c\"}}}' background='{\"bgColor\":\"#dc2626\"}']\n    [paragraph text=\"New paragraph\" align=\"center\" color=\"#16a34a\" fontsize=\"base\" responsive='{\"tablet\":{\"color\":\"#ea580c\",\"spacing\":{\"pt\":\"0em\",\"pr\":\"0em\",\"pb\":\"0em\",\"pl\":\"0em\"},\"background\":{\"bgColor\":\"#16a34a\"}},\"mobile\":{}}' background='{\"bgColor\":\"#ca8a04\"}' spacing='{\"pt\":\"3em\",\"pr\":\"3em\",\"pb\":\"3em\",\"pl\":\"3em\"}']\n  [/column]\n[/columns]\n\n[list style=\"unordered\" items='&#91;\"Item 1\",\"Item 2\"&#93;']",
+    "html": "[columns responsive='{\"tablet\":{\"stack\":true},\"mobile\":{\"stack\":true}}']\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraphs\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"},\"mobile\":{}}']\n  [/column]\n  [column width=\"33.333%\" responsive='{\"tablet\":{\"background\":{\"bgColor\":\"#ca8a04\"}}}' background='{\"bgColor\":\"#16a34a\",\"bgImage\":\"/media/1777671596630-friends_portraits.png\"}']\n    [header text=\"New heading\" level=\"2\" align=\"center\" color=\"#dc2626\" responsive='{\"tablet\":{\"color\":\"#dc2626\",\"align\":\"center\",\"level\":2},\"mobile\":{\"align\":\"center\",\"color\":\"#9333ea\"}}']\n    [paragraph text=\"New paragraph\" align=\"center\" responsive='{\"tablet\":{\"align\":\"center\"}}']\n    [image src=\"/media/1777671588524-crabtropics.png\" alt=\"\" caption=\"\" align=\"center\" background='{\"bgColor\":\"#16a34a\"}' responsive='{\"tablet\":{\"background\":{\"bgColor\":\"#ea580c\"}}}']\n  [/column]\n  [column width=\"33.333%\" responsive='{\"tablet\":{\"background\":{\"bgColor\":\"#ea580c\"}}}' background='{\"bgColor\":\"#dc2626\",\"bgImage\":\"/media/1777671596630-friends_portraits.png\"}']\n    [paragraph text=\"New paragraph\" align=\"center\" color=\"#16a34a\" fontsize=\"base\" responsive='{\"tablet\":{\"color\":\"#09090b\",\"spacing\":{\"pt\":\"0em\",\"pr\":\"0em\",\"pb\":\"0em\",\"pl\":\"0em\"}},\"mobile\":{}}' background='{\"bgColor\":\"#ca8a04\"}' spacing='{\"pt\":\"3em\",\"pr\":\"3em\",\"pb\":\"3em\",\"pl\":\"3em\"}']\n  [/column]\n[/columns]\n\n[list style=\"unordered\" items='&#91;\"Item 1\",\"Item 2\"&#93;']",
     "pageBgColor": "#ffffff",
     "createdAt": "2026-03-25T19:58:40.950Z",
-    "updatedAt": "2026-05-09T22:55:19.950Z",
+    "updatedAt": "2026-05-09T23:17:37.934Z",
     "injectCode": {
       "tracking": "",
       "head": "",

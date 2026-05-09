@@ -3,6 +3,10 @@ import type { CSSProperties } from "react";
 /** Stored as `background` on block data. */
 export interface BackgroundBlockData {
   bgColor?: string;
+  bgImage?: string;       // URL
+  bgSize?: string;        // cover | contain | auto | custom
+  bgPosition?: string;    // center | top | bottom | left | right | custom
+  bgRepeat?: string;      // no-repeat | repeat | repeat-x | repeat-y
 }
 
 /** Stored as `spacing` on block data. */
@@ -71,6 +75,14 @@ export function getBlockWrapperProps(data: Record<string, unknown>): {
   const style: CSSProperties = {};
 
   if (background.bgColor) style.backgroundColor = background.bgColor;
+  if (background.bgImage === "none") {
+    style.backgroundImage = "none";
+  } else if (background.bgImage) {
+    style.backgroundImage = `url(${background.bgImage})`;
+    style.backgroundSize     = background.bgSize     || "cover";
+    style.backgroundPosition = background.bgPosition || "center";
+    style.backgroundRepeat   = (background.bgRepeat  || "no-repeat") as CSSProperties["backgroundRepeat"];
+  }
 
   if (spacing.pt) style.paddingTop    = spacing.pt;
   if (spacing.pr) style.paddingRight  = spacing.pr;
