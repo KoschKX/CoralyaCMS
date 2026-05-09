@@ -147,7 +147,7 @@ export default function PostEditorPage({
     setActiveColIdx(colIdx);
   }, []);
 
-  const { isSectionEnabled, toggleSection, controlsDisplayData, handleControlsChange, handleBaseControlsChange } =
+  const { isSectionEnabled, isFieldOverridden, toggleSection, controlsDisplayData, controlsInheritedData, handleControlsChange, handleBaseControlsChange } =
     useResponsiveBlock({
       selectedBlock,
       viewport,
@@ -233,7 +233,7 @@ export default function PostEditorPage({
                     onChange={(e) => handleTitleChange(e.target.value)}
                     className="mb-10 w-full bg-transparent text-4xl font-bold text-zinc-900 placeholder:text-zinc-300 focus:outline-none"
                   />
-                  <ViewportContext.Provider value={{ viewport, isSectionEnabled, toggleSection }}>
+                  <ViewportContext.Provider value={{ viewport, isSectionEnabled, isFieldOverridden, toggleSection, inheritedData: {} }}>
                     <ResponsiveStyleInjector
                       blocks={liveBlocks}
                       tabletBp={tabletBp}
@@ -299,8 +299,10 @@ export default function PostEditorPage({
                   viewport={viewport}
                   setViewport={setViewport}
                   isSectionEnabled={isSectionEnabled}
+                  isFieldOverridden={isFieldOverridden}
                   toggleSection={toggleSection}
                   controlsDisplayData={controlsDisplayData}
+                  controlsInheritedData={controlsInheritedData}
                   onControlsChange={handleControlsChange}
                   onBaseControlsChange={handleBaseControlsChange}
                   activeColIdx={activeColIdx}

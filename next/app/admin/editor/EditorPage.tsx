@@ -146,7 +146,7 @@ export default function EditorPage({
     onSaveSuccess: handleSaveSuccess,
   });
 
-  const { isSectionEnabled, toggleSection, controlsDisplayData, handleControlsChange, handleBaseControlsChange } =
+  const { isSectionEnabled, isFieldOverridden, toggleSection, controlsDisplayData, controlsInheritedData, handleControlsChange, handleBaseControlsChange } =
     useResponsiveBlock({
       selectedBlock,
       viewport,
@@ -247,7 +247,7 @@ export default function EditorPage({
                     wrap="off"
                     className="sr-only"
                   />
-                  <ViewportContext.Provider value={{ viewport, isSectionEnabled, toggleSection }}>
+                  <ViewportContext.Provider value={{ viewport, isSectionEnabled, isFieldOverridden, toggleSection, inheritedData: {} }}>
                     <ResponsiveStyleInjector
                       blocks={liveBlocks}
                       tabletBp={tabletBp}
@@ -300,8 +300,10 @@ export default function EditorPage({
                   viewport={viewport}
                   setViewport={setViewport}
                   isSectionEnabled={isSectionEnabled}
+                  isFieldOverridden={isFieldOverridden}
                   toggleSection={toggleSection}
                   controlsDisplayData={controlsDisplayData}
+                  controlsInheritedData={controlsInheritedData}
                   onControlsChange={handleControlsChange}
                   onBaseControlsChange={handleBaseControlsChange}
                   activeColIdx={activeColIdx}

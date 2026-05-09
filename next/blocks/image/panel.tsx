@@ -1,12 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { PanelSection } from "@/components/ui/PanelSection";
 import { MediaPickerDialog } from "@/components/MediaPickerDialog";
+import { ViewportContext } from "@/components/ui/ViewportContext";
 import type { PanelControlProps } from "@/lib/block-types";
 
 export function ImagePanelControls({ data, onChange }: PanelControlProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
+  const { viewport, isFieldOverridden, inheritedData } = useContext(ViewportContext);
+  const isResponsive = viewport !== "desktop";
+  const inheritedAlign = (inheritedData.align as string) ?? "left";
+
+  function inheritedPlaceholder(field: string, fallback: string) {
+    return isResponsive && !isFieldOverridden(field) ? "—" : fallback;
+  }
 
   return (
     <div className="space-y-5">
@@ -17,7 +25,7 @@ export function ImagePanelControls({ data, onChange }: PanelControlProps) {
             aria-label="Image URL"
             className="min-w-0 flex-1 rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
             value={(data.src as string) ?? ""}
-            placeholder="https://…"
+            placeholder={inheritedPlaceholder("src", "https://…")}
             onChange={(e) => onChange({ ...data, src: e.target.value })}
           />
           <button
@@ -46,7 +54,7 @@ export function ImagePanelControls({ data, onChange }: PanelControlProps) {
           aria-label="Alt text"
           className="w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
           value={(data.alt as string) ?? ""}
-          placeholder="Describe the image…"
+          placeholder={inheritedPlaceholder("alt", "Describe the image…")}
           onChange={(e) => onChange({ ...data, alt: e.target.value })}
         />
       </PanelSection>
@@ -57,27 +65,33 @@ export function ImagePanelControls({ data, onChange }: PanelControlProps) {
           aria-label="Caption"
           className="w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
           value={(data.caption as string) ?? ""}
-          placeholder="Optional caption…"
+          placeholder={inheritedPlaceholder("caption", "Optional caption…")}
           onChange={(e) => onChange({ ...data, caption: e.target.value })}
         />
       </PanelSection>
 
       <PanelSection title="Alignment" fields={["align"]}>
         <div className="flex gap-1">
-          {(["left", "center", "right"] as const).map((a) => (
-            <button
-              key={a}
-              title={a}
-              onClick={() => onChange({ ...data, align: a })}
-              className={`flex h-8 flex-1 items-center justify-center rounded border text-xs font-medium transition ${
-                (data.align ?? "left") === a
-                  ? "border-zinc-900 bg-zinc-900 text-white"
-                  : "border-zinc-200 text-zinc-500 hover:border-zinc-400"
-              }`}
-            >
-              {a[0].toUpperCase()}
-            </button>
-          ))}
+          {(["left", "center", "right"] as const).map((a) => {
+            const isSelected = (data.align ?? "left") === a;
+            const isBlue = isResponsive && a === inheritedAlign;
+            return (
+              <button
+                key={a}
+                title={a}
+                onClick={() => onChange({ ...data, align: a })}
+                className={`flex h-8 flex-1 items-center justify-center rounded border text-xs font-medium transition ${
+                  isBlue
+                    ? "border-blue-400 border-dashed bg-white text-blue-500"
+                    : isSelected
+                    ? "border-zinc-900 bg-zinc-900 text-white"
+                    : "border-zinc-200 text-zinc-500 hover:border-zinc-400"
+                }`}
+              >
+                {a[0].toUpperCase()}
+              </button>
+            );
+          })}
         </div>
       </PanelSection>
 

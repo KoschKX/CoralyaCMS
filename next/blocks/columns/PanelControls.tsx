@@ -24,6 +24,8 @@ interface Props {
 
 export default function ColumnsPanelControls({ data, onChange }: Props) {
   const { viewport } = useContext(ViewportContext);
+  const isResponsive = viewport !== "desktop";
+  const parentViewport = viewport === "mobile" ? "tablet" : "desktop";
   const cols = (data.cols as Col[]) ?? [];
   const selectedColIdx = typeof data.__selectedColIdx === "number" ? data.__selectedColIdx : null;
   const [customWidths, setCustomWidths] = useState<string[]>(
@@ -95,6 +97,7 @@ export default function ColumnsPanelControls({ data, onChange }: Props) {
         const colIdx = selectedColIdx;
         const col = cols[colIdx];
         const currentWidth = col ? getColWidth(col, viewport) : "";
+        const inheritedWidth = col && isResponsive ? getColWidth(col, parentViewport) : null;
         const isWidthEnabled = !col ? true : !!col.responsive?.[viewport]?.width;
         function toggleColWidth() {
           if (!col) return;
@@ -120,26 +123,32 @@ export default function ColumnsPanelControls({ data, onChange }: Props) {
           >
             <div className="space-y-2">
               <div className="flex flex-wrap gap-1">
-                {FRACTION_PRESETS.map((p) => (
-                  <button
-                    key={p.label}
-                    onClick={() => {
-                      setWidth(colIdx, p.value);
-                      setCustomWidths((prev) => {
-                        const next = [...prev];
-                        next[colIdx] = p.value;
-                        return next;
-                      });
-                    }}
-                    className={`rounded border px-2 py-0.5 text-xs transition ${
-                      currentWidth === p.value
-                        ? "border-zinc-900 bg-zinc-900 text-white"
-                        : "border-zinc-200 text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50"
-                    }`}
-                  >
-                    {p.label}
-                  </button>
-                ))}
+                {FRACTION_PRESETS.map((p) => {
+                  const isSelected = currentWidth === p.value;
+                  const isBlue = inheritedWidth !== null && p.value === inheritedWidth;
+                  return (
+                    <button
+                      key={p.label}
+                      onClick={() => {
+                        setWidth(colIdx, p.value);
+                        setCustomWidths((prev) => {
+                          const next = [...prev];
+                          next[colIdx] = p.value;
+                          return next;
+                        });
+                      }}
+                      className={`rounded border px-2 py-0.5 text-xs transition ${
+                        isBlue
+                          ? "border-blue-400 border-dashed bg-white text-blue-500"
+                          : isSelected
+                          ? "border-zinc-900 bg-zinc-900 text-white"
+                          : "border-zinc-200 text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50"
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  );
+                })}
               </div>
               <div className="flex gap-1">
                 <input
@@ -152,7 +161,7 @@ export default function ColumnsPanelControls({ data, onChange }: Props) {
                       return next;
                     })
                   }
-                  placeholder="e.g. 40% or 2fr"
+                  placeholder={isResponsive && !col?.responsive?.[viewport]?.width ? "—" : "e.g. 40% or 2fr"}
                   className="flex-1 rounded border border-zinc-200 px-2 py-1 text-xs focus:outline-none focus:border-zinc-400"
                 />
                 <button

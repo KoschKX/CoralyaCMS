@@ -24,6 +24,13 @@ export function useResponsiveBlock({
     return fields.some((f) => f in overrides);
   }
 
+  function isFieldOverridden(field: string): boolean {
+    if (viewport === "desktop" || !selectedBlock) return false;
+    const responsive = (selectedBlock.data.responsive as Record<string, Record<string, unknown>>) ?? {};
+    const overrides = responsive[viewport] ?? {};
+    return field in overrides;
+  }
+
   function toggleSection(_title: string, fields: string[]) {
     if (!selectedBlock) return;
     const current = selectedBlock.data;
@@ -45,6 +52,14 @@ export function useResponsiveBlock({
 
   function controlsDisplayData(data: Record<string, unknown>): Record<string, unknown> {
     return mergeViewportOverrides(data, viewport, true);
+  }
+
+  /** Returns the merged data for the PARENT viewport (desktop for tablet, tablet for mobile).
+   * Used to highlight the inherited/previous-breakpoint value in panel controls. */
+  function controlsInheritedData(data: Record<string, unknown>): Record<string, unknown> {
+    if (viewport === "desktop") return data;
+    const parentViewport: Viewport = viewport === "mobile" ? "tablet" : "desktop";
+    return mergeViewportOverrides(data, parentViewport, true);
   }
 
   function handleControlsChange(newData: Record<string, unknown>) {
@@ -75,5 +90,5 @@ export function useResponsiveBlock({
     setSelectedBlock((prev) => prev && { ...prev, data: finalData });
   }
 
-  return { isSectionEnabled, toggleSection, controlsDisplayData, handleControlsChange, handleBaseControlsChange };
+  return { isSectionEnabled, isFieldOverridden, toggleSection, controlsDisplayData, controlsInheritedData, handleControlsChange, handleBaseControlsChange };
 }

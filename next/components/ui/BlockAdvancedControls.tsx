@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useContext, useState } from "react";
 import type { BlockData } from "@/lib/block-types";
+import { ViewportContext } from "./ViewportContext";
 import type { BackgroundBlockData, SpacingBlockData, BorderBlockData, AdvancedBlockData } from "@/lib/block-advanced-css";
 import { getBackgroundData, getSpacingData, getBorderData, getAdvancedData } from "@/lib/block-advanced-css";
 import type { PaletteColor } from "@/lib/color-palette";
@@ -32,11 +33,13 @@ function BoxInput({
   value,
   onChange,
   placeholder = "—",
+  inherited = false,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
+  inherited?: boolean;
 }) {
   return (
     <div className="flex flex-col items-center gap-0.5">
@@ -44,9 +47,13 @@ function BoxInput({
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
+        placeholder={inherited ? "—" : placeholder}
         aria-label={label}
-        className="w-full rounded border border-zinc-200 bg-white px-1 py-1 text-center text-[11px] text-zinc-700 placeholder:text-zinc-300 focus:border-zinc-400 focus:outline-none"
+        className={`w-full rounded border bg-white px-1 py-1 text-center text-[11px] text-zinc-700 focus:outline-none ${
+          inherited
+            ? "border-dashed border-blue-300 placeholder:text-blue-300 focus:border-blue-400"
+            : "border-zinc-200 placeholder:text-zinc-300 focus:border-zinc-400"
+        }`}
       />
       <MiniLabel>{label}</MiniLabel>
     </div>
@@ -57,16 +64,18 @@ function BoxInput({
 function FourSideInputs({
   top, right, bottom, left,
   onChange,
+  inherited = false,
 }: {
   top: string; right: string; bottom: string; left: string;
   onChange: (side: "t" | "r" | "b" | "l", value: string) => void;
+  inherited?: boolean;
 }) {
   return (
     <div className="grid grid-cols-4 gap-1.5">
-      <BoxInput label="Top"    value={top}    onChange={(v) => onChange("t", v)} />
-      <BoxInput label="Right"  value={right}  onChange={(v) => onChange("r", v)} />
-      <BoxInput label="Bottom" value={bottom} onChange={(v) => onChange("b", v)} />
-      <BoxInput label="Left"   value={left}   onChange={(v) => onChange("l", v)} />
+      <BoxInput label="Top"    value={top}    onChange={(v) => onChange("t", v)} inherited={inherited} />
+      <BoxInput label="Right"  value={right}  onChange={(v) => onChange("r", v)} inherited={inherited} />
+      <BoxInput label="Bottom" value={bottom} onChange={(v) => onChange("b", v)} inherited={inherited} />
+      <BoxInput label="Left"   value={left}   onChange={(v) => onChange("l", v)} inherited={inherited} />
     </div>
   );
 }
@@ -76,43 +85,54 @@ function BgColorSwatches({
   current,
   palette,
   onChange,
+  inheritedColor = null,
 }: {
   current: string;
   palette: PaletteColor[];
   onChange: (v: string) => void;
+  inheritedColor?: string | null;
 }) {
   const isCustom = current !== "" && !palette.some((c) => c.value === current);
   return (
     <div className="flex flex-wrap gap-1.5">
-      {palette.map(({ label, value }) => (
-        <button
-          key={label}
-          title={label}
-          onClick={() => onChange(value)}
-          className={`h-6 w-6 rounded-full transition ${
-            current === value
-              ? "scale-110 border-2 border-zinc-900"
-              : "hover:opacity-80"
-          }`}
-          style={{
-            background:
-              value === ""
-                ? "linear-gradient(135deg,#e5e7eb 50%,#fff 50%)"
-                : value,
-            outline: value === "#ffffff" ? "1px solid #e5e7eb" : undefined,
-          }}
-        />
-      ))}
+      {palette.map(({ label, value }) => {
+        const isSelected = current === value;
+        const isBlue = inheritedColor !== null && value === inheritedColor;
+        return (
+          <button
+            key={label}
+            title={label}
+            onClick={() => onChange(value)}
+            className={`h-6 w-6 rounded-full transition ${
+              !isBlue && isSelected
+                ? "scale-110 border-2 border-zinc-900"
+                : "hover:opacity-80"
+            }`}
+            style={{
+              background:
+                value === ""
+                  ? "linear-gradient(135deg,#e5e7eb 50%,#fff 50%)"
+                  : value,
+              outline: isBlue
+                ? "2px dashed #60a5fa"
+                : value === "#ffffff" ? "1px solid #e5e7eb" : undefined,
+              outlineOffset: isBlue ? "2px" : undefined,
+            }}
+          />
+        );
+      })}
       {/* Custom colour */}
       <label
         title="Custom colour"
         className={`relative flex h-6 w-6 cursor-pointer items-center justify-center overflow-hidden rounded-full transition ${
-          isCustom ? "scale-110 border-2 border-zinc-900" : "hover:opacity-80"
+          isCustom && !(inheritedColor !== null && current === inheritedColor) ? "scale-110 border-2 border-zinc-900" : "hover:opacity-80"
         }`}
         style={{
           background: isCustom
             ? current
             : "conic-gradient(red,yellow,lime,cyan,blue,magenta,red)",
+          outline: isCustom && inheritedColor !== null && current === inheritedColor ? "2px dashed #60a5fa" : undefined,
+          outlineOffset: isCustom && inheritedColor !== null && current === inheritedColor ? "2px" : undefined,
         }}
       >
         <input
@@ -192,6 +212,20 @@ export function BlockAdvancedControls({
     ? settings.paletteColors
     : COLOR_PALETTE;
 
+  const { viewport, isFieldOverridden, inheritedData } = useContext(ViewportContext);
+  const isResponsive = viewport !== "desktop";
+  const bgInherited = isResponsive && !isFieldOverridden("background");
+  const spacingInherited = isResponsive && !isFieldOverridden("spacing");
+  const borderInherited = isResponsive && !isFieldOverridden("border");
+  const inheritedBg = (inheritedData.background as Record<string, unknown>) ?? {};
+  const inheritedBgColor = isResponsive ? ((inheritedBg.bgColor as string) ?? "") : null;
+  const borderInputCls = (hasValue: boolean) =>
+    `rounded border px-1.5 py-1 text-[11px] text-zinc-700 focus:outline-none ${
+      borderInherited && !hasValue
+        ? "border-dashed border-blue-300 placeholder:text-blue-300 focus:border-blue-400"
+        : "border-zinc-200 placeholder:text-zinc-300 focus:border-zinc-400"
+    }`;
+
   const raw = data as Record<string, unknown>;
   const background = getBackgroundData(raw);
   const spacing    = getSpacingData(raw);
@@ -244,6 +278,7 @@ export function BlockAdvancedControls({
             current={background.bgColor ?? ""}
             palette={palette}
             onChange={(v) => updateBackground({ bgColor: v || undefined })}
+            inheritedColor={inheritedBgColor}
           />
         </div>
       </Section>
@@ -258,6 +293,7 @@ export function BlockAdvancedControls({
             onChange={(side, v) =>
               updateSpacing({ [`p${side}`]: v || undefined } as Partial<SpacingBlockData>)
             }
+            inherited={spacingInherited}
           />
         </div>
         <div>
@@ -268,6 +304,7 @@ export function BlockAdvancedControls({
             onChange={(side, v) =>
               updateSpacing({ [`m${side}`]: v || undefined } as Partial<SpacingBlockData>)
             }
+            inherited={spacingInherited}
           />
         </div>
       </Section>
@@ -295,8 +332,8 @@ export function BlockAdvancedControls({
                   type="text"
                   value={border.color ?? ""}
                   onChange={(e) => updateBorder({ color: e.target.value || undefined })}
-                  placeholder="#000000"
-                  className="min-w-0 flex-1 rounded border border-zinc-200 px-1.5 py-1 text-[11px] text-zinc-700 placeholder:text-zinc-300 focus:border-zinc-400 focus:outline-none"
+                  placeholder={borderInherited ? "—" : "#000000"}
+                  className={`min-w-0 flex-1 ${borderInputCls(!!border.color)}`}
                 />
               </div>
             </div>
@@ -306,8 +343,8 @@ export function BlockAdvancedControls({
                 type="text"
                 value={border.width ?? ""}
                 onChange={(e) => updateBorder({ width: e.target.value || undefined })}
-                placeholder="1px"
-                className="rounded border border-zinc-200 px-1.5 py-1 text-[11px] text-zinc-700 placeholder:text-zinc-300 focus:border-zinc-400 focus:outline-none"
+                placeholder={borderInherited ? "—" : "1px"}
+                className={borderInputCls(!!border.width)}
               />
             </div>
           </div>
@@ -332,8 +369,8 @@ export function BlockAdvancedControls({
                 type="text"
                 value={border.radius ?? ""}
                 onChange={(e) => updateBorder({ radius: e.target.value || undefined })}
-                placeholder="4px"
-                className="rounded border border-zinc-200 px-1.5 py-1 text-[11px] text-zinc-700 placeholder:text-zinc-300 focus:border-zinc-400 focus:outline-none"
+                placeholder={borderInherited ? "—" : "4px"}
+                className={borderInputCls(!!border.radius)}
               />
             </div>
           </div>

@@ -10,8 +10,10 @@ interface BlockPanelProps {
   viewport: Viewport;
   setViewport: (vp: Viewport) => void;
   isSectionEnabled: (fields: string[]) => boolean;
+  isFieldOverridden: (field: string) => boolean;
   toggleSection: (title: string, fields: string[]) => void;
   controlsDisplayData: (data: Record<string, unknown>) => Record<string, unknown>;
+  controlsInheritedData: (data: Record<string, unknown>) => Record<string, unknown>;
   onControlsChange: (newData: Record<string, unknown>) => void;
   onBaseControlsChange: (newData: Record<string, unknown>) => void;
   activeColIdx: number | null;
@@ -48,8 +50,10 @@ export default function BlockPanel({
   viewport,
   setViewport,
   isSectionEnabled,
+  isFieldOverridden,
   toggleSection,
   controlsDisplayData,
+  controlsInheritedData,
   onControlsChange,
   onBaseControlsChange,
   activeColIdx,
@@ -62,6 +66,7 @@ export default function BlockPanel({
   const activeViewport: Viewport = supportsBreakpoints ? viewport : "desktop";
   const Controls = blockMap[selectedBlock.name]?.PanelControls;
   const displayData = controlsDisplayData(selectedBlock.data);
+  const inheritedData = controlsInheritedData(selectedBlock.data);
 
   return (
     <>
@@ -70,7 +75,7 @@ export default function BlockPanel({
           {selectedBlock.name}
         </span>
       </div>
-      <ViewportContext.Provider value={{ viewport: activeViewport, isSectionEnabled, toggleSection }}>
+      <ViewportContext.Provider value={{ viewport: activeViewport, isSectionEnabled, isFieldOverridden, toggleSection, inheritedData }}>
         {Controls && (
           <Controls
             data={{

@@ -84,7 +84,7 @@
     "status": "published",
     "blocks": [
       {
-        "id": "sc-6",
+        "id": "sc-5",
         "type": "columns",
         "data": {
           "cols": [
@@ -124,7 +124,9 @@
                     "color": "#dc2626",
                     "responsive": {
                       "tablet": {
-                        "color": "#16a34a"
+                        "color": "#dc2626",
+                        "align": "center",
+                        "level": 2
                       },
                       "mobile": {
                         "align": "center",
@@ -137,7 +139,13 @@
                   "id": "sc-2",
                   "type": "paragraph",
                   "data": {
-                    "text": "New paragraph"
+                    "text": "New paragraph",
+                    "responsive": {
+                      "tablet": {
+                        "align": "center"
+                      }
+                    },
+                    "align": "center"
                   }
                 },
                 {
@@ -164,8 +172,15 @@
                     "color": "#16a34a",
                     "responsive": {
                       "tablet": {
-                        "color": "#ea580c"
-                      }
+                        "color": "#ea580c",
+                        "spacing": {
+                          "pt": "0em",
+                          "pr": "0em",
+                          "pb": "0em",
+                          "pl": "0em"
+                        }
+                      },
+                      "mobile": {}
                     },
                     "background": {
                       "bgColor": "#ca8a04"
@@ -176,19 +191,6 @@
                       "pb": "3em",
                       "pl": "3em"
                     }
-                  }
-                }
-              ]
-            },
-            {
-              "width": "33.333%",
-              "blocks": [
-                {
-                  "id": "sc-5",
-                  "type": "paragraph",
-                  "data": {
-                    "text": "New paragraph",
-                    "align": "center"
                   }
                 }
               ]
@@ -205,7 +207,7 @@
         }
       },
       {
-        "id": "sc-7",
+        "id": "sc-6",
         "type": "list",
         "data": {
           "style": "unordered",
@@ -216,10 +218,10 @@
         }
       }
     ],
-    "html": "[columns responsive='{\"tablet\":{\"stack\":true},\"mobile\":{\"stack\":true}}']\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraphs\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"},\"mobile\":{}}']\n  [/column]\n  [column width=\"33.333%\" responsive='{\"tablet\":{}}']\n    [header text=\"New heading\" level=\"2\" align=\"center\" color=\"#dc2626\" responsive='{\"tablet\":{\"color\":\"#16a34a\"},\"mobile\":{\"align\":\"center\",\"color\":\"#9333ea\"}}']\n    [paragraph text=\"New paragraph\"]\n    [image src=\"/media/1777671588524-crabtropics.png\" alt=\"\" caption=\"\" align=\"center\"]\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"}}' background='{\"bgColor\":\"#ca8a04\"}' spacing='{\"pt\":\"3em\",\"pr\":\"3em\",\"pb\":\"3em\",\"pl\":\"3em\"}']\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\"]\n  [/column]\n[/columns]\n\n[list style=\"unordered\" items='&#91;\"Item 1\",\"Item 2\"&#93;']",
+    "html": "[columns responsive='{\"tablet\":{\"stack\":true},\"mobile\":{\"stack\":true}}']\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraphs\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"},\"mobile\":{}}']\n  [/column]\n  [column width=\"33.333%\" responsive='{\"tablet\":{}}']\n    [header text=\"New heading\" level=\"2\" align=\"center\" color=\"#dc2626\" responsive='{\"tablet\":{\"color\":\"#dc2626\",\"align\":\"center\",\"level\":2},\"mobile\":{\"align\":\"center\",\"color\":\"#9333ea\"}}']\n    [paragraph text=\"New paragraph\" responsive='{\"tablet\":{\"align\":\"center\"}}' align=\"center\"]\n    [image src=\"/media/1777671588524-crabtropics.png\" alt=\"\" caption=\"\" align=\"center\"]\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\",\"spacing\":{\"pt\":\"0em\",\"pr\":\"0em\",\"pb\":\"0em\",\"pl\":\"0em\"}},\"mobile\":{}}' background='{\"bgColor\":\"#ca8a04\"}' spacing='{\"pt\":\"3em\",\"pr\":\"3em\",\"pb\":\"3em\",\"pl\":\"3em\"}']\n  [/column]\n[/columns]\n\n[list style=\"unordered\" items='&#91;\"Item 1\",\"Item 2\"&#93;']",
     "pageBgColor": "#ffffff",
     "createdAt": "2026-03-25T19:58:40.950Z",
-    "updatedAt": "2026-05-09T01:04:46.364Z",
+    "updatedAt": "2026-05-09T01:34:34.183Z",
     "injectCode": {
       "tracking": "",
       "head": "",
