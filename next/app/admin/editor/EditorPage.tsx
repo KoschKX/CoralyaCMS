@@ -197,18 +197,18 @@ export default function EditorPage({
                 viewport breakpoint so responsive CSS fires at the right size.
                 When the panel is closed the ResizeObserver handles this automatically. */}
             <div
-              className="mx-auto transition-[max-width] duration-200 ease-in-out"
+              className="mx-auto"
               style={panelOpen && mainMode !== "code" ? {
                 maxWidth:
                   viewport === "mobile" ? "390px"
                   : viewport === "tablet" ? "768px"
-                  : "2000px",
-              } : undefined}
+                  : "100%",
+              } : { maxWidth: "100%" }}
             >
             <div
               className="text-zinc-900 bg-white rounded-lg shadow-sm mx-auto"
               style={{
-                height: "calc(100vh - 48px)",
+                minHeight: "calc(100vh - 48px)",
                 maxWidth: "var(--content-max-width, 48rem)",
                 padding: "2.5rem var(--content-padding-x, 1.5rem)",
                 background: pageBgColor || "#fff",
@@ -253,7 +253,7 @@ export default function EditorPage({
                       tabletBp={tabletBp}
                       mobileBp={mobileBp}
                       forContainer
-                      forcedViewport={panelOpen ? viewport : undefined}
+                      forcedViewport={panelOpen && viewport !== "desktop" ? viewport : undefined}
                     />
                     <VisualEditor
                       initialBlocks={liveBlocks}
