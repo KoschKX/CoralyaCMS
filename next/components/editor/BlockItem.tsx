@@ -244,12 +244,23 @@ function BlockItem({
     : (isSelected && isContainerBlock) || descendantSelected    ? "ring-2 ring-blue-200"
     : "ring-1 ring-transparent";
 
+  // Margins go on the outer div so they create transparent space (CSS spec).
+  // backgroundColor and all other styles stay on the inner div.
+  // Block spacing is a dedicated div below the inner content that shares the
+  // backgroundColor — so the background extends through the gap between blocks.
+  const { marginTop, marginRight, marginBottom, marginLeft, backgroundColor, ...innerStyle } = wrapperStyle;
+  const hasMargin = marginTop || marginRight || marginBottom || marginLeft;
+  const outerExtraStyle: React.CSSProperties = hasMargin
+    ? { marginTop, marginRight, marginBottom, marginLeft }
+    : {};
+  const finalInnerStyle = { ...(backgroundColor ? { backgroundColor } : {}), ...innerStyle };
+
   return (
     <div
       key={block.id}
       data-block-id={block.id}
       className={`relative transition ${ringClass}`}
-      style={{ paddingBottom: isUnavailable ? 0 : "var(--block-spacing, 1.5rem)" }}
+      style={Object.keys(outerExtraStyle).length ? outerExtraStyle : undefined}
       onClick={(e) => {
         if (isSelected) { e.stopPropagation(); return; }
         if (isContainerBlock) { e.stopPropagation(); onSelectBlock(block.id, block.data as Record<string, unknown>, block.type); }
@@ -258,7 +269,7 @@ function BlockItem({
       <div
         className={`group/block relative${wrapperExtraClass ? ` ${wrapperExtraClass}` : ""}`}
         id={wrapperId}
-        style={Object.keys(wrapperStyle).length ? wrapperStyle : undefined}
+        style={Object.keys(finalInnerStyle).length ? finalInnerStyle : undefined}
       >
         <EditableBlock
           block={block}
@@ -331,6 +342,12 @@ function BlockItem({
           </>
         )}
       </div>
+
+      {/* Spacer: extends backgroundColor across the block-spacing gap so the
+          background is contiguous. Transparent when no backgroundColor is set. */}
+      {!isUnavailable && backgroundColor && (
+        <div style={{ height: "var(--block-spacing, 1.5rem)", backgroundColor, marginTop: "-var(--block-spacing, 1.5rem)" }} aria-hidden />
+      )}
 
       {(!isLast || isInColumn || isSelected) && (
         <AddZone

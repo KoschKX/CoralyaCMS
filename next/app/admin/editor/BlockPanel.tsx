@@ -68,6 +68,34 @@ export default function BlockPanel({
   const displayData = controlsDisplayData(selectedBlock.data);
   const inheritedData = controlsInheritedData(selectedBlock.data);
 
+  // When a column is actively selected within a columns block, redirect the
+  // advanced controls to that specific column's data rather than the whole block.
+  const isColumnSelected = selectedBlock.name === "columns" && activeColIdx !== null;
+  const rawCols = isColumnSelected
+    ? ((selectedBlock.data.cols as Record<string, unknown>[]) ?? [])
+    : null;
+  const activeColData = (rawCols && activeColIdx !== null)
+    ? (rawCols[activeColIdx] as Record<string, unknown> ?? {})
+    : null;
+
+  const advancedData = (activeColData ?? displayData) as typeof displayData;
+  const advancedOnChange = (activeColData !== null && rawCols !== null)
+    ? (patch: Record<string, unknown>) => {
+        const newCols = rawCols.map((col, i) =>
+          i === activeColIdx ? { ...col, ...patch } : col
+        );
+        onControlsChange({ cols: newCols });
+      }
+    : onControlsChange;
+  const advancedOnBaseChange = (activeColData !== null && rawCols !== null)
+    ? (patch: Record<string, unknown>) => {
+        const newCols = rawCols.map((col, i) =>
+          i === activeColIdx ? { ...col, ...patch } : col
+        );
+        onBaseControlsChange({ cols: newCols });
+      }
+    : onBaseControlsChange;
+
   return (
     <>
       <div className="flex items-center">
@@ -88,9 +116,9 @@ export default function BlockPanel({
           />
         )}
         <BlockAdvancedControls
-          data={displayData}
-          onChange={onControlsChange}
-          onBaseChange={onBaseControlsChange}
+          data={advancedData}
+          onChange={advancedOnChange}
+          onBaseChange={advancedOnBaseChange}
         />
       </ViewportContext.Provider>
     </>

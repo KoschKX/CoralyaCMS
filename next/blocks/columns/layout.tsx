@@ -1,6 +1,7 @@
 import "./styles.css";
 import type { EditorBlock } from "@/lib/pages-db";
 import type { BlockLayoutProps } from "@/lib/block-types";
+import { getBlockWrapperProps } from "@/lib/block-advanced-css";
 
 type ColEntry = { blocks: EditorBlock[]; width?: string };
 
@@ -19,11 +20,12 @@ export default function ColumnsLayout({ data, renderBlocks, blockId }: BlockLayo
       {cols.map((col, i) => {
         const width = col.width || `${100 / (cols.length || 1)}%`;
         const paddingLeft = cols.length > 1 && i === 0 ? "0" : "0.75rem";
+        const { style: colStyle, extraClass: colExtraClass } = getBlockWrapperProps(col as Record<string, unknown>);
         return (
           <div
             key={i}
-            className="block-columns__col-wrapper min-w-0"
-            style={{ width, paddingLeft, paddingRight: "0.75rem", boxSizing: "border-box" }}
+            className={`block-columns__col-wrapper min-w-0${colExtraClass ? ` ${colExtraClass}` : ""}`}
+            style={{ width, paddingLeft, paddingRight: "0.75rem", boxSizing: "border-box", ...colStyle }}
           >
             {renderBlocks ? renderBlocks(col.blocks ?? []) : null}
           </div>

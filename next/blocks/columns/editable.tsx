@@ -2,6 +2,7 @@
 
 import type { EditorBlock } from "@/lib/pages-db";
 import type { EditableProps } from "@/lib/block-types";
+import { getBlockWrapperProps } from "@/lib/block-advanced-css";
 
 export function ColumnsEditable({
   data,
@@ -23,12 +24,13 @@ export function ColumnsEditable({
         const colClass = `block-columns__col-wrapper${isColSelected ? " is-selected" : ""}`;
         const paddingLeft = cols.length > 1 && colIdx === 0 ? "0" : "0.75rem";
         const width = col.width || `${100 / (cols.length || 1)}%`;
+        const { style: colStyle, extraClass: colExtraClass } = getBlockWrapperProps(col as Record<string, unknown>);
 
         return (
           <div
             key={colIdx}
-            style={{ width, minHeight: 1, minWidth: 0, paddingLeft, paddingRight: "0.75rem", boxSizing: "border-box" }}
-            className={colClass}
+            style={{ width, minHeight: 1, minWidth: 0, paddingLeft, paddingRight: "0.75rem", boxSizing: "border-box", ...colStyle }}
+            className={`${colClass}${colExtraClass ? ` ${colExtraClass}` : ""}`}
             onClick={(e) => { e.stopPropagation(); onActiveColChange?.(colIdx); onSelect?.(); }}
           >
             <div className="block-columns__col min-w-0 relative rounded transition cursor-pointer">

@@ -1,10 +1,10 @@
 "use client";
 
-import { useContext, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import type { BlockData } from "@/lib/block-types";
 import { ViewportContext } from "./ViewportContext";
-import type { BackgroundBlockData, SpacingBlockData, BorderBlockData, AdvancedBlockData } from "@/lib/block-advanced-css";
-import { getBackgroundData, getSpacingData, getBorderData, getAdvancedData } from "@/lib/block-advanced-css";
+import type { BackgroundBlockData, SpacingBlockData, BorderBlockData, AdvancedBlockData, DisplayBlockData } from "@/lib/block-advanced-css";
+import { getBackgroundData, getSpacingData, getBorderData, getAdvancedData, getDisplayData } from "@/lib/block-advanced-css";
 import type { PaletteColor } from "@/lib/color-palette";
 import { COLOR_PALETTE } from "@/lib/color-palette";
 import { useSettings } from "@/hooks/useSettings";
@@ -24,6 +24,77 @@ function MiniLabel({ children }: { children: React.ReactNode }) {
     <span className="text-[9px] font-medium uppercase tracking-wider text-zinc-400">
       {children}
     </span>
+  );
+}
+
+type DropdownOption = { value: string; label: string };
+
+/** Fully custom dropdown — replaces native <select> so the popup is styled. */
+function Dropdown({
+  value,
+  onChange,
+  options,
+  className = "",
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  options: DropdownOption[];
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const selected = options.find((o) => o.value === value);
+
+  useEffect(() => {
+    if (!open) return;
+    function onMouseDown(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onMouseDown);
+    return () => document.removeEventListener("mousedown", onMouseDown);
+  }, [open]);
+
+  return (
+    <div ref={ref} className={`relative ${className}`}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between rounded border border-zinc-200 bg-white px-2 py-1 text-[11px] hover:border-zinc-300 focus:border-zinc-400 focus:outline-none"
+      >
+        <span className={selected?.value === "" ? "text-zinc-400" : "text-zinc-700"}>
+          {selected?.label ?? "—"}
+        </span>
+        <svg
+          className={`ml-1 flex-shrink-0 text-zinc-400 transition-transform duration-150 ${open ? "rotate-180" : ""}`}
+          width="10" height="10" viewBox="0 0 12 12" fill="none"
+        >
+          <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute left-0 right-0 top-full z-50 mt-0.5 overflow-hidden rounded border border-zinc-200 bg-white py-0.5 shadow-lg">
+          {options.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => { onChange(opt.value); setOpen(false); }}
+              className={`flex w-full items-center gap-1.5 px-2 py-1 text-left text-[11px] transition-colors hover:bg-zinc-50 ${
+                opt.value === value ? "font-medium text-zinc-900" : "text-zinc-500"
+              }`}
+            >
+              <span className="w-2 flex-shrink-0">
+                {opt.value === value && (
+                  <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor" className="text-zinc-500">
+                    <circle cx="4" cy="4" r="2.5"/>
+                  </svg>
+                )}
+              </span>
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -230,6 +301,7 @@ export function BlockAdvancedControls({
   const background = getBackgroundData(raw);
   const spacing    = getSpacingData(raw);
   const border     = getBorderData(raw);
+  const display    = getDisplayData(raw);
   const adv        = getAdvancedData(raw);
 
   /** Patch background and emit. */
@@ -257,6 +329,15 @@ export function BlockAdvancedControls({
       if (!patch[k]) delete next[k];
     }
     onChange({ border: Object.keys(next).length ? next : undefined });
+  }
+
+  /** Patch display and emit. */
+  function updateDisplay(patch: Partial<DisplayBlockData>) {
+    const next = { ...display, ...patch };
+    for (const k of Object.keys(patch) as (keyof DisplayBlockData)[]) {
+      if (patch[k] === undefined || patch[k] === "") delete next[k as keyof DisplayBlockData];
+    }
+    onChange({ display: Object.keys(next).length ? next : undefined });
   }
 
   /** Patch advanced and emit (always base-level — CSS ID/class are never viewport-specific). */
@@ -309,6 +390,143 @@ export function BlockAdvancedControls({
         </div>
       </Section>
 
+      {/* ── Display ─────────────────────────────────── */}
+      <Section title="Display" defaultOpen={false}>
+        <div className="space-y-3">
+          <div>
+            <MiniLabel>Display</MiniLabel>
+            <Dropdown
+              value={display.display ?? ""}
+              onChange={(v) => {
+                const val = v || undefined;
+                updateDisplay({
+                  display: val,
+                  flexDirection: undefined, flexWrap: undefined,
+                  justifyContent: undefined, alignItems: undefined, gap: undefined,
+                  gridTemplateColumns: undefined, gridGap: undefined,
+                });
+              }}
+              options={[
+                { value: "", label: "— default —" },
+                { value: "block", label: "block" },
+                { value: "inline", label: "inline" },
+                { value: "inline-block", label: "inline-block" },
+                { value: "flex", label: "flex" },
+                { value: "inline-flex", label: "inline-flex" },
+                { value: "grid", label: "grid" },
+                { value: "inline-grid", label: "inline-grid" },
+                { value: "none", label: "none" },
+              ]}
+              className="mt-1"
+            />
+          </div>
+
+          {(display.display === "flex" || display.display === "inline-flex") && (
+            <>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <MiniLabel>Direction</MiniLabel>
+                  <Dropdown
+                    value={display.flexDirection ?? ""}
+                    onChange={(v) => updateDisplay({ flexDirection: v || undefined })}
+                    options={[
+                      { value: "", label: "— default —" },
+                      { value: "row", label: "row" },
+                      { value: "row-reverse", label: "row-reverse" },
+                      { value: "column", label: "column" },
+                      { value: "column-reverse", label: "column-reverse" },
+                    ]}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <MiniLabel>Wrap</MiniLabel>
+                  <Dropdown
+                    value={display.flexWrap ?? ""}
+                    onChange={(v) => updateDisplay({ flexWrap: v || undefined })}
+                    options={[
+                      { value: "", label: "— default —" },
+                      { value: "nowrap", label: "nowrap" },
+                      { value: "wrap", label: "wrap" },
+                      { value: "wrap-reverse", label: "wrap-reverse" },
+                    ]}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <MiniLabel>Justify Content</MiniLabel>
+                  <Dropdown
+                    value={display.justifyContent ?? ""}
+                    onChange={(v) => updateDisplay({ justifyContent: v || undefined })}
+                    options={[
+                      { value: "", label: "— default —" },
+                      { value: "flex-start", label: "flex-start" },
+                      { value: "flex-end", label: "flex-end" },
+                      { value: "center", label: "center" },
+                      { value: "space-between", label: "space-between" },
+                      { value: "space-around", label: "space-around" },
+                      { value: "space-evenly", label: "space-evenly" },
+                    ]}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <MiniLabel>Align Items</MiniLabel>
+                  <Dropdown
+                    value={display.alignItems ?? ""}
+                    onChange={(v) => updateDisplay({ alignItems: v || undefined })}
+                    options={[
+                      { value: "", label: "— default —" },
+                      { value: "flex-start", label: "flex-start" },
+                      { value: "flex-end", label: "flex-end" },
+                      { value: "center", label: "center" },
+                      { value: "baseline", label: "baseline" },
+                      { value: "stretch", label: "stretch" },
+                    ]}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div>
+                <MiniLabel>Gap</MiniLabel>
+                <input
+                  type="text"
+                  value={display.gap ?? ""}
+                  onChange={(e) => updateDisplay({ gap: e.target.value || undefined })}
+                  placeholder="1rem"
+                  className="mt-1 w-full rounded border border-zinc-200 px-1.5 py-1 text-[11px] text-zinc-700 placeholder:text-zinc-300 focus:border-zinc-400 focus:outline-none"
+                />
+              </div>
+            </>
+          )}
+
+          {(display.display === "grid" || display.display === "inline-grid") && (
+            <>
+              <div>
+                <MiniLabel>Grid Template Columns</MiniLabel>
+                <input
+                  type="text"
+                  value={display.gridTemplateColumns ?? ""}
+                  onChange={(e) => updateDisplay({ gridTemplateColumns: e.target.value || undefined })}
+                  placeholder="repeat(3, 1fr)"
+                  className="mt-1 w-full rounded border border-zinc-200 px-1.5 py-1 text-[11px] text-zinc-700 placeholder:text-zinc-300 focus:border-zinc-400 focus:outline-none"
+                />
+              </div>
+              <div>
+                <MiniLabel>Gap</MiniLabel>
+                <input
+                  type="text"
+                  value={display.gridGap ?? ""}
+                  onChange={(e) => updateDisplay({ gridGap: e.target.value || undefined })}
+                  placeholder="1rem"
+                  className="mt-1 w-full rounded border border-zinc-200 px-1.5 py-1 text-[11px] text-zinc-700 placeholder:text-zinc-300 focus:border-zinc-400 focus:outline-none"
+                />
+              </div>
+            </>
+          )}
+        </div>
+      </Section>
+
       {/* ── Border ──────────────────────────────────── */}
       <Section title="Border" defaultOpen={false}>
         <div className="space-y-2">
@@ -351,17 +569,17 @@ export function BlockAdvancedControls({
           <div className="flex gap-2">
             <div className="flex flex-1 flex-col gap-1">
               <MiniLabel>Style</MiniLabel>
-              <select
+              <Dropdown
                 value={border.style || "solid"}
-                onChange={(e) => updateBorder({ style: e.target.value || undefined })}
-                className="rounded border border-zinc-200 bg-white px-1.5 py-1 text-[11px] text-zinc-700 focus:border-zinc-400 focus:outline-none"
-              >
-                <option value="solid">Solid</option>
-                <option value="dashed">Dashed</option>
-                <option value="dotted">Dotted</option>
-                <option value="double">Double</option>
-                <option value="none">None</option>
-              </select>
+                onChange={(v) => updateBorder({ style: v || undefined })}
+                options={[
+                  { value: "solid", label: "Solid" },
+                  { value: "dashed", label: "Dashed" },
+                  { value: "dotted", label: "Dotted" },
+                  { value: "double", label: "Double" },
+                  { value: "none", label: "None" },
+                ]}
+              />
             </div>
             <div className="flex w-16 flex-col gap-1">
               <MiniLabel>Radius</MiniLabel>
