@@ -146,7 +146,7 @@ export default function EditorPage({
     onSaveSuccess: handleSaveSuccess,
   });
 
-  const { isSectionEnabled, toggleSection, controlsDisplayData, handleControlsChange } =
+  const { isSectionEnabled, toggleSection, controlsDisplayData, handleControlsChange, handleBaseControlsChange } =
     useResponsiveBlock({
       selectedBlock,
       viewport,
@@ -303,6 +303,7 @@ export default function EditorPage({
                   toggleSection={toggleSection}
                   controlsDisplayData={controlsDisplayData}
                   onControlsChange={handleControlsChange}
+                  onBaseControlsChange={handleBaseControlsChange}
                   activeColIdx={activeColIdx}
                 />
               )}

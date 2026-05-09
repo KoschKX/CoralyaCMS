@@ -2,6 +2,7 @@
 
 import { blockMap } from "@/blocks/index";
 import { ViewportContext, type Viewport } from "@/components/ui/ViewportContext";
+import { BlockAdvancedControls } from "@/components/ui/BlockAdvancedControls";
 import type { SelectedBlock } from "@/lib/types";
 
 interface BlockPanelProps {
@@ -12,6 +13,8 @@ interface BlockPanelProps {
   toggleSection: (title: string, fields: string[]) => void;
   controlsDisplayData: (data: Record<string, unknown>) => Record<string, unknown>;
   onControlsChange: (newData: Record<string, unknown>) => void;
+  /** Always merges at the base/desktop level — used for advanced CSS controls. */
+  onBaseControlsChange: (newData: Record<string, unknown>) => void;
   activeColIdx: number | null;
 }
 
@@ -49,6 +52,7 @@ export default function BlockPanel({
   toggleSection,
   controlsDisplayData,
   onControlsChange,
+  onBaseControlsChange,
   activeColIdx,
 }: BlockPanelProps) {
   if (!selectedBlock) {
@@ -84,6 +88,11 @@ export default function BlockPanel({
       ) : (
         <p className="text-xs text-zinc-400">No extra settings for this block type.</p>
       )}
+      <BlockAdvancedControls
+        data={controlsDisplayData(selectedBlock.data)}
+        onChange={onControlsChange}
+        onBaseChange={onBaseControlsChange}
+      />
     </>
   );
 }

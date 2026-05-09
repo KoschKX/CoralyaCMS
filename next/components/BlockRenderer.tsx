@@ -3,6 +3,7 @@ import type { EditorBlock } from "@/lib/pages-db";
 import { publicBlockMap } from "@/blocks/layout-registry";
 import { parseShortcode } from "@/lib/shortcodes";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { getBlockWrapperProps } from "@/lib/block-advanced-css";
 
 interface Props {
   blocks: EditorBlock[];
@@ -101,9 +102,16 @@ function BlockRenderer({ blocks, disabledBlocks = [] }: Props) {
           const def = publicBlockMap[entry.resolvedType];
           if (!def) return null;
 
+          const { style, extraClass, id } = getBlockWrapperProps(entry.resolvedData);
+
           return (
             <ErrorBoundary key={entry.id}>
-              <div data-block-id={entry.id}>
+              <div
+                data-block-id={entry.id}
+                id={id}
+                className={extraClass || undefined}
+                style={Object.keys(style).length ? style : undefined}
+              >
                 <def.Layout
                   data={entry.resolvedData}
                   blockId={entry.id}

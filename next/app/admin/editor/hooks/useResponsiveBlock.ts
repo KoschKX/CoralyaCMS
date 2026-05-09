@@ -65,5 +65,25 @@ export function useResponsiveBlock({
     setSelectedBlock((prev) => prev && { ...prev, data: finalData });
   }
 
-  return { isSectionEnabled, toggleSection, controlsDisplayData, handleControlsChange };
+  /**
+   * Like handleControlsChange but always merges at the top-level (desktop/base)
+   * regardless of the current viewport. Used for advanced CSS controls whose
+   * values are stored flat on block.data and read by getBlockWrapperProps.
+   */
+  function handleBaseControlsChange(newData: Record<string, unknown>) {
+    if (!selectedBlock) return;
+    const current = selectedBlock.data;
+    const merged = { ...current };
+    for (const [k, v] of Object.entries(newData)) {
+      if (v !== undefined) {
+        merged[k] = v;
+      } else {
+        delete merged[k];
+      }
+    }
+    updateBlock(selectedBlock.id, merged);
+    setSelectedBlock((prev) => prev && { ...prev, data: merged });
+  }
+
+  return { isSectionEnabled, toggleSection, controlsDisplayData, handleControlsChange, handleBaseControlsChange };
 }
