@@ -56,7 +56,7 @@ export function useCanvasWidth(
   // finishes) so we read the settled canvas width.
   useEffect(() => {
     if (panelOpen) return;
-    const id = setTimeout(() => setObserverEnabled(true), 250);
+    const id = setTimeout(() => setObserverEnabled(true), 200);
     return () => clearTimeout(id);
   }, [panelOpen]);
 
