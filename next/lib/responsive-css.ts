@@ -32,6 +32,31 @@ function rulesFor(overrides: Record<string, unknown>): string {
   ].filter(Boolean).join(" ");
 }
 
+/** CSS properties that apply only to the block wrapper (not cascaded to children). */
+function wrapperRulesFor(overrides: Record<string, unknown>): string {
+  const spacing    = (overrides.spacing    as Record<string, string> | undefined) ?? {};
+  const background = (overrides.background as Record<string, string> | undefined) ?? {};
+  const border     = (overrides.border     as Record<string, string> | undefined) ?? {};
+  const rules: string[] = [];
+  if (spacing.pt) rules.push(`padding-top: ${spacing.pt} !important;`);
+  if (spacing.pr) rules.push(`padding-right: ${spacing.pr} !important;`);
+  if (spacing.pb) rules.push(`padding-bottom: ${spacing.pb} !important;`);
+  if (spacing.pl) rules.push(`padding-left: ${spacing.pl} !important;`);
+  if (spacing.mt) rules.push(`margin-top: ${spacing.mt} !important;`);
+  if (spacing.mr) rules.push(`margin-right: ${spacing.mr} !important;`);
+  if (spacing.mb) rules.push(`margin-bottom: ${spacing.mb} !important;`);
+  if (spacing.ml) rules.push(`margin-left: ${spacing.ml} !important;`);
+  if (background.bgColor) rules.push(`background-color: ${background.bgColor} !important;`);
+  const hasBorder = border.color || border.width || border.style;
+  if (hasBorder) {
+    rules.push(`border-width: ${border.width || "1px"} !important;`);
+    rules.push(`border-style: ${border.style || "solid"} !important;`);
+    rules.push(`border-color: ${border.color || "currentColor"} !important;`);
+  }
+  if (border.radius) rules.push(`border-radius: ${border.radius} !important;`);
+  return rules.join(" ");
+}
+
 /**
  * Generate per-column-wrapper width CSS rules for the flex-based ColumnsLayout.
  * Targets .block-columns__col-wrapper:nth-child(N) with width overrides.
@@ -116,6 +141,10 @@ export function buildResponsiveCSS(
           const sel = `[data-block-id="${block.id}"], [data-block-id="${block.id}"] *`;
           css += `${sel} { ${rules} }\n`;
         }
+        const wrapperRules = wrapperRulesFor(cascaded);
+        if (wrapperRules) {
+          css += `[data-block-id="${block.id}"] { ${wrapperRules} }\n`;
+        }
       }
 
       const def = blockMap[block.type];
@@ -173,10 +202,15 @@ export function buildResponsiveCSS(
 
     if (responsive) {
       const sel = `[data-block-id="${block.id}"], [data-block-id="${block.id}"] *`;
+      const wrapperSel = `[data-block-id="${block.id}"]`;
       const tabletRules = responsive.tablet ? rulesFor(responsive.tablet) : "";
       const mobileRules = responsive.mobile ? rulesFor(responsive.mobile) : "";
+      const tabletWrapperRules = responsive.tablet ? wrapperRulesFor(responsive.tablet) : "";
+      const mobileWrapperRules = responsive.mobile ? wrapperRulesFor(responsive.mobile) : "";
       if (tabletRules) css += `${tabletQuery} { ${sel} { ${tabletRules} } }\n`;
       if (mobileRules) css += `${mobileQuery} { ${sel} { ${mobileRules} } }\n`;
+      if (tabletWrapperRules) css += `${tabletQuery} { ${wrapperSel} { ${tabletWrapperRules} } }\n`;
+      if (mobileWrapperRules) css += `${mobileQuery} { ${wrapperSel} { ${mobileWrapperRules} } }\n`;
     }
 
     // Recurse into child blocks of container blocks (e.g. columns)
