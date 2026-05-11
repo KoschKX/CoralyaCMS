@@ -33,7 +33,7 @@ export function ColumnsEditable({
         return (
           <div
             key={colIdx}
-            style={{ width, minHeight: 1, minWidth: 0, paddingLeft, paddingRight: "0.75rem", boxSizing: "border-box", ...colStyle }}
+            style={{ width, minHeight: 1, minWidth: 0, boxSizing: "border-box", ...colStyle }}
             className={`${colClass}${colExtraClass ? ` ${colExtraClass}` : ""}`}
             onClick={(e) => { e.stopPropagation(); onActiveColChange?.(colIdx); onSelect?.(); }}
           >

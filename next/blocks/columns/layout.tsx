@@ -25,7 +25,7 @@ export default function ColumnsLayout({ data, renderBlocks, blockId }: BlockLayo
           <div
             key={i}
             className={`block-columns__col-wrapper min-w-0${colExtraClass ? ` ${colExtraClass}` : ""}`}
-            style={{ width, paddingLeft, paddingRight: "0.75rem", boxSizing: "border-box", ...colStyle }}
+            style={{ width, boxSizing: "border-box", ...colStyle }}
           >
             {renderBlocks ? renderBlocks(col.blocks ?? []) : null}
           </div>
