@@ -1,0 +1,229 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   coralya-carousel block
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Root ─────────────────────────────────────────────────────────────────── */
+.coralya-carousel {
+  --car-count:    1;
+  --car-per-view: 1;
+  --car-index:    0;
+  --car-gap:      0px;
+  --car-radius:   0px;
+  --car-aspect:   56.25%; /* 16/9 default */
+  container-type: inline-size;
+  /* NOTE: user-select must NOT be set here — it causes a Safari/macOS bug
+     where cursor: pointer stops working on child <button> elements.
+     Apply it only to content areas below. */
+}
+
+/* ── Stage: positioned wrapper for viewport + arrows ─────────────────────── */
+.coralya-carousel-stage {
+  position: relative; /* arrows are positioned relative to this, NOT the viewport */
+}
+
+/* ── Viewport: clips the track ────────────────────────────────────────────── */
+.coralya-carousel-viewport {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Empty viewport (no slides) */
+.coralya-carousel-viewport--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 10rem;
+  background: #f4f4f5;
+  border-radius: var(--car-radius);
+  color: #a1a1aa;
+  font-size: 0.875rem;
+}
+
+/* ── Track ────────────────────────────────────────────────────────────────── */
+.coralya-carousel-track {
+  display: flex;
+  user-select: none; /* prevent accidental text selection while swiping */
+  /* Track is N/P times the container width so each slide fills 1/P */
+  width: calc(var(--car-count) * 100% / var(--car-per-view));
+  transform: translateX(calc(-1 * var(--car-index) * 100% / var(--car-count)));
+  transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ── Individual slide ─────────────────────────────────────────────────────── */
+.coralya-carousel-slide {
+  /* Each slide occupies 1/N of track width = 1/P of container width */
+  flex: 0 0 calc(100% / var(--car-count));
+  min-width: 0;
+  /* Gap is split equally on each side of a slide */
+  padding-inline: calc(var(--car-gap) / 2);
+}
+
+/* ── Media container ──────────────────────────────────────────────────────── */
+.coralya-carousel-media {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--car-radius);
+}
+
+/* Aspect-ratio box via padding-top trick (not used in auto mode) */
+.coralya-carousel:not(.coralya-carousel--aspect-auto) .coralya-carousel-media {
+  padding-top: var(--car-aspect);
+}
+
+/* Image fills the media area */
+.coralya-carousel:not(.coralya-carousel--aspect-auto) .coralya-carousel-media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Link wrapper fills the media area when slide has a link */
+.coralya-carousel:not(.coralya-carousel--aspect-auto) .coralya-carousel-media > a {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+/* Empty-slide placeholder fills the media area */
+.coralya-carousel-slide-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f4f4f5;
+  border-radius: inherit;
+}
+
+.coralya-carousel-slide-placeholder svg {
+  width: 3rem;
+  height: 3rem;
+  color: #d4d4d8;
+}
+
+/* Auto height mode: no padding trick, image flows naturally */
+.coralya-carousel--aspect-auto .coralya-carousel-media img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ── Slide caption ────────────────────────────────────────────────────────── */
+.coralya-carousel-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.625rem 1rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+  color: #fff;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  margin: 0;
+  z-index: 2;
+}
+
+/* ── Fade effect ──────────────────────────────────────────────────────────── */
+.coralya-carousel--fade .coralya-carousel-track {
+  /* Override slide-mode transform — use opacity instead */
+  width: 100%;
+  transform: none;
+  transition: none;
+  position: relative; /* so inset:0 on children works */
+}
+
+/* All slides stacked; active one sets the height */
+.coralya-carousel--fade .coralya-carousel-slide {
+  position: absolute;
+  inset: 0;
+  padding-inline: 0;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Active slide: back to normal flow so it defines track height */
+.coralya-carousel--fade .coralya-carousel-slide--active {
+  position: relative;
+  z-index: 1;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Arrows ───────────────────────────────────────────────────────────────── */
+.coralya-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.38);
+  color: #fff;
+  border: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  padding: 0;
+  transition: background 0.2s;
+}
+
+.coralya-carousel-arrow:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.68);
+}
+
+.coralya-carousel-arrow:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.coralya-carousel-arrow--prev { left: 0.75rem; cursor: pointer; }
+.coralya-carousel-arrow--next { right: 0.75rem; cursor: pointer; }
+
+.coralya-carousel-arrow svg {
+  width: 1rem;
+  height: 1rem;
+  pointer-events: none;
+  cursor: pointer;
+}
+
+/* ── Dots ─────────────────────────────────────────────────────────────────── */
+.coralya-carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.375rem;
+  padding-top: 0.75rem;
+  user-select: none;
+}
+
+.coralya-carousel-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  border: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #d4d4d8;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  padding: 0;
+  flex-shrink: 0;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.coralya-carousel-dot--active {
+  background: #18181b;
+  transform: scale(1.35);
+}

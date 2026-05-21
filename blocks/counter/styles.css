@@ -1,0 +1,178 @@
+/* ── Counter Block ───────────────────────────────────────────────────────────
+   Supports two visual modes: box (stat cards) and circle (SVG progress rings).
+   Dynamic per-block colors are driven by CSS custom properties.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* ── Container (enables container queries for all children) ─────────────── */
+.coralya-counters {
+  container-type: inline-size;
+}
+
+/* ── Shared grid ─────────────────────────────────────────────────────────── */
+.coralya-counters-grid {
+  display: grid;
+  gap: 1.5rem;
+  /* minmax(0, 1fr) prevents items from overflowing their track */
+  grid-template-columns: repeat(var(--cnt-cols, 4), minmax(0, 1fr));
+}
+
+/* ── Box style ───────────────────────────────────────────────────────────── */
+.coralya-counter--box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 1.25rem;
+  border: 1px solid var(--cnt-border, #e4e4e7);
+  border-radius: 6px;
+}
+
+.coralya-counter-icon {
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--cnt-color, #18181b);
+  margin-bottom: 0.75rem;
+}
+
+.coralya-counter-value {
+  display: flex;
+  align-items: baseline;
+  gap: 0.1em;
+  line-height: 1;
+}
+
+.coralya-counter-number {
+  font-size: var(--cnt-num-size, 2.75rem);
+  font-weight: 700;
+  color: var(--cnt-color, #18181b);
+}
+
+.coralya-counter-unit {
+  font-size: calc(var(--cnt-num-size, 2.75rem) * 0.5);
+  font-weight: 600;
+  color: var(--cnt-color, #18181b);
+}
+
+.coralya-counter-label {
+  margin-top: 0.625rem;
+  font-size: 0.9375rem;
+  color: #71717a;
+  line-height: 1.4;
+}
+
+/* ── Circle style ────────────────────────────────────────────────────────── */
+/* Circles have a fixed intrinsic size — flex-wrap lets them reflow naturally */
+.coralya-counters--circle .coralya-counters-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.coralya-counter--circle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.coralya-counter-ring {
+  position: relative;
+  width: var(--ring-size, 200px);
+  height: var(--ring-size, 200px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.coralya-counter-ring svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  overflow: visible;
+}
+
+.coralya-counter-ring-track {
+  fill: none;
+  stroke: var(--ring-unfilled, #e4e4e7);
+}
+
+.coralya-counter-ring-fill {
+  fill: none;
+  stroke: var(--ring-filled, #18181b);
+  stroke-linecap: round;
+  stroke-dasharray: var(--ring-circ);
+  stroke-dashoffset: var(--ring-circ); /* starts hidden */
+  animation: coralya-ring-draw 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: 0.15s;
+}
+
+@keyframes coralya-ring-draw {
+  to { stroke-dashoffset: var(--ring-offset); }
+}
+
+.coralya-counter-ring-label {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 0.08em;
+  font-size: calc(var(--ring-size, 200px) * 0.2);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ring-filled, #18181b);
+}
+
+.coralya-counter-ring-unit {
+  font-size: 0.55em;
+  font-weight: 600;
+}
+
+/* ── Responsive (container-query based — responds to the block's own width) ── */
+
+/* 3 → 2 cols when container gets tight */
+@container (width < 480px) {
+  .coralya-counters-cols-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* 4 → 2 cols at medium, → 1 col on very narrow */
+@container (width < 600px) {
+  .coralya-counters-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* 5 → 3 cols → 2 cols */
+@container (width < 700px) {
+  .coralya-counters-cols-5 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@container (width < 460px) {
+  .coralya-counters-cols-5 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* 6 → 3 cols → 2 cols */
+@container (width < 780px) {
+  .coralya-counters-cols-6 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@container (width < 520px) {
+  .coralya-counters-cols-6 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* All grids → 1 col on very narrow containers */
+@container (width < 300px) {
+  .coralya-counters-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,12 @@
+[
+  {
+    "id": "480cc5c5-29f2-4792-bab8-657616f225e9",
+    "username": "Gary",
+    "displayName": "Angelone",
+    "email": "gmangelone@gmail.com",
+    "passwordHash": "scrypt:e67ac4e7f5ebf7d334809e70d3a4a456:75578e1afe9eb0a9e479b45ee135bb6cb0a30c5a00e6e49ee5bbdf75e0bb03fd17347ae72ab975fbfadcb1b9d98ac5b792d42fcf861436bb23c72a3766c20b55",
+    "role": "administrator",
+    "createdAt": "2026-04-25T13:11:50.202Z",
+    "updatedAt": "2026-04-25T13:11:50.202Z"
+  }
+]

@@ -1,0 +1,30 @@
+/* Brighter color for HTML tags */
+.token.html-tag .token.tag {
+  color: #ff61ef;
+  font-weight: bold;
+}
+/* Color the [ and ] brackets for shortcodes */
+.token.shortcode-bracket {
+  color: #ffb454;
+  font-weight: bold;
+}
+.token.shortcode-tag .token.name {
+  color: #ffb454;
+  font-weight: bold;
+}
+.token.shortcode-attr-name {
+  color: #36e2a2;
+  font-weight: bold;
+}
+.token.shortcode-attr-value {
+  color: #82aaff;
+}
+
+
+/* Force variable names before = to be red, even if Prism uses attr-name */
+.token.shortcode-variable,
+.token.shortcode-attr-name,
+.token.attr-name.language-shortcode {
+  color: #ff5370 !important;
+  font-weight: bold;
+}

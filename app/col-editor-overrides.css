@@ -1,0 +1,9 @@
+.block-columns__col-wrapper.is-selected {
+  outline: 2px solid #3b82f6 !important;
+  z-index: 1;
+}
+
+/* Only outline the deepest selected col-wrapper, never its parent(s) */
+.block-columns__col-wrapper.is-selected .block-columns__col-wrapper.is-selected {
+  outline: none !important;
+}
