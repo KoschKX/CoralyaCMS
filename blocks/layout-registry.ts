@@ -37,6 +37,7 @@ import SocialSharingLayout  from "./social-sharing/layout";
 import TestimonialsLayout   from "./testimonials/layout";
 import StarRatingLayout        from "./star-rating/layout";
 import SyntaxHighlighterLayout from "./syntax-highlighter/layout";
+import YoutubeLayout           from "./youtube/layout";
 
 export interface PublicBlockDef {
   Layout: (props: BlockLayoutProps) => ReactNode;
@@ -63,6 +64,7 @@ export const publicBlockMap: Record<string, PublicBlockDef> = {
   testimonials:     { Layout: TestimonialsLayout },
   "star-rating":         { Layout: StarRatingLayout },
   "syntax-highlighter":  { Layout: SyntaxHighlighterLayout },
+  "youtube":             { Layout: YoutubeLayout },
   columns: {
     Layout: ColumnsLayout,
     isContainer: columnsIsContainer,

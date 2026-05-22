@@ -84,7 +84,7 @@
     "status": "published",
     "blocks": [
       {
-        "id": "sc-14",
+        "id": "sc-15",
         "type": "columns",
         "data": {
           "cols": [
@@ -158,7 +158,7 @@
                   }
                 },
                 {
-                  "id": "571247ee-b736-4ccd-914d-2c04e092d6aa",
+                  "id": "sc-3",
                   "type": "star-rating",
                   "data": {
                     "rating": 4.5,
@@ -177,7 +177,7 @@
                   }
                 },
                 {
-                  "id": "sc-3",
+                  "id": "sc-4",
                   "type": "testimonials",
                   "data": {
                     "columns": 1,
@@ -197,7 +197,7 @@
                   }
                 },
                 {
-                  "id": "sc-4",
+                  "id": "sc-5",
                   "type": "countdown",
                   "data": {
                     "targetDate": "2027-01-01T00:00",
@@ -217,7 +217,25 @@
                   }
                 },
                 {
-                  "id": "sc-5",
+                  "id": "e72cf827-889c-4627-926c-17fef007657b",
+                  "type": "youtube",
+                  "data": {
+                    "url": "https://www.youtube.com/watch?v=jlZHNuBSlfA&list=RDjlZHNuBSlfA&start_radio=1",
+                    "title": "",
+                    "aspectRatio": "16:9",
+                    "maxWidth": "",
+                    "alignment": "center",
+                    "autoplay": false,
+                    "mute": false,
+                    "loop": false,
+                    "controls": true,
+                    "startTime": "",
+                    "endTime": "",
+                    "privacy": false
+                  }
+                },
+                {
+                  "id": "sc-6",
                   "type": "testimonials",
                   "data": {
                     "design": "classic",
@@ -244,7 +262,7 @@
                   }
                 },
                 {
-                  "id": "sc-6",
+                  "id": "sc-7",
                   "type": "testimonials",
                   "data": {
                     "design": "classic",
@@ -304,7 +322,7 @@
                   }
                 },
                 {
-                  "id": "sc-7",
+                  "id": "sc-8",
                   "type": "testimonials",
                   "data": {
                     "design": "classic",
@@ -331,7 +349,7 @@
                   }
                 },
                 {
-                  "id": "sc-8",
+                  "id": "sc-9",
                   "type": "social-sharing",
                   "data": {
                     "tagline": "Share this:",
@@ -370,7 +388,7 @@
                   }
                 },
                 {
-                  "id": "sc-9",
+                  "id": "sc-10",
                   "type": "carousel",
                   "data": {
                     "effect": "slide",
@@ -412,7 +430,7 @@
                   }
                 },
                 {
-                  "id": "sc-10",
+                  "id": "sc-11",
                   "type": "counter",
                   "data": {
                     "style": "box",
@@ -470,7 +488,7 @@
                   }
                 },
                 {
-                  "id": "sc-11",
+                  "id": "sc-12",
                   "type": "paragraph",
                   "data": {
                     "text": "New paragraph",
@@ -483,7 +501,7 @@
                   }
                 },
                 {
-                  "id": "sc-12",
+                  "id": "sc-13",
                   "type": "image",
                   "data": {
                     "src": "/media/1777671588524-crabtropics.png",
@@ -498,7 +516,7 @@
               "width": "33.333%",
               "blocks": [
                 {
-                  "id": "sc-13",
+                  "id": "sc-14",
                   "type": "paragraph",
                   "data": {
                     "text": "New paragraph",
@@ -541,7 +559,7 @@
         }
       },
       {
-        "id": "sc-15",
+        "id": "sc-16",
         "type": "list",
         "data": {
           "style": "unordered",
@@ -552,10 +570,10 @@
         }
       }
     ],
-    "html": "[columns responsive='{\"tablet\":{\"stack\":true},\"mobile\":{\"stack\":true}}']\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraphs\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"},\"mobile\":{}}']\n  [/column]\n  [column width=\"33.333%\" responsive='{\"tablet\":{}}']\n    [header text=\"New heading\" level=\"2\" align=\"center\" color=\"#dc2626\" responsive='{\"tablet\":{\"color\":\"#dc2626\",\"align\":\"center\",\"level\":2},\"mobile\":{\"align\":\"center\",\"color\":\"#9333ea\"}}']\n    [button text=\"Test Button\" url=\"\" target=\"_self\" type=\"flat\" size=\"medium\" align=\"center\" stretch=\"false\" bgcolor=\"\" textcolor=\"\" bordercolor=\"\" hoverbgcolor=\"\" hovertextcolor=\"\" hoverbordercolor=\"\" borderradius=\"\" icon=\"\" iconposition=\"left\"]\n    [star-rating rating=\"4.5\" maxRating=\"5\" hideEmpty=\"false\" iconSize=\"1.75rem\" activeColor=\"#dc2626\" inactiveColor=\"\" gap=\"0.25rem\" showText=\"true\" textSize=\"\" textColor=\"\" textGap=\"0.5rem\" alignment=\"center\" rounding=\"auto\"]\n    [testimonials columns=\"1\" gap=\"1.5rem\" padding=\"1.75rem\" borderRadius=\"0.5rem\" showQuoteIcon=\"true\" showAvatar=\"true\" showRating=\"true\" bgColor=\"\" textColor=\"\" borderColor=\"#e4e4e7\" quoteColor=\"\" starColor=\"\" roleColor=\"\" items=\"&#91;{&quot;id&quot;:&quot;t1&quot;,&quot;quote&quot;:&quot;Working with this team was an absolute pleasure. The results exceeded all expectations and the communication was excellent throughout.&quot;,&quot;name&quot;:&quot;Sarah Johnson&quot;,&quot;role&quot;:&quot;Marketing Director, Brightline Co.&quot;,&quot;photo&quot;:&quot;&quot;,&quot;rating&quot;:5},{&quot;id&quot;:&quot;t2&quot;,&quot;quote&quot;:&quot;Incredible attention to detail and a genuine passion for quality. I wouldn\"]\n    [countdown targetDate=\"2027-01-01T00:00\" heading=\"\" subheading=\"\" showWeeks=\"false\" labelPosition=\"below\" alignment=\"center\" counterBgColor=\"#dc2626\" counterTextColor=\"#ffffff\" labelColor=\"#ffffff\" borderRadius=\"6px\" linkText=\"\" linkUrl=\"\" linkTarget=\"_self\" expiredText=\"Event has ended\"]\n    [testimonials design=\"classic\" navigation=\"false\" speed=\"5000\" random=\"false\" speechBubble=\"true\" columns=\"1\" gap=\"1.5rem\" padding=\"1.75rem\" borderRadius=\"0.5rem\" borderStyle=\"solid\" borderColor=\"#e4e4e7\" borderTop=\"1px\" borderRight=\"1px\" borderBottom=\"1px\" borderLeft=\"1px\" bgColor=\"\" textColor=\"\" nameColor=\"\" navColor=\"\" navSize=\"\" items=\"&#91;{&quot;id&quot;:&quot;t1&quot;,&quot;quote&quot;:&quot;Working with this team was an absolute pleasure. The results exceeded all expectations and the communication was excellent throughout.&quot;,&quot;name&quot;:&quot;Sarah Johnson&quot;,&quot;company&quot;:&quot;Brightline Co.&quot;,&quot;companyLink&quot;:&quot;&quot;,&quot;companyTarget&quot;:&quot;_self&quot;,&quot;photo&quot;:&quot;&quot;,&quot;photoRadius&quot;:&quot;&quot;,&quot;avatar&quot;:&quot;placeholder&quot;,&quot;avatarPosition&quot;:&quot;above&quot;,&quot;avatarSize&quot;:&quot;&quot;,&quot;icon&quot;:&quot;&quot;,&quot;iconAlignment&quot;:&quot;left&quot;,&quot;rating&quot;:5},{&quot;id&quot;:&quot;t2&quot;,&quot;quote&quot;:&quot;Incredible attention to detail and a genuine passion for quality. I wouldn\"]\n    [testimonials design=\"classic\" navigation=\"true\" speed=\"5000\" random=\"false\" speechBubble=\"true\" columns=\"1\" gap=\"1.5rem\" padding=\"1.75rem\" borderRadius=\"0.5rem\" borderStyle=\"solid\" borderColor=\"#e4e4e7\" borderTop=\"1px\" borderRight=\"1px\" borderBottom=\"1px\" borderLeft=\"1px\" bgColor=\"\" textColor=\"\" nameColor=\"\" navColor=\"\" navSize=\"\" items='&#91;{\"id\":\"t1\",\"quote\":\"Working with this team was an absolute pleasure. The results exceeded all expectations and the communication was excellent throughout.\",\"name\":\"Sarah Johnson\",\"company\":\"Brightline Co.\",\"companyLink\":\"\",\"companyTarget\":\"_self\",\"photo\":\"/media/1777671596630-friends_portraits.png\",\"photoRadius\":\"\",\"avatar\":\"image\",\"avatarPosition\":\"above\",\"avatarSize\":\"\",\"icon\":\"\",\"iconAlignment\":\"left\",\"rating\":5},{\"id\":\"t2\",\"quote\":\"Incredible attention to detail and a genuine passion for quality. I wouldn&#39;t hesitate to recommend them to anyone.\",\"name\":\"Mark Williams\",\"company\":\"Keystone Labs\",\"companyLink\":\"\",\"companyTarget\":\"_self\",\"photo\":\"\",\"photoRadius\":\"\",\"avatar\":\"placeholder\",\"avatarPosition\":\"above\",\"avatarSize\":\"\",\"icon\":\"\",\"iconAlignment\":\"left\",\"rating\":5}&#93;']\n    [testimonials design=\"classic\" navigation=\"false\" speed=\"5000\" random=\"false\" speechBubble=\"true\" columns=\"1\" gap=\"1.5rem\" padding=\"1.75rem\" borderRadius=\"0.5rem\" borderStyle=\"solid\" borderColor=\"#e4e4e7\" borderTop=\"1px\" borderRight=\"1px\" borderBottom=\"1px\" borderLeft=\"1px\" bgColor=\"\" textColor=\"\" nameColor=\"\" navColor=\"\" navSize=\"\" items=\"&#91;{&quot;id&quot;:&quot;t1&quot;,&quot;quote&quot;:&quot;Working with this team was an absolute pleasure. The results exceeded all expectations and the communication was excellent throughout.&quot;,&quot;name&quot;:&quot;Sarah Johnson&quot;,&quot;company&quot;:&quot;Brightline Co.&quot;,&quot;companyLink&quot;:&quot;&quot;,&quot;companyTarget&quot;:&quot;_self&quot;,&quot;photo&quot;:&quot;/media/1777671596630-friends_portraits.png&quot;,&quot;photoRadius&quot;:&quot;&quot;,&quot;avatar&quot;:&quot;image&quot;,&quot;avatarPosition&quot;:&quot;above&quot;,&quot;avatarSize&quot;:&quot;&quot;,&quot;icon&quot;:&quot;&quot;,&quot;iconAlignment&quot;:&quot;left&quot;,&quot;rating&quot;:5},{&quot;id&quot;:&quot;t2&quot;,&quot;quote&quot;:&quot;Incredible attention to detail and a genuine passion for quality. I wouldn\"]\n    [social-sharing tagline=\"Share this:\" taglinetag=\"h4\" taglineplacement=\"before\" iconsize=\"20px\" iconsboxed=\"false\" iconsboxedradius=\"4px\" colortype=\"custom\" iconcolor=\"#000000\" boxcolor=\"\" bgcolor=\"\" alignment=\"flex-start\" url=\"\" title=\"\" description=\"\" networks='&#91;\"facebook\",\"twitter\",\"bluesky\",\"reddit\",\"linkedin\",\"whatsapp\",\"copy_link\",\"email\",\"custom_1779437528668\"&#93;' customNetworks='&#91;{\"id\":\"custom_1779437528668\",\"label\":\"Test\",\"color\":\"#555555\",\"shareUrlTemplate\":\"#\"}&#93;']\n    [carousel effect=\"slide\" perview=\"1\" gap=\"0\" aspectratio=\"16/9\" borderradius=\"0\" autoplay=\"false\" autoplaydelay=\"3000\" loop=\"true\" showarrows=\"true\" showdots=\"true\" items='&#91;{\"id\":\"s1\",\"src\":\"/media/1777671604459-character_maker.png\",\"alt\":\"Slide 1\",\"caption\":\"\",\"link\":\"\",\"linkTarget\":\"_self\"},{\"id\":\"s2\",\"src\":\"/media/1777671596630-friends_portraits.png\",\"alt\":\"Slide 2\",\"caption\":\"\",\"link\":\"\",\"linkTarget\":\"_self\"},{\"id\":\"s3\",\"src\":\"/media/1777671588524-crabtropics.png\",\"alt\":\"Slide 3\",\"caption\":\"\",\"link\":\"\",\"linkTarget\":\"_self\"}&#93;']\n    [counter style=\"box\" columns=\"4\" color=\"\" bordercolor=\"\" filledcolor=\"\" unfilledcolor=\"\" items='&#91;{\"id\":\"d1\",\"value\":\"150\",\"unit\":\"+\",\"unitPos\":\"suffix\",\"label\":\"Projects completed\",\"icon\":\"\",\"filledColor\":\"\",\"unfilledColor\":\"\",\"size\":200},{\"id\":\"d2\",\"value\":\"98\",\"unit\":\"%\",\"unitPos\":\"suffix\",\"label\":\"Client satisfaction\",\"icon\":\"\",\"filledColor\":\"\",\"unfilledColor\":\"\",\"size\":200},{\"id\":\"d3\",\"value\":\"12\",\"unit\":\"\",\"unitPos\":\"suffix\",\"label\":\"Years of experience\",\"icon\":\"\",\"filledColor\":\"\",\"unfilledColor\":\"\",\"size\":200},{\"id\":\"d4\",\"value\":\"50\",\"unit\":\"K\",\"unitPos\":\"suffix\",\"label\":\"Users served\",\"icon\":\"\",\"filledColor\":\"\",\"unfilledColor\":\"\",\"size\":200}&#93;']\n    [paragraph text=\"New paragraph\" align=\"center\" responsive='{\"tablet\":{\"align\":\"center\"}}']\n    [image src=\"/media/1777671588524-crabtropics.png\" alt=\"\" caption=\"\" align=\"center\"]\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\",\"spacing\":{\"pt\":\"0em\",\"pr\":\"0em\",\"pb\":\"0em\",\"pl\":\"0em\"}},\"mobile\":{}}' background='{\"bgColor\":\"#ca8a04\"}' spacing='{\"pt\":\"3em\",\"pr\":\"3em\",\"pb\":\"3em\",\"pl\":\"3em\"}']\n  [/column]\n[/columns]\n\n[list style=\"unordered\" items='&#91;\"Item 1\",\"Item 2\"&#93;']",
+    "html": "[columns responsive='{\"tablet\":{\"stack\":true},\"mobile\":{\"stack\":true}}']\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraphs\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"},\"mobile\":{}}']\n  [/column]\n  [column width=\"33.333%\" responsive='{\"tablet\":{}}']\n    [header text=\"New heading\" level=\"2\" align=\"center\" color=\"#dc2626\" responsive='{\"tablet\":{\"color\":\"#dc2626\",\"align\":\"center\",\"level\":2},\"mobile\":{\"align\":\"center\",\"color\":\"#9333ea\"}}']\n    [button text=\"Test Button\" url=\"\" target=\"_self\" type=\"flat\" size=\"medium\" align=\"center\" stretch=\"false\" bgcolor=\"\" textcolor=\"\" bordercolor=\"\" hoverbgcolor=\"\" hovertextcolor=\"\" hoverbordercolor=\"\" borderradius=\"\" icon=\"\" iconposition=\"left\"]\n    [star-rating rating=\"4.5\" maxRating=\"5\" hideEmpty=\"false\" iconSize=\"1.75rem\" activeColor=\"#dc2626\" inactiveColor=\"\" gap=\"0.25rem\" showText=\"true\" textSize=\"\" textColor=\"\" textGap=\"0.5rem\" alignment=\"center\" rounding=\"auto\"]\n    [testimonials columns=\"1\" gap=\"1.5rem\" padding=\"1.75rem\" borderRadius=\"0.5rem\" showQuoteIcon=\"true\" showAvatar=\"true\" showRating=\"true\" bgColor=\"\" textColor=\"\" borderColor=\"#e4e4e7\" quoteColor=\"\" starColor=\"\" roleColor=\"\" items=\"&#91;{&quot;id&quot;:&quot;t1&quot;,&quot;quote&quot;:&quot;Working with this team was an absolute pleasure. The results exceeded all expectations and the communication was excellent throughout.&quot;,&quot;name&quot;:&quot;Sarah Johnson&quot;,&quot;role&quot;:&quot;Marketing Director, Brightline Co.&quot;,&quot;photo&quot;:&quot;&quot;,&quot;rating&quot;:5},{&quot;id&quot;:&quot;t2&quot;,&quot;quote&quot;:&quot;Incredible attention to detail and a genuine passion for quality. I wouldn\"]\n    [countdown targetDate=\"2027-01-01T00:00\" heading=\"\" subheading=\"\" showWeeks=\"false\" labelPosition=\"below\" alignment=\"center\" counterBgColor=\"#dc2626\" counterTextColor=\"#ffffff\" labelColor=\"#ffffff\" borderRadius=\"6px\" linkText=\"\" linkUrl=\"\" linkTarget=\"_self\" expiredText=\"Event has ended\"]\n    [youtube url=\"https://www.youtube.com/watch?v=jlZHNuBSlfA&list=RDjlZHNuBSlfA&start_radio=1\" title=\"\" aspectRatio=\"16:9\" maxWidth=\"\" alignment=\"center\" autoplay=\"false\" mute=\"false\" loop=\"false\" controls=\"true\" startTime=\"\" endTime=\"\" privacy=\"false\"]\n    [testimonials design=\"classic\" navigation=\"false\" speed=\"5000\" random=\"false\" speechBubble=\"true\" columns=\"1\" gap=\"1.5rem\" padding=\"1.75rem\" borderRadius=\"0.5rem\" borderStyle=\"solid\" borderColor=\"#e4e4e7\" borderTop=\"1px\" borderRight=\"1px\" borderBottom=\"1px\" borderLeft=\"1px\" bgColor=\"\" textColor=\"\" nameColor=\"\" navColor=\"\" navSize=\"\" items=\"&#91;{&quot;id&quot;:&quot;t1&quot;,&quot;quote&quot;:&quot;Working with this team was an absolute pleasure. The results exceeded all expectations and the communication was excellent throughout.&quot;,&quot;name&quot;:&quot;Sarah Johnson&quot;,&quot;company&quot;:&quot;Brightline Co.&quot;,&quot;companyLink&quot;:&quot;&quot;,&quot;companyTarget&quot;:&quot;_self&quot;,&quot;photo&quot;:&quot;&quot;,&quot;photoRadius&quot;:&quot;&quot;,&quot;avatar&quot;:&quot;placeholder&quot;,&quot;avatarPosition&quot;:&quot;above&quot;,&quot;avatarSize&quot;:&quot;&quot;,&quot;icon&quot;:&quot;&quot;,&quot;iconAlignment&quot;:&quot;left&quot;,&quot;rating&quot;:5},{&quot;id&quot;:&quot;t2&quot;,&quot;quote&quot;:&quot;Incredible attention to detail and a genuine passion for quality. I wouldn\"]\n    [testimonials design=\"classic\" navigation=\"true\" speed=\"5000\" random=\"false\" speechBubble=\"true\" columns=\"1\" gap=\"1.5rem\" padding=\"1.75rem\" borderRadius=\"0.5rem\" borderStyle=\"solid\" borderColor=\"#e4e4e7\" borderTop=\"1px\" borderRight=\"1px\" borderBottom=\"1px\" borderLeft=\"1px\" bgColor=\"\" textColor=\"\" nameColor=\"\" navColor=\"\" navSize=\"\" items='&#91;{\"id\":\"t1\",\"quote\":\"Working with this team was an absolute pleasure. The results exceeded all expectations and the communication was excellent throughout.\",\"name\":\"Sarah Johnson\",\"company\":\"Brightline Co.\",\"companyLink\":\"\",\"companyTarget\":\"_self\",\"photo\":\"/media/1777671596630-friends_portraits.png\",\"photoRadius\":\"\",\"avatar\":\"image\",\"avatarPosition\":\"above\",\"avatarSize\":\"\",\"icon\":\"\",\"iconAlignment\":\"left\",\"rating\":5},{\"id\":\"t2\",\"quote\":\"Incredible attention to detail and a genuine passion for quality. I wouldn&#39;t hesitate to recommend them to anyone.\",\"name\":\"Mark Williams\",\"company\":\"Keystone Labs\",\"companyLink\":\"\",\"companyTarget\":\"_self\",\"photo\":\"\",\"photoRadius\":\"\",\"avatar\":\"placeholder\",\"avatarPosition\":\"above\",\"avatarSize\":\"\",\"icon\":\"\",\"iconAlignment\":\"left\",\"rating\":5}&#93;']\n    [testimonials design=\"classic\" navigation=\"false\" speed=\"5000\" random=\"false\" speechBubble=\"true\" columns=\"1\" gap=\"1.5rem\" padding=\"1.75rem\" borderRadius=\"0.5rem\" borderStyle=\"solid\" borderColor=\"#e4e4e7\" borderTop=\"1px\" borderRight=\"1px\" borderBottom=\"1px\" borderLeft=\"1px\" bgColor=\"\" textColor=\"\" nameColor=\"\" navColor=\"\" navSize=\"\" items=\"&#91;{&quot;id&quot;:&quot;t1&quot;,&quot;quote&quot;:&quot;Working with this team was an absolute pleasure. The results exceeded all expectations and the communication was excellent throughout.&quot;,&quot;name&quot;:&quot;Sarah Johnson&quot;,&quot;company&quot;:&quot;Brightline Co.&quot;,&quot;companyLink&quot;:&quot;&quot;,&quot;companyTarget&quot;:&quot;_self&quot;,&quot;photo&quot;:&quot;/media/1777671596630-friends_portraits.png&quot;,&quot;photoRadius&quot;:&quot;&quot;,&quot;avatar&quot;:&quot;image&quot;,&quot;avatarPosition&quot;:&quot;above&quot;,&quot;avatarSize&quot;:&quot;&quot;,&quot;icon&quot;:&quot;&quot;,&quot;iconAlignment&quot;:&quot;left&quot;,&quot;rating&quot;:5},{&quot;id&quot;:&quot;t2&quot;,&quot;quote&quot;:&quot;Incredible attention to detail and a genuine passion for quality. I wouldn\"]\n    [social-sharing tagline=\"Share this:\" taglinetag=\"h4\" taglineplacement=\"before\" iconsize=\"20px\" iconsboxed=\"false\" iconsboxedradius=\"4px\" colortype=\"custom\" iconcolor=\"#000000\" boxcolor=\"\" bgcolor=\"\" alignment=\"flex-start\" url=\"\" title=\"\" description=\"\" networks='&#91;\"facebook\",\"twitter\",\"bluesky\",\"reddit\",\"linkedin\",\"whatsapp\",\"copy_link\",\"email\",\"custom_1779437528668\"&#93;' customNetworks='&#91;{\"id\":\"custom_1779437528668\",\"label\":\"Test\",\"color\":\"#555555\",\"shareUrlTemplate\":\"#\"}&#93;']\n    [carousel effect=\"slide\" perview=\"1\" gap=\"0\" aspectratio=\"16/9\" borderradius=\"0\" autoplay=\"false\" autoplaydelay=\"3000\" loop=\"true\" showarrows=\"true\" showdots=\"true\" items='&#91;{\"id\":\"s1\",\"src\":\"/media/1777671604459-character_maker.png\",\"alt\":\"Slide 1\",\"caption\":\"\",\"link\":\"\",\"linkTarget\":\"_self\"},{\"id\":\"s2\",\"src\":\"/media/1777671596630-friends_portraits.png\",\"alt\":\"Slide 2\",\"caption\":\"\",\"link\":\"\",\"linkTarget\":\"_self\"},{\"id\":\"s3\",\"src\":\"/media/1777671588524-crabtropics.png\",\"alt\":\"Slide 3\",\"caption\":\"\",\"link\":\"\",\"linkTarget\":\"_self\"}&#93;']\n    [counter style=\"box\" columns=\"4\" color=\"\" bordercolor=\"\" filledcolor=\"\" unfilledcolor=\"\" items='&#91;{\"id\":\"d1\",\"value\":\"150\",\"unit\":\"+\",\"unitPos\":\"suffix\",\"label\":\"Projects completed\",\"icon\":\"\",\"filledColor\":\"\",\"unfilledColor\":\"\",\"size\":200},{\"id\":\"d2\",\"value\":\"98\",\"unit\":\"%\",\"unitPos\":\"suffix\",\"label\":\"Client satisfaction\",\"icon\":\"\",\"filledColor\":\"\",\"unfilledColor\":\"\",\"size\":200},{\"id\":\"d3\",\"value\":\"12\",\"unit\":\"\",\"unitPos\":\"suffix\",\"label\":\"Years of experience\",\"icon\":\"\",\"filledColor\":\"\",\"unfilledColor\":\"\",\"size\":200},{\"id\":\"d4\",\"value\":\"50\",\"unit\":\"K\",\"unitPos\":\"suffix\",\"label\":\"Users served\",\"icon\":\"\",\"filledColor\":\"\",\"unfilledColor\":\"\",\"size\":200}&#93;']\n    [paragraph text=\"New paragraph\" align=\"center\" responsive='{\"tablet\":{\"align\":\"center\"}}']\n    [image src=\"/media/1777671588524-crabtropics.png\" alt=\"\" caption=\"\" align=\"center\"]\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\",\"spacing\":{\"pt\":\"0em\",\"pr\":\"0em\",\"pb\":\"0em\",\"pl\":\"0em\"}},\"mobile\":{}}' background='{\"bgColor\":\"#ca8a04\"}' spacing='{\"pt\":\"3em\",\"pr\":\"3em\",\"pb\":\"3em\",\"pl\":\"3em\"}']\n  [/column]\n[/columns]\n\n[list style=\"unordered\" items='&#91;\"Item 1\",\"Item 2\"&#93;']",
     "pageBgColor": "#ffffff",
     "createdAt": "2026-03-25T19:58:40.950Z",
-    "updatedAt": "2026-05-22T10:13:44.621Z",
+    "updatedAt": "2026-05-22T10:37:29.504Z",
     "injectCode": {
       "tracking": "",
       "head": "",

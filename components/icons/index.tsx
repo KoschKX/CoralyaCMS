@@ -20,6 +20,7 @@ import CountdownIcon   from '../../public/icons/countdown.svg';
 import TestimonialsIcon from '../../public/icons/testimonials.svg';
 import StarFilledIcon         from '../../public/icons/star-filled.svg';
 import SyntaxHighlighterIcon  from '../../public/icons/syntax-highlighter.svg';
+import YoutubeIcon            from '../../public/icons/youtube.svg';
 
 export const ICON_COMPONENTS: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   paragraph: ParagraphIcon,
@@ -44,4 +45,5 @@ export const ICON_COMPONENTS: Record<string, React.FC<React.SVGProps<SVGSVGEleme
   "star":               StarFilledIcon,
   "star-rating":        StarFilledIcon,
   "syntax-highlighter": SyntaxHighlighterIcon,
+  "youtube":            YoutubeIcon,
 };
