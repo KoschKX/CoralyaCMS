@@ -6,7 +6,7 @@ import { EmbedPanelControls } from "./panel";
 const embed: BlockDefinition = {
   name: "embed",
   label: "Embed",
-  icon: "◫",
+  icon: "embed",
   category: "media",
   defaultData: {
     code:      "",

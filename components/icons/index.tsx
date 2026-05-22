@@ -21,6 +21,7 @@ import TestimonialsIcon from '../../public/icons/testimonials.svg';
 import StarFilledIcon         from '../../public/icons/star-filled.svg';
 import SyntaxHighlighterIcon  from '../../public/icons/syntax-highlighter.svg';
 import VideoFileIcon          from '../../public/icons/video-file.svg';
+import ConnectionIcon         from '../../public/icons/connection.svg';
 
 export const ICON_COMPONENTS: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   paragraph: ParagraphIcon,
@@ -32,7 +33,7 @@ export const ICON_COMPONENTS: Record<string, React.FC<React.SVGProps<SVGSVGEleme
   table: TableIcon,
   columns: ColumnsIcon,
   column: ColumnIcon,
-  embed: MediaIcon,
+  embed: ConnectionIcon,
   image: MediaIcon,
   html:      HtmlIcon,
   button:    ButtonIcon,
