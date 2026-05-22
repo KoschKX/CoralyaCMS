@@ -36,6 +36,8 @@ import counter        from "./counter/config";
 import carousel       from "./carousel/config";
 import socialSharing  from "./social-sharing/config";
 import countdown      from "./countdown/config";
+import testimonials   from "./testimonials/config";
+import starRating     from "./star-rating/config";
 
 import {
   registerBlock,
@@ -46,7 +48,7 @@ import {
   getPluginIcon,
 } from "@/lib/plugin-registry";
 
-for (const block of [paragraph, header, list, code, quote, delimiter, table, embed, columns, html, image, button, counter, carousel, socialSharing, countdown]) {
+for (const block of [paragraph, header, list, code, quote, delimiter, table, embed, columns, html, image, button, counter, carousel, socialSharing, countdown, testimonials, starRating]) {
   registerBlock(block);
 }
 

@@ -45,14 +45,16 @@ export function serializeAttr(key: string, v: unknown): string {
   if (typeof v === "number" || typeof v === "boolean") {
     return `${key}="${v}"`;
   }
-  // Array or object — single-quote delimiter so JSON's own " stay readable
-  const json = escapeBrackets(JSON.stringify(v));
+  // Array or object — single-quote delimiter so JSON's own " stay readable.
+  // Also escape bare single quotes (apostrophes in text) so the regex parser
+  // doesn't terminate on them.
+  const json = escapeBrackets(JSON.stringify(v)).replace(/'/g, "&#39;");
   return `${key}='${json}'`;
 }
 
 function decodeAttrValue(raw: string, singleQuoted: boolean): unknown {
   const s = singleQuoted
-    ? unescapeBrackets(raw)
+    ? unescapeBrackets(raw).replace(/&#39;/g, "'")
     : unescapeBrackets(raw).replace(/&quot;/g, '"');
   try { return JSON.parse(s); } catch { return s; }
 }

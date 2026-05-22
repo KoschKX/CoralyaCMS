@@ -17,6 +17,8 @@ import CounterIcon from '../../public/icons/counter.svg';
 import CarouselIcon    from '../../public/icons/carousel.svg';
 import ShareIcon       from '../../public/icons/share.svg';
 import CountdownIcon   from '../../public/icons/countdown.svg';
+import TestimonialsIcon from '../../public/icons/testimonials.svg';
+import StarFilledIcon   from '../../public/icons/star-filled.svg';
 
 export const ICON_COMPONENTS: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   paragraph: ParagraphIcon,
@@ -37,4 +39,7 @@ export const ICON_COMPONENTS: Record<string, React.FC<React.SVGProps<SVGSVGEleme
   share:            ShareIcon,
   "social-sharing": ShareIcon,
   countdown:          CountdownIcon,
+  testimonials:       TestimonialsIcon,
+  "star":             StarFilledIcon,
+  "star-rating":      StarFilledIcon,
 };

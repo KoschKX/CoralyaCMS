@@ -405,8 +405,6 @@ export function SocialSharingPanelControls({ data, onChange }: PanelControlProps
             wrap
           />
 
-          {/* Background color */}
-          <OptionColor label="Background" value={(data.bgColor as string) ?? ""} onChange={(v) => onChange({ ...data, bgColor: v })} />
         </div>
       </PanelSection>
 

@@ -32,7 +32,10 @@ import ImageLayout     from "./image/layout";
 import ButtonLayout    from "./button/layout";
 import CounterLayout   from "./counter/layout";
 import CarouselLayout  from "./carousel/layout";
-import CountdownLayout from "./countdown/layout";
+import CountdownLayout      from "./countdown/layout";
+import SocialSharingLayout  from "./social-sharing/layout";
+import TestimonialsLayout   from "./testimonials/layout";
+import StarRatingLayout     from "./star-rating/layout";
 
 export interface PublicBlockDef {
   Layout: (props: BlockLayoutProps) => ReactNode;
@@ -53,8 +56,11 @@ export const publicBlockMap: Record<string, PublicBlockDef> = {
   image:     { Layout: ImageLayout },
   button:    { Layout: ButtonLayout },
   counter:   { Layout: CounterLayout },
-  carousel:  { Layout: CarouselLayout },
-  countdown: { Layout: CountdownLayout },
+  carousel:        { Layout: CarouselLayout },
+  countdown:        { Layout: CountdownLayout },
+  "social-sharing": { Layout: SocialSharingLayout },
+  testimonials:     { Layout: TestimonialsLayout },
+  "star-rating":    { Layout: StarRatingLayout },
   columns: {
     Layout: ColumnsLayout,
     isContainer: columnsIsContainer,

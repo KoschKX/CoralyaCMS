@@ -388,7 +388,6 @@ export default function SocialSharingLayout({
   const colorType = (data.colorType as string) === "custom" ? "custom" : "brand";
   const iconColor = (data.iconColor as string) || "";
   const boxColor = (data.boxColor as string) || "";
-  const bgColor = sanitizeColor(data.bgColor);
   const alignment = (data.alignment as string) || "flex-start";
 
   const [shareUrl, setShareUrl] = useState((data.url as string) || "");
@@ -414,7 +413,6 @@ export default function SocialSharingLayout({
   const customById = Object.fromEntries(customNetworks.map((c) => [c.id, c]));
 
   const containerStyle: React.CSSProperties = {};
-  if (bgColor) containerStyle.backgroundColor = bgColor;
 
   const TagName = taglineTag;
 

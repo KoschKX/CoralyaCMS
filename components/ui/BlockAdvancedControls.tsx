@@ -312,39 +312,14 @@ export function BlockAdvancedControls({
       {/* ── Border ──────────────────────────────────── */}
       <Section title="Border" defaultOpen={false}>
         <div className="space-y-2">
-          <div className="flex gap-2">
-            <div className="flex flex-1 flex-col gap-1">
-              <MiniLabel>Color</MiniLabel>
-              <div className="flex items-center gap-1">
-                <label className="relative flex h-6 w-6 flex-shrink-0 cursor-pointer overflow-hidden rounded border border-zinc-200">
-                  <span
-                    className="absolute inset-0"
-                    style={{ background: border.color || "#000000" }}
-                  />
-                  <input
-                    type="color"
-                    value={border.color || "#000000"}
-                    onChange={(e) => updateBorder({ color: e.target.value || undefined })}
-                    className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                  />
-                </label>
-                <input
-                  type="text"
-                  value={border.color ?? ""}
-                  onChange={(e) => updateBorder({ color: e.target.value || undefined })}
-                  placeholder={borderInherited ? "—" : "#000000"}
-                  className={`min-w-0 flex-1 ${borderInputCls(!!border.color)}`}
-                />
-              </div>
-            </div>
-            <div className="flex w-16 flex-col gap-1">
-              <MiniLabel>Width</MiniLabel>
-              <input
-                type="text"
-                value={border.width ?? ""}
-                onChange={(e) => updateBorder({ width: e.target.value || undefined })}
-                placeholder={borderInherited ? "—" : "1px"}
-                className={borderInputCls(!!border.width)}
+          <div>
+            <MiniLabel>Color</MiniLabel>
+            <div className="mt-1">
+              <BgColorSwatches
+                current={border.color ?? ""}
+                palette={palette}
+                onChange={(v) => updateBorder({ color: v || undefined })}
+                inheritedColor={borderInherited ? (border.color ?? null) : null}
               />
             </div>
           </div>
@@ -362,6 +337,16 @@ export function BlockAdvancedControls({
                 <option value="double">Double</option>
                 <option value="none">None</option>
               </select>
+            </div>
+            <div className="flex w-16 flex-col gap-1">
+              <MiniLabel>Width</MiniLabel>
+              <input
+                type="text"
+                value={border.width ?? ""}
+                onChange={(e) => updateBorder({ width: e.target.value || undefined })}
+                placeholder={borderInherited ? "—" : "1px"}
+                className={borderInputCls(!!border.width)}
+              />
             </div>
             <div className="flex w-16 flex-col gap-1">
               <MiniLabel>Radius</MiniLabel>
