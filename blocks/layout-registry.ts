@@ -35,7 +35,8 @@ import CarouselLayout  from "./carousel/layout";
 import CountdownLayout      from "./countdown/layout";
 import SocialSharingLayout  from "./social-sharing/layout";
 import TestimonialsLayout   from "./testimonials/layout";
-import StarRatingLayout     from "./star-rating/layout";
+import StarRatingLayout        from "./star-rating/layout";
+import SyntaxHighlighterLayout from "./syntax-highlighter/layout";
 
 export interface PublicBlockDef {
   Layout: (props: BlockLayoutProps) => ReactNode;
@@ -60,7 +61,8 @@ export const publicBlockMap: Record<string, PublicBlockDef> = {
   countdown:        { Layout: CountdownLayout },
   "social-sharing": { Layout: SocialSharingLayout },
   testimonials:     { Layout: TestimonialsLayout },
-  "star-rating":    { Layout: StarRatingLayout },
+  "star-rating":         { Layout: StarRatingLayout },
+  "syntax-highlighter":  { Layout: SyntaxHighlighterLayout },
   columns: {
     Layout: ColumnsLayout,
     isContainer: columnsIsContainer,
