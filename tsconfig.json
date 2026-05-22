@@ -19,7 +19,11 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@/blocks": ["./.generated/blocks"],
+      "@/blocks/*": ["./.generated/blocks/*"],
+      "@/plugins": ["./.generated/plugins"],
+      "@/plugins/*": ["./.generated/plugins/*"]
     }
   },
   "include": [

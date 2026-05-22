@@ -4,8 +4,10 @@
   "private": true,
   "engines": { "node": ">=20.0.0" },
   "scripts": {
+    "codegen": "node lib/codegen.mjs",
     "dev": "next dev --turbo",
     "build": "next build",
+
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",

@@ -223,7 +223,7 @@ export function OptionSegment({
 }: {
   label?: string;
   value: string;
-  options: readonly { value: string; label: string }[];
+  options: readonly { value: string; label: string; icon?: React.ReactNode }[];
   onChange: (v: string) => void;
   /** Allow buttons to wrap — useful when there are many options. */
   wrap?: boolean;
@@ -236,12 +236,14 @@ export function OptionSegment({
           <button
             key={opt.value}
             type="button"
+            title={opt.label}
+            aria-label={opt.label}
             onClick={() => onChange(opt.value)}
             className={`${PILL_BASE} px-2.5 py-1${
               wrap ? "" : " flex flex-1 items-center justify-center"
             } ${value === opt.value ? PILL_ACTIVE : PILL_IDLE}`}
           >
-            {opt.label}
+            {opt.icon ?? opt.label}
           </button>
         ))}
       </div>
@@ -295,27 +297,42 @@ export function OptionSelect({
   value,
   options,
   onChange,
+  stacked = false,
 }: {
   label: string;
   value: string;
   options: readonly { value: string; label: string }[];
   onChange: (v: string) => void;
+  stacked?: boolean;
 }) {
+  const select = (
+    <select
+      aria-label={label}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="flex-1 rounded border border-zinc-200 bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
+    >
+      {options.map((opt) => (
+        <option key={opt.value} value={opt.value}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+  );
+
+  if (stacked) {
+    return (
+      <div>
+        <label className="mb-1 block text-xs text-zinc-500">{label}</label>
+        <div className="flex">{select}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center gap-2">
       <label className="w-28 shrink-0 text-xs text-zinc-500">{label}</label>
-      <select
-        aria-label={label}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="flex-1 rounded border border-zinc-200 bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
-      >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
+      {select}
     </div>
   );
 }

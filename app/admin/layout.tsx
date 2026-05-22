@@ -4,7 +4,7 @@ import { LogoutButton } from "./LogoutButton";
 import { SidebarContentNav } from "./SidebarContentNav";
 import "../col-editor-overrides.css";
 // Ensure plugins are installed before reading their admin pages
-import "@/plugins/index";
+import "@/plugins";
 import { installedPlugins } from "@/lib/plugin-registry";
 
 export const metadata = {

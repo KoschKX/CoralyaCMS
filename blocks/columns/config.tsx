@@ -1,6 +1,6 @@
 import type { BlockDefinition, BlockData } from "@/lib/block-types";
 import type { EditorBlock } from "@/lib/pages-db";
-import ColumnsLayout, { columnsIsContainer, columnsGetChildBlocks } from "./layout";
+import ColumnsLayout, { isContainer, getChildBlocks } from "./layout";
 import ColumnsPanelControls from "./PanelControls";
 import { ColumnsEditable } from "./editable";
 
@@ -32,8 +32,8 @@ const columns: BlockDefinition = {
   category: "design",
   supportsBreakpoints: true,
   defaultData: { cols: [{ blocks: [], width: "50%" }, { blocks: [], width: "50%" }] },
-  isContainer: columnsIsContainer,
-  getChildBlocks: columnsGetChildBlocks,
+  isContainer: isContainer,
+  getChildBlocks: getChildBlocks,
 
   setChildBlocks: (data: BlockData, arrays: EditorBlock[][]) => ({
     ...data,

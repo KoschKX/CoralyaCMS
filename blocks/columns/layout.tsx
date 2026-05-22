@@ -6,8 +6,8 @@ type ColEntry = { blocks: EditorBlock[]; width?: string };
 
 // Exported so layout-registry.ts and columns/config.tsx can share a single
 // source of truth for the container metadata instead of duplicating the logic.
-export const columnsIsContainer = true as const;
-export function columnsGetChildBlocks(data: Record<string, unknown>): EditorBlock[][] {
+export const isContainer = true as const;
+export function getChildBlocks(data: Record<string, unknown>): EditorBlock[][] {
   const cols = (data.cols as ColEntry[]) ?? [];
   return cols.map((col) => col.blocks ?? []);
 }

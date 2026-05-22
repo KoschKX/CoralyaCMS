@@ -2,44 +2,46 @@ import "./styles.css";
 import type { BlockLayoutProps } from "@/lib/block-types";
 
 /**
- * Only allow http and https embed URLs to prevent javascript: / data: injections.
- * Returns null when the URL is absent, empty, or uses a disallowed scheme.
+ * Strip <script> tags (and their content) from raw embed HTML.
+ * We keep everything else — iframes, blockquotes, divs — as-is.
+ * This is intentionally minimal: the editor is a trusted admin user.
  */
-function sanitizeEmbedUrl(raw: unknown): string | null {
-  if (typeof raw !== "string" || !raw.trim()) return null;
-  try {
-    const url = new URL(raw.trim());
-    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
-    return url.href;
-  } catch {
-    return null;
-  }
+function sanitize(html: string): string {
+  return html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script\s*>/gi, "");
 }
 
-export default function EmbedLayout({ data, blockId }: BlockLayoutProps & { blockId: string }) {
-  const src = sanitizeEmbedUrl(data.embed);
-  if (!src) {
+export default function EmbedLayout({ data, blockId }: BlockLayoutProps & { blockId?: string }) {
+  // Support both new `code` field and legacy `embed` URL field
+  const raw = String(data.code ?? data.embed ?? "").trim();
+
+  const maxWidth    = String(data.maxWidth ?? "").trim() || "100%";
+  const alignStyle: React.CSSProperties =
+    data.alignment === "left"  ? { marginRight: "auto" } :
+    data.alignment === "right" ? { marginLeft:  "auto" } :
+    { marginLeft: "auto", marginRight: "auto" };
+
+  if (!raw) {
     return (
       <div
         data-block-id={blockId}
-        className={`block-embed aspect-video w-full overflow-hidden rounded-lg bg-zinc-100 flex items-center justify-center block-${blockId}`}
+        className="block-embed w-full overflow-hidden rounded-lg bg-zinc-100 flex items-center justify-center"
+        style={{ minHeight: "120px" }}
         aria-label="Empty embed"
       />
     );
   }
+
+  const html = sanitize(raw);
+
   return (
-    <div data-block-id={blockId} className={`block-embed aspect-video w-full overflow-hidden rounded-lg block-${blockId}`}>
-      <iframe
-        src={src}
-        title="Embedded content"
-        className="h-full w-full"
-        // Restrict what the embedded page can do while still supporting
-        // common embeds (YouTube, Google Maps, Vimeo, etc.).
-        sandbox="allow-scripts allow-same-origin allow-popups allow-presentation allow-forms"
-        allow="fullscreen; picture-in-picture"
-        allowFullScreen
-        loading="lazy"
-      />
-    </div>
+    <div
+      data-block-id={blockId}
+      className="block-embed"
+      style={{ maxWidth, width: "100%", ...alignStyle }}
+      // dangerouslySetInnerHTML is intentional: the editor is a trusted admin
+      // user pasting embed snippets (YouTube, Vimeo, Maps, etc.).
+      // Script tags are stripped above as a minimal safeguard.
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
   );
 }

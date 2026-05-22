@@ -11,6 +11,7 @@ export interface MediaFile {
 }
 
 const IMAGE_EXTS = new Set([".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"]);
+const VIDEO_EXTS = new Set([".mp4", ".webm", ".ogg", ".mov"]);
 
 function extOf(name: string) {
   return name.slice(name.lastIndexOf(".")).toLowerCase();
@@ -20,14 +21,20 @@ function isImage(name: string) {
   return IMAGE_EXTS.has(extOf(name));
 }
 
+function isVideo(name: string) {
+  return VIDEO_EXTS.has(extOf(name));
+}
+
 export function MediaPickerDialog({
   open,
   onClose,
   onSelect,
+  mediaType = "image",
 }: {
   open: boolean;
   onClose: () => void;
   onSelect: (url: string) => void;
+  mediaType?: "image" | "video" | "any";
 }) {
   const [files, setFiles] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(false);
@@ -83,7 +90,19 @@ export function MediaPickerDialog({
 
   if (!open) return null;
 
-  const imageFiles = files.filter((f) => isImage(f.name));
+  const filterFn =
+    mediaType === "video" ? isVideo :
+    mediaType === "any"   ? () => true :
+    isImage;
+  const shownFiles = files.filter((f) => filterFn(f.name));
+  const acceptAttr =
+    mediaType === "video" ? "video/*" :
+    mediaType === "any"   ? "*/*" :
+    "image/*";
+  const emptyLabel =
+    mediaType === "video" ? "No videos uploaded yet." :
+    mediaType === "any"   ? "No files uploaded yet." :
+    "No images uploaded yet.";
 
   return createPortal(
     <div
@@ -124,7 +143,7 @@ export function MediaPickerDialog({
             ref={fileInputRef}
             type="file"
             multiple
-            accept="image/*"
+            accept={acceptAttr}
             className="sr-only"
             onChange={(e) => handleUpload(e.target.files)}
           />
@@ -149,19 +168,19 @@ export function MediaPickerDialog({
             <div className="flex items-center justify-center py-16 text-sm text-zinc-400">
               Loading…
             </div>
-          ) : imageFiles.length === 0 ? (
+          ) : shownFiles.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <p className="text-sm text-zinc-400">No images uploaded yet.</p>
+              <p className="text-sm text-zinc-400">{emptyLabel}</p>
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="mt-3 text-sm font-medium text-zinc-600 underline hover:text-zinc-900"
               >
-                Upload your first image
+                Upload your first file
               </button>
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
-              {imageFiles.map((file) => (
+              {shownFiles.map((file) => (
                 <button
                   key={file.name}
                   type="button"
@@ -170,12 +189,30 @@ export function MediaPickerDialog({
                   title={file.name}
                 >
                   <div className="aspect-square">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={file.url}
-                      alt={file.name}
-                      className="h-full w-full object-cover"
-                    />
+                    {isImage(file.name) ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={file.url}
+                        alt={file.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full flex-col items-center justify-center gap-1 bg-zinc-800 px-1">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="white" strokeWidth="1.5">
+                          <rect x="3" y="5" width="18" height="14" rx="1.5"/>
+                          <rect x="5"  y="7"  width="2" height="2" rx="0.4" fill="white" stroke="none"/>
+                          <rect x="5"  y="11" width="2" height="2" rx="0.4" fill="white" stroke="none"/>
+                          <rect x="5"  y="15" width="2" height="2" rx="0.4" fill="white" stroke="none"/>
+                          <rect x="17" y="7"  width="2" height="2" rx="0.4" fill="white" stroke="none"/>
+                          <rect x="17" y="11" width="2" height="2" rx="0.4" fill="white" stroke="none"/>
+                          <rect x="17" y="15" width="2" height="2" rx="0.4" fill="white" stroke="none"/>
+                          <polygon points="10,9.5 10,14.5 15,12" fill="white" stroke="none"/>
+                        </svg>
+                        <span className="w-full truncate text-center text-[9px] text-zinc-300">
+                          {file.name}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <div className="absolute inset-x-0 bottom-0 truncate bg-black/60 px-1.5 py-1 text-[10px] text-white opacity-0 transition group-hover:opacity-100">
                     {file.name}
