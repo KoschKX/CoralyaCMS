@@ -67,11 +67,11 @@ function parseAttrsStr(raw: string): Record<string, unknown> {
   let m: RegExpExecArray | null;
   ATTR_RE_DOUBLE.lastIndex = 0;
   while ((m = ATTR_RE_DOUBLE.exec(raw)) !== null) {
-    attrs[m[1].toLowerCase()] = decodeAttrValue(m[2], false);
+    attrs[m[1]] = decodeAttrValue(m[2], false);
   }
   ATTR_RE_SINGLE.lastIndex = 0;
   while ((m = ATTR_RE_SINGLE.exec(raw)) !== null) {
-    attrs[m[1].toLowerCase()] = decodeAttrValue(m[2], true);
+    attrs[m[1]] = decodeAttrValue(m[2], true);
   }
   return attrs;
 }
@@ -302,9 +302,19 @@ function blockToShortcode(type: string, data: Record<string, unknown>, depth = 0
     return def.serializeShortcode(data, depth, blocksToShortcodes, serializeAttr);
   }
 
-  // All properties — scalar and complex — are serialised
+  // All properties — scalar and complex — are serialised.
+  // Skip any all-lowercase key that has a camelCase counterpart in the same
+  // data object (legacy artefact from the old case-folding parser).
+  const dataKeys = Object.keys(data);
   const attrs = Object.entries(data)
-    .filter(([k]) => k !== "id")
+    .filter(([k]) => {
+      if (k === "id") return false;
+      if (k === k.toLowerCase()) {
+        const hasCamelVersion = dataKeys.some((k2) => k2 !== k && k2.toLowerCase() === k);
+        if (hasCamelVersion) return false;
+      }
+      return true;
+    })
     .map(([k, v]) => serializeAttr(k, v))
     .join(" ");
   return attrs ? `${pad}[${type} ${attrs}]` : `${pad}[${type}]`;

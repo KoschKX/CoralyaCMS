@@ -31,9 +31,11 @@ import embed     from "./embed/config";
 import columns   from "./columns/config";
 import html      from "./html/config";
 import image     from "./image/config";
-import button    from "./button/config";
-import counter   from "./counter/config";
-import carousel  from "./carousel/config";
+import button         from "./button/config";
+import counter        from "./counter/config";
+import carousel       from "./carousel/config";
+import socialSharing  from "./social-sharing/config";
+import countdown      from "./countdown/config";
 
 import {
   registerBlock,
@@ -44,7 +46,7 @@ import {
   getPluginIcon,
 } from "@/lib/plugin-registry";
 
-for (const block of [paragraph, header, list, code, quote, delimiter, table, embed, columns, html, image, button, counter, carousel]) {
+for (const block of [paragraph, header, list, code, quote, delimiter, table, embed, columns, html, image, button, counter, carousel, socialSharing, countdown]) {
   registerBlock(block);
 }
 

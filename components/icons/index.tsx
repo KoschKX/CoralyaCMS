@@ -14,7 +14,9 @@ import MediaIcon from '../../public/icons/media.svg';
 import HtmlIcon from '../../public/icons/html.svg';
 import ButtonIcon from '../../public/icons/button.svg';
 import CounterIcon from '../../public/icons/counter.svg';
-import CarouselIcon from '../../public/icons/carousel.svg';
+import CarouselIcon    from '../../public/icons/carousel.svg';
+import ShareIcon       from '../../public/icons/share.svg';
+import CountdownIcon   from '../../public/icons/countdown.svg';
 
 export const ICON_COMPONENTS: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   paragraph: ParagraphIcon,
@@ -30,6 +32,9 @@ export const ICON_COMPONENTS: Record<string, React.FC<React.SVGProps<SVGSVGEleme
   image: MediaIcon,
   html:      HtmlIcon,
   button:    ButtonIcon,
-  counter:   CounterIcon,
-  carousel:  CarouselIcon,
+  counter:         CounterIcon,
+  carousel:         CarouselIcon,
+  share:            ShareIcon,
+  "social-sharing": ShareIcon,
+  countdown:          CountdownIcon,
 };

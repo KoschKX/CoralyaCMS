@@ -84,7 +84,7 @@
     "status": "published",
     "blocks": [
       {
-        "id": "sc-7",
+        "id": "sc-10",
         "type": "columns",
         "data": {
           "cols": [
@@ -158,9 +158,78 @@
                   }
                 },
                 {
-                  "id": "272490fd-636a-4e60-86ed-abfb9822917a",
+                  "id": "sc-3",
+                  "type": "countdown",
+                  "data": {
+                    "targetDate": "2027-01-01T00:00",
+                    "heading": "",
+                    "subheading": "",
+                    "showWeeks": false,
+                    "labelPosition": "below",
+                    "alignment": "center",
+                    "counterBgColor": "#dc2626",
+                    "counterTextColor": "#ffffff",
+                    "labelColor": "#ffffff",
+                    "borderRadius": "6px",
+                    "linkText": "",
+                    "linkUrl": "",
+                    "linkTarget": "_self",
+                    "expiredText": "Event has ended"
+                  }
+                },
+                {
+                  "id": "sc-4",
+                  "type": "social-sharing",
+                  "data": {
+                    "tagline": "Share this:",
+                    "taglinetag": "h4",
+                    "taglineplacement": "before",
+                    "iconsize": "20px",
+                    "iconsboxed": false,
+                    "iconsboxedradius": "4px",
+                    "colortype": "custom",
+                    "iconcolor": "#000000",
+                    "boxcolor": "",
+                    "bgcolor": "",
+                    "alignment": "flex-start",
+                    "url": "",
+                    "title": "",
+                    "description": "",
+                    "networks": [
+                      "facebook",
+                      "twitter",
+                      "bluesky",
+                      "reddit",
+                      "linkedin",
+                      "whatsapp",
+                      "copy_link",
+                      "email",
+                      "custom_1779437528668"
+                    ],
+                    "customNetworks": [
+                      {
+                        "id": "custom_1779437528668",
+                        "label": "Test",
+                        "color": "#555555",
+                        "shareUrlTemplate": "#"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "sc-5",
                   "type": "carousel",
                   "data": {
+                    "effect": "slide",
+                    "perview": 1,
+                    "gap": 0,
+                    "aspectratio": "16/9",
+                    "borderradius": 0,
+                    "autoplay": false,
+                    "autoplaydelay": 3000,
+                    "loop": true,
+                    "showarrows": true,
+                    "showdots": true,
                     "items": [
                       {
                         "id": "s1",
@@ -186,21 +255,11 @@
                         "link": "",
                         "linkTarget": "_self"
                       }
-                    ],
-                    "effect": "slide",
-                    "perView": 1,
-                    "gap": 0,
-                    "aspectRatio": "16/9",
-                    "borderRadius": 0,
-                    "autoplay": false,
-                    "autoplayDelay": 3000,
-                    "loop": true,
-                    "showArrows": true,
-                    "showDots": true
+                    ]
                   }
                 },
                 {
-                  "id": "sc-3",
+                  "id": "sc-6",
                   "type": "counter",
                   "data": {
                     "style": "box",
@@ -258,7 +317,7 @@
                   }
                 },
                 {
-                  "id": "sc-4",
+                  "id": "sc-7",
                   "type": "paragraph",
                   "data": {
                     "text": "New paragraph",
@@ -271,7 +330,7 @@
                   }
                 },
                 {
-                  "id": "sc-5",
+                  "id": "sc-8",
                   "type": "image",
                   "data": {
                     "src": "/media/1777671588524-crabtropics.png",
@@ -286,7 +345,7 @@
               "width": "33.333%",
               "blocks": [
                 {
-                  "id": "sc-6",
+                  "id": "sc-9",
                   "type": "paragraph",
                   "data": {
                     "text": "New paragraph",
@@ -329,7 +388,7 @@
         }
       },
       {
-        "id": "sc-8",
+        "id": "sc-11",
         "type": "list",
         "data": {
           "style": "unordered",
@@ -340,10 +399,10 @@
         }
       }
     ],
-    "html": "[columns responsive='{\"tablet\":{\"stack\":true},\"mobile\":{\"stack\":true}}']\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraphs\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"},\"mobile\":{}}']\n  [/column]\n  [column width=\"33.333%\" responsive='{\"tablet\":{}}']\n    [header text=\"New heading\" level=\"2\" align=\"center\" color=\"#dc2626\" responsive='{\"tablet\":{\"color\":\"#dc2626\",\"align\":\"center\",\"level\":2},\"mobile\":{\"align\":\"center\",\"color\":\"#9333ea\"}}']\n    [button text=\"Test Button\" url=\"\" target=\"_self\" type=\"flat\" size=\"medium\" align=\"center\" stretch=\"false\" bgcolor=\"\" textcolor=\"\" bordercolor=\"\" hoverbgcolor=\"\" hovertextcolor=\"\" hoverbordercolor=\"\" borderradius=\"\" icon=\"\" iconposition=\"left\"]\n    [carousel items='&#91;{\"id\":\"s1\",\"src\":\"/media/1777671604459-character_maker.png\",\"alt\":\"Slide 1\",\"caption\":\"\",\"link\":\"\",\"linkTarget\":\"_self\"},{\"id\":\"s2\",\"src\":\"/media/1777671596630-friends_portraits.png\",\"alt\":\"Slide 2\",\"caption\":\"\",\"link\":\"\",\"linkTarget\":\"_self\"},{\"id\":\"s3\",\"src\":\"/media/1777671588524-crabtropics.png\",\"alt\":\"Slide 3\",\"caption\":\"\",\"link\":\"\",\"linkTarget\":\"_self\"}&#93;' effect=\"slide\" perView=\"1\" gap=\"0\" aspectRatio=\"16/9\" borderRadius=\"0\" autoplay=\"false\" autoplayDelay=\"3000\" loop=\"true\" showArrows=\"true\" showDots=\"true\"]\n    [counter style=\"box\" columns=\"4\" color=\"\" bordercolor=\"\" filledcolor=\"\" unfilledcolor=\"\" items='&#91;{\"id\":\"d1\",\"value\":\"150\",\"unit\":\"+\",\"unitPos\":\"suffix\",\"label\":\"Projects completed\",\"icon\":\"\",\"filledColor\":\"\",\"unfilledColor\":\"\",\"size\":200},{\"id\":\"d2\",\"value\":\"98\",\"unit\":\"%\",\"unitPos\":\"suffix\",\"label\":\"Client satisfaction\",\"icon\":\"\",\"filledColor\":\"\",\"unfilledColor\":\"\",\"size\":200},{\"id\":\"d3\",\"value\":\"12\",\"unit\":\"\",\"unitPos\":\"suffix\",\"label\":\"Years of experience\",\"icon\":\"\",\"filledColor\":\"\",\"unfilledColor\":\"\",\"size\":200},{\"id\":\"d4\",\"value\":\"50\",\"unit\":\"K\",\"unitPos\":\"suffix\",\"label\":\"Users served\",\"icon\":\"\",\"filledColor\":\"\",\"unfilledColor\":\"\",\"size\":200}&#93;']\n    [paragraph text=\"New paragraph\" align=\"center\" responsive='{\"tablet\":{\"align\":\"center\"}}']\n    [image src=\"/media/1777671588524-crabtropics.png\" alt=\"\" caption=\"\" align=\"center\"]\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\",\"spacing\":{\"pt\":\"0em\",\"pr\":\"0em\",\"pb\":\"0em\",\"pl\":\"0em\"}},\"mobile\":{}}' background='{\"bgColor\":\"#ca8a04\"}' spacing='{\"pt\":\"3em\",\"pr\":\"3em\",\"pb\":\"3em\",\"pl\":\"3em\"}']\n  [/column]\n[/columns]\n\n[list style=\"unordered\" items='&#91;\"Item 1\",\"Item 2\"&#93;']",
+    "html": "[columns responsive='{\"tablet\":{\"stack\":true},\"mobile\":{\"stack\":true}}']\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraphs\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\"},\"mobile\":{}}']\n  [/column]\n  [column width=\"33.333%\" responsive='{\"tablet\":{}}']\n    [header text=\"New heading\" level=\"2\" align=\"center\" color=\"#dc2626\" responsive='{\"tablet\":{\"color\":\"#dc2626\",\"align\":\"center\",\"level\":2},\"mobile\":{\"align\":\"center\",\"color\":\"#9333ea\"}}']\n    [button text=\"Test Button\" url=\"\" target=\"_self\" type=\"flat\" size=\"medium\" align=\"center\" stretch=\"false\" bgcolor=\"\" textcolor=\"\" bordercolor=\"\" hoverbgcolor=\"\" hovertextcolor=\"\" hoverbordercolor=\"\" borderradius=\"\" icon=\"\" iconposition=\"left\"]\n    [countdown targetDate=\"2027-01-01T00:00\" heading=\"\" subheading=\"\" showWeeks=\"false\" labelPosition=\"below\" alignment=\"center\" counterBgColor=\"#dc2626\" counterTextColor=\"#ffffff\" labelColor=\"#ffffff\" borderRadius=\"6px\" linkText=\"\" linkUrl=\"\" linkTarget=\"_self\" expiredText=\"Event has ended\"]\n    [social-sharing tagline=\"Share this:\" taglinetag=\"h4\" taglineplacement=\"before\" iconsize=\"20px\" iconsboxed=\"false\" iconsboxedradius=\"4px\" colortype=\"custom\" iconcolor=\"#000000\" boxcolor=\"\" bgcolor=\"\" alignment=\"flex-start\" url=\"\" title=\"\" description=\"\" networks='&#91;\"facebook\",\"twitter\",\"bluesky\",\"reddit\",\"linkedin\",\"whatsapp\",\"copy_link\",\"email\",\"custom_1779437528668\"&#93;' customNetworks='&#91;{\"id\":\"custom_1779437528668\",\"label\":\"Test\",\"color\":\"#555555\",\"shareUrlTemplate\":\"#\"}&#93;']\n    [carousel effect=\"slide\" perview=\"1\" gap=\"0\" aspectratio=\"16/9\" borderradius=\"0\" autoplay=\"false\" autoplaydelay=\"3000\" loop=\"true\" showarrows=\"true\" showdots=\"true\" items='&#91;{\"id\":\"s1\",\"src\":\"/media/1777671604459-character_maker.png\",\"alt\":\"Slide 1\",\"caption\":\"\",\"link\":\"\",\"linkTarget\":\"_self\"},{\"id\":\"s2\",\"src\":\"/media/1777671596630-friends_portraits.png\",\"alt\":\"Slide 2\",\"caption\":\"\",\"link\":\"\",\"linkTarget\":\"_self\"},{\"id\":\"s3\",\"src\":\"/media/1777671588524-crabtropics.png\",\"alt\":\"Slide 3\",\"caption\":\"\",\"link\":\"\",\"linkTarget\":\"_self\"}&#93;']\n    [counter style=\"box\" columns=\"4\" color=\"\" bordercolor=\"\" filledcolor=\"\" unfilledcolor=\"\" items='&#91;{\"id\":\"d1\",\"value\":\"150\",\"unit\":\"+\",\"unitPos\":\"suffix\",\"label\":\"Projects completed\",\"icon\":\"\",\"filledColor\":\"\",\"unfilledColor\":\"\",\"size\":200},{\"id\":\"d2\",\"value\":\"98\",\"unit\":\"%\",\"unitPos\":\"suffix\",\"label\":\"Client satisfaction\",\"icon\":\"\",\"filledColor\":\"\",\"unfilledColor\":\"\",\"size\":200},{\"id\":\"d3\",\"value\":\"12\",\"unit\":\"\",\"unitPos\":\"suffix\",\"label\":\"Years of experience\",\"icon\":\"\",\"filledColor\":\"\",\"unfilledColor\":\"\",\"size\":200},{\"id\":\"d4\",\"value\":\"50\",\"unit\":\"K\",\"unitPos\":\"suffix\",\"label\":\"Users served\",\"icon\":\"\",\"filledColor\":\"\",\"unfilledColor\":\"\",\"size\":200}&#93;']\n    [paragraph text=\"New paragraph\" align=\"center\" responsive='{\"tablet\":{\"align\":\"center\"}}']\n    [image src=\"/media/1777671588524-crabtropics.png\" alt=\"\" caption=\"\" align=\"center\"]\n  [/column]\n  [column width=\"33.333%\"]\n    [paragraph text=\"New paragraph\" align=\"center\" color=\"#16a34a\" responsive='{\"tablet\":{\"color\":\"#ea580c\",\"spacing\":{\"pt\":\"0em\",\"pr\":\"0em\",\"pb\":\"0em\",\"pl\":\"0em\"}},\"mobile\":{}}' background='{\"bgColor\":\"#ca8a04\"}' spacing='{\"pt\":\"3em\",\"pr\":\"3em\",\"pb\":\"3em\",\"pl\":\"3em\"}']\n  [/column]\n[/columns]\n\n[list style=\"unordered\" items='&#91;\"Item 1\",\"Item 2\"&#93;']",
     "pageBgColor": "#ffffff",
     "createdAt": "2026-03-25T19:58:40.950Z",
-    "updatedAt": "2026-05-21T12:29:48.684Z",
+    "updatedAt": "2026-05-22T09:17:31.545Z",
     "injectCode": {
       "tracking": "",
       "head": "",

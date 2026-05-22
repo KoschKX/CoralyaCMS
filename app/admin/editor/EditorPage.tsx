@@ -283,7 +283,7 @@ export default function EditorPage({
               <ViewportSwitcher viewport={viewport} setViewport={setViewport} />
             )}
             <PanelTabs mainMode={mainMode} panelTab={panelTab} setPanelTab={setPanelTab} />
-            <div className="space-y-6 px-4 py-5" role="tabpanel">
+            <div className="space-y-6 px-4 py-5 text-zinc-900" role="tabpanel">
               {panelTab === "page" && (
                 <PagePanel
                   status={status}

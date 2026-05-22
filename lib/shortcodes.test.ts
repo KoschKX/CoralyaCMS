@@ -149,4 +149,63 @@ describe("shortcode round-trip", () => {
     expect(sc.trim().length).toBeGreaterThan(0);
     expect(sc).toContain("[paragraph");
   });
+
+  it("preserves camelCase attribute key names through the round-trip", () => {
+    // Regression: the parser previously lowercased all attribute keys, turning
+    // camelCase fields like bgColor → bgcolor and customNetworks → customnetworks,
+    // which caused block data to be silently dropped on every page reload.
+    const blocks: EditorBlock[] = [
+      {
+        id: "1",
+        type: "image",
+        data: {
+          bgColor: "#ff0000",
+          iconSize: "20px",
+          iconsBoxed: true,
+          customNetworks: [{ id: "custom_1", label: "Test", color: "#555" }],
+        },
+      },
+    ];
+    const result = roundTrip(blocks);
+    expect(result[0].data.bgColor).toBe("#ff0000");
+    expect(result[0].data.iconSize).toBe("20px");
+    expect(result[0].data.iconsBoxed).toBe(true);
+    expect(result[0].data.customNetworks).toEqual([{ id: "custom_1", label: "Test", color: "#555" }]);
+    // Lowercase variants must NOT exist
+    expect(result[0].data.bgcolor).toBeUndefined();
+    expect(result[0].data.iconsize).toBeUndefined();
+    expect(result[0].data.iconsboxed).toBeUndefined();
+    expect(result[0].data.customnetworks).toBeUndefined();
+  });
+
+  it("drops stale lowercase duplicate keys when serialising", () => {
+    // Regression: blocks loaded from an old page had both customnetworks (stale lowercase)
+    // and customNetworks (correct camelCase) in their data.  The serialiser must emit only
+    // the camelCase key so the shortcode stays clean after every save.
+    const blocks: EditorBlock[] = [
+      {
+        id: "1",
+        type: "image",
+        data: {
+          customnetworks: [{ id: "stale", label: "Stale", color: "#000" }], // stale
+          customNetworks: [{ id: "custom_1", label: "Good", color: "#fff" }], // correct
+          iconsboxed: false, // stale
+          iconsBoxed: true,  // correct
+        },
+      },
+    ];
+    const shortcode = blocksToShortcodes(blocks);
+    // camelCase versions must appear
+    expect(shortcode).toContain("customNetworks=");
+    expect(shortcode).toContain("iconsBoxed=");
+    // lowercase duplicates must NOT appear
+    expect(shortcode).not.toContain("customnetworks=");
+    expect(shortcode).not.toContain("iconsboxed=");
+    // After a round-trip only the camelCase data survives
+    const result = roundTrip(blocks);
+    expect(result[0].data.customNetworks).toEqual([{ id: "custom_1", label: "Good", color: "#fff" }]);
+    expect(result[0].data.customnetworks).toBeUndefined();
+    expect(result[0].data.iconsBoxed).toBe(true);
+    expect(result[0].data.iconsboxed).toBeUndefined();
+  });
 });

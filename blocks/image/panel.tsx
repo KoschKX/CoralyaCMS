@@ -5,6 +5,7 @@ import { PanelSection } from "@/components/ui/PanelSection";
 import { MediaPickerDialog } from "@/components/MediaPickerDialog";
 import { ViewportContext } from "@/components/ui/ViewportContext";
 import type { PanelControlProps } from "@/lib/block-types";
+import { OptionAlign } from "@/components/ui/PanelControls";
 
 export function ImagePanelControls({ data, onChange }: PanelControlProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -71,28 +72,11 @@ export function ImagePanelControls({ data, onChange }: PanelControlProps) {
       </PanelSection>
 
       <PanelSection title="Alignment" fields={["align"]}>
-        <div className="flex gap-1">
-          {(["left", "center", "right"] as const).map((a) => {
-            const isSelected = (data.align ?? "left") === a;
-            const isBlue = isResponsive && a === inheritedAlign;
-            return (
-              <button
-                key={a}
-                title={a}
-                onClick={() => onChange({ ...data, align: a })}
-                className={`flex h-8 flex-1 items-center justify-center rounded border text-xs font-medium transition ${
-                  isBlue
-                    ? "border-blue-400 border-dashed bg-white text-blue-500"
-                    : isSelected
-                    ? "border-zinc-900 bg-zinc-900 text-white"
-                    : "border-zinc-200 text-zinc-500 hover:border-zinc-400"
-                }`}
-              >
-                {a[0].toUpperCase()}
-              </button>
-            );
-          })}
-        </div>
+        <OptionAlign
+          value={(data.align as string) ?? "left"}
+          onChange={(v) => onChange({ ...data, align: v })}
+          inheritedValue={isResponsive ? inheritedAlign : undefined}
+        />
       </PanelSection>
 
       <MediaPickerDialog

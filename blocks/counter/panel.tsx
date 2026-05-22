@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { PanelSection } from "@/components/ui/PanelSection";
 import type { PanelControlProps } from "@/lib/block-types";
+import { OptionColor, OptionSegment } from "@/components/ui/PanelControls";
 import type { CounterItem } from "./layout";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -24,94 +25,6 @@ function newItem(): CounterItem {
     unfilledColor: "",
     size: 200,
   };
-}
-
-function ColorRow({
-  label,
-  field,
-  item,
-  onUpdate,
-}: {
-  label: string;
-  field: keyof CounterItem;
-  item: CounterItem;
-  onUpdate: (item: CounterItem) => void;
-}) {
-  const value = (item[field] as string) ?? "";
-  return (
-    <div className="flex items-center gap-2">
-      <span className="w-24 shrink-0 text-xs text-zinc-500">{label}</span>
-      <div className="flex flex-1 items-center gap-1.5">
-        <input
-          type="color"
-          aria-label={label}
-          value={value || "#000000"}
-          onChange={(e) => onUpdate({ ...item, [field]: e.target.value })}
-          className="h-7 w-7 shrink-0 cursor-pointer rounded border border-zinc-200 p-0.5"
-        />
-        <input
-          type="text"
-          value={value}
-          placeholder="—"
-          onChange={(e) => onUpdate({ ...item, [field]: e.target.value })}
-          className="min-w-0 flex-1 rounded border border-zinc-200 bg-white px-2 py-1 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
-        />
-        {value && (
-          <button
-            type="button"
-            onClick={() => onUpdate({ ...item, [field]: "" })}
-            className="text-[10px] text-zinc-400 hover:text-red-400"
-          >
-            ✕
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function BlockColorRow({
-  label,
-  field,
-  data,
-  onChange,
-}: {
-  label: string;
-  field: string;
-  data: PanelControlProps["data"];
-  onChange: PanelControlProps["onChange"];
-}) {
-  const value = (data[field] as string) ?? "";
-  return (
-    <div className="flex items-center gap-2">
-      <span className="w-28 shrink-0 text-xs text-zinc-500">{label}</span>
-      <div className="flex flex-1 items-center gap-1.5">
-        <input
-          type="color"
-          aria-label={label}
-          value={value || "#000000"}
-          onChange={(e) => onChange({ ...data, [field]: e.target.value })}
-          className="h-7 w-7 shrink-0 cursor-pointer rounded border border-zinc-200 p-0.5"
-        />
-        <input
-          type="text"
-          value={value}
-          placeholder="—"
-          onChange={(e) => onChange({ ...data, [field]: e.target.value })}
-          className="min-w-0 flex-1 rounded border border-zinc-200 bg-white px-2 py-1 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
-        />
-        {value && (
-          <button
-            type="button"
-            onClick={() => onChange({ ...data, [field]: "" })}
-            className="text-[10px] text-zinc-400 hover:text-red-400"
-          >
-            ✕
-          </button>
-        )}
-      </div>
-    </div>
-  );
 }
 
 // ── Item editor (accordion row) ───────────────────────────────────────────────
@@ -220,23 +133,15 @@ function ItemEditor({
               />
             </div>
             <div className="w-28 shrink-0">
-              <label className="mb-1 block text-xs text-zinc-500">Position</label>
-              <div className="flex gap-1">
-                {(["prefix", "suffix"] as const).map((pos) => (
-                  <button
-                    key={pos}
-                    type="button"
-                    onClick={() => onUpdate({ ...item, unitPos: pos })}
-                    className={`flex flex-1 items-center justify-center rounded border py-1.5 text-xs font-medium transition ${
-                      item.unitPos === pos
-                        ? "border-zinc-900 bg-zinc-900 text-white"
-                        : "border-zinc-200 text-zinc-500 hover:border-zinc-400"
-                    }`}
-                  >
-                    {pos === "prefix" ? "Pre" : "Suf"}
-                  </button>
-                ))}
-              </div>
+              <OptionSegment
+                label="Position"
+                value={item.unitPos || "suffix"}
+                options={[
+                  { value: "prefix", label: "Pre" },
+                  { value: "suffix", label: "Suf" },
+                ]}
+                onChange={(v) => onUpdate({ ...item, unitPos: v as "prefix" | "suffix" })}
+              />
             </div>
           </div>
 
@@ -269,8 +174,8 @@ function ItemEditor({
           {/* Circle-only: colors + size */}
           {style === "circle" && (
             <>
-              <ColorRow label="Fill color"   field="filledColor"   item={item} onUpdate={onUpdate} />
-              <ColorRow label="Track color"  field="unfilledColor" item={item} onUpdate={onUpdate} />
+              <OptionColor label="Fill color"  value={(item.filledColor   as string) ?? ""} onChange={(v) => onUpdate({ ...item, filledColor:   v })} />
+              <OptionColor label="Track color" value={(item.unfilledColor as string) ?? ""} onChange={(v) => onUpdate({ ...item, unfilledColor: v })} />
               <div>
                 <label className="mb-1 block text-xs text-zinc-500">Size (px)</label>
                 <input
@@ -326,45 +231,24 @@ export function CounterPanelControls({ data, onChange }: PanelControlProps) {
 
       {/* ── Style ─────────────────────────────────────────────────────── */}
       <PanelSection title="Style">
-        <div className="flex gap-1">
-          {(["box", "circle"] as const).map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => onChange({ ...data, style: s })}
-              className={`flex flex-1 items-center justify-center rounded border py-1.5 text-xs font-medium transition ${
-                style === s
-                  ? "border-zinc-900 bg-zinc-900 text-white"
-                  : "border-zinc-200 text-zinc-500 hover:border-zinc-400"
-              }`}
-            >
-              {s === "box" ? "Stat box" : "Circle"}
-            </button>
-          ))}
-        </div>
+        <OptionSegment
+          value={style}
+          options={[
+            { value: "box",    label: "Stat box" },
+            { value: "circle", label: "Circle" },
+          ]}
+          onChange={(v) => onChange({ ...data, style: v })}
+        />
       </PanelSection>
 
       {/* ── Layout ────────────────────────────────────────────────────── */}
       <PanelSection title="Layout">
-        <div>
-          <p className="mb-1.5 text-xs text-zinc-500">Columns</p>
-          <div className="flex gap-1">
-            {[1, 2, 3, 4, 5, 6].map((n) => (
-              <button
-                key={n}
-                type="button"
-                onClick={() => onChange({ ...data, columns: n })}
-                className={`flex h-7 flex-1 items-center justify-center rounded border text-xs font-medium transition ${
-                  columns === n
-                    ? "border-zinc-900 bg-zinc-900 text-white"
-                    : "border-zinc-200 text-zinc-500 hover:border-zinc-400"
-                }`}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
-        </div>
+        <OptionSegment
+          label="Columns"
+          value={String(columns)}
+          options={[1, 2, 3, 4, 5, 6].map((n) => ({ value: String(n), label: String(n) }))}
+          onChange={(v) => onChange({ ...data, columns: Number(v) })}
+        />
       </PanelSection>
 
       {/* ── Colors ────────────────────────────────────────────────────── */}
@@ -372,13 +256,13 @@ export function CounterPanelControls({ data, onChange }: PanelControlProps) {
         <div className="space-y-2">
           {style === "box" ? (
             <>
-              <BlockColorRow label="Number color"  field="color"       data={data} onChange={onChange} />
-              <BlockColorRow label="Border color"  field="borderColor" data={data} onChange={onChange} />
+              <OptionColor label="Number color" value={(data.color       as string) ?? ""} onChange={(v) => onChange({ ...data, color:       v })} />
+              <OptionColor label="Border color" value={(data.borderColor as string) ?? ""} onChange={(v) => onChange({ ...data, borderColor: v })} />
             </>
           ) : (
             <>
-              <BlockColorRow label="Fill color"   field="filledColor"   data={data} onChange={onChange} />
-              <BlockColorRow label="Track color"  field="unfilledColor" data={data} onChange={onChange} />
+              <OptionColor label="Fill color"  value={(data.filledColor   as string) ?? ""} onChange={(v) => onChange({ ...data, filledColor:   v })} />
+              <OptionColor label="Track color" value={(data.unfilledColor as string) ?? ""} onChange={(v) => onChange({ ...data, unfilledColor: v })} />
             </>
           )}
         </div>

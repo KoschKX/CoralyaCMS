@@ -32,6 +32,7 @@ import ImageLayout     from "./image/layout";
 import ButtonLayout    from "./button/layout";
 import CounterLayout   from "./counter/layout";
 import CarouselLayout  from "./carousel/layout";
+import CountdownLayout from "./countdown/layout";
 
 export interface PublicBlockDef {
   Layout: (props: BlockLayoutProps) => ReactNode;
@@ -53,6 +54,7 @@ export const publicBlockMap: Record<string, PublicBlockDef> = {
   button:    { Layout: ButtonLayout },
   counter:   { Layout: CounterLayout },
   carousel:  { Layout: CarouselLayout },
+  countdown: { Layout: CountdownLayout },
   columns: {
     Layout: ColumnsLayout,
     isContainer: columnsIsContainer,
