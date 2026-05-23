@@ -21,7 +21,12 @@ import TestimonialsIcon from '../../public/icons/testimonials.svg';
 import StarFilledIcon         from '../../public/icons/star-filled.svg';
 import SyntaxHighlighterIcon  from '../../public/icons/syntax-highlighter.svg';
 import VideoFileIcon          from '../../public/icons/video-file.svg';
-import ConnectionIcon         from '../../public/icons/connection.svg';
+import AudioIcon              from '../../public/icons/audio.svg';
+import NewsTickerIcon         from '../../public/icons/news-ticker.svg';
+import InstagramIcon          from '../../public/icons/instagram.svg';
+import FlickrIcon             from '../../public/icons/flickr.svg';
+import GalleryIcon            from '../../public/icons/gallery.svg';
+import ChartIcon              from '../../public/icons/chart.svg';
 
 export const ICON_COMPONENTS: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   paragraph: ParagraphIcon,
@@ -33,7 +38,7 @@ export const ICON_COMPONENTS: Record<string, React.FC<React.SVGProps<SVGSVGEleme
   table: TableIcon,
   columns: ColumnsIcon,
   column: ColumnIcon,
-  embed: ConnectionIcon,
+  embed: MediaIcon,
   image: MediaIcon,
   html:      HtmlIcon,
   button:    ButtonIcon,
@@ -48,4 +53,10 @@ export const ICON_COMPONENTS: Record<string, React.FC<React.SVGProps<SVGSVGEleme
   "syntax-highlighter": SyntaxHighlighterIcon,
   "video":              VideoFileIcon,
   "video-file":         VideoFileIcon,
+  "audio":              AudioIcon,
+  "news-ticker":        NewsTickerIcon,
+  "instagram":          InstagramIcon,
+  "flickr":             FlickrIcon,
+  "gallery":            GalleryIcon,
+  "chart":              ChartIcon,
 };

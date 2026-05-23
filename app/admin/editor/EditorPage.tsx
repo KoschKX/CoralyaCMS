@@ -186,7 +186,7 @@ export default function EditorPage({
             blocksPanelOpen && mainMode === "visual" ? "w-64" : "w-0"
           }`}
         >
-          <div className="w-64">
+          <div className="h-full w-64">
             <BlocksPanel onAdd={(type) => { handleAddBlockFromPanel(type); setBlocksPanelOpen(false); }} />
           </div>
         </aside>

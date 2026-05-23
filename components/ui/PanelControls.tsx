@@ -20,31 +20,41 @@ const PILL_BASE   = "rounded border text-xs font-medium transition";
 
 // ── OptionColor ───────────────────────────────────────────────────────────────
 /**
- * Palette swatches + custom colour picker, matching the Text colour control.
- * Renders a label above a swatch row.
+ * Palette swatches + transparent button + custom colour picker.
+ * Used in block panels and in advanced controls.
+ *
+ * Props:
+ *   label          — shown above the swatches; omit or pass "" to hide
+ *   inheritedColor — when set, that swatch gets a blue dashed ring as a hint
+ *                    that the value is inherited from a parent
  */
 export function OptionColor({
   label,
   value,
   onChange,
+  inheritedColor = null,
 }: {
-  label: string;
+  label?: string;
   value: string;
   onChange: (v: string) => void;
+  inheritedColor?: string | null;
 }) {
   const { data: settings } = useSettings();
   const palette: PaletteColor[] = settings?.paletteColors?.length
     ? settings.paletteColors
     : COLOR_PALETTE;
 
-  const isCustom = value !== "" && !palette.some((c) => c.value === value);
+  // "transparent" has its own fixed button; everything else not in palette = custom
+  const isCustom =
+    value !== "" && value !== "transparent" && !palette.some((c) => c.value === value);
 
   return (
     <div className="space-y-1">
-      <p className="text-xs text-zinc-500">{label}</p>
+      {label ? <p className="text-xs text-zinc-500">{label}</p> : null}
       <div className="flex flex-wrap gap-1.5">
         {palette.map(({ label: swatchLabel, value: swatchValue }) => {
-          const isSelected = value === swatchValue;
+          const isSelected  = value === swatchValue;
+          const isInherited = inheritedColor !== null && swatchValue === inheritedColor;
           return (
             <button
               key={swatchLabel}
@@ -52,41 +62,78 @@ export function OptionColor({
               title={swatchLabel}
               onClick={() => onChange(swatchValue)}
               className={`h-6 w-6 rounded-full transition ${
-                isSelected ? "scale-110 border-2 border-zinc-900" : "hover:opacity-80"
+                isSelected && !isInherited ? "scale-110 border-2 border-zinc-900" : "hover:opacity-80"
               }`}
               style={{
                 background:
                   swatchValue === ""
                     ? "linear-gradient(135deg,#e5e7eb 50%,#fff 50%)"
                     : swatchValue,
-                outline:
-                  swatchValue === "#ffffff" && !isSelected
+                outline: isInherited
+                  ? "2px dashed #60a5fa"
+                  : swatchValue === "#ffffff" && !isSelected
                     ? "1px solid #e5e7eb"
                     : undefined,
+                outlineOffset: isInherited ? "2px" : undefined,
               }}
             />
           );
         })}
 
+        {/* Transparent */}
+        {(() => {
+          const isSelected  = value === "transparent";
+          const isInherited = inheritedColor === "transparent";
+          return (
+            <button
+              type="button"
+              title="Transparent"
+              onClick={() => onChange("transparent")}
+              className={`relative h-6 w-6 overflow-hidden rounded-full transition ${
+                isSelected && !isInherited ? "scale-110 border-2 border-zinc-900" : "hover:opacity-80"
+              }`}
+              style={{
+                backgroundImage:
+                  "linear-gradient(45deg,#ccc 25%,transparent 25%)," +
+                  "linear-gradient(-45deg,#ccc 25%,transparent 25%)," +
+                  "linear-gradient(45deg,transparent 75%,#ccc 75%)," +
+                  "linear-gradient(-45deg,transparent 75%,#ccc 75%)",
+                backgroundSize: "6px 6px",
+                backgroundPosition: "0 0,0 3px,3px -3px,-3px 0",
+                backgroundColor: "#fff",
+                outline: isInherited ? "2px dashed #60a5fa" : undefined,
+                outlineOffset: isInherited ? "2px" : undefined,
+              }}
+            />
+          );
+        })()}
+
         {/* Custom colour */}
-        <label
-          title="Custom colour"
-          className={`relative flex h-6 w-6 cursor-pointer items-center justify-center overflow-hidden rounded-full transition ${
-            isCustom ? "scale-110 border-2 border-zinc-900" : "hover:opacity-80"
-          }`}
-          style={{
-            background: isCustom
-              ? value
-              : "conic-gradient(red,yellow,lime,cyan,blue,magenta,red)",
-          }}
-        >
-          <input
-            type="color"
-            value={isCustom ? value : "#000000"}
-            onChange={(e) => onChange(e.target.value)}
-            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-          />
-        </label>
+        {(() => {
+          const isInherited = isCustom && inheritedColor !== null && value === inheritedColor;
+          return (
+            <label
+              title="Custom colour"
+              className={`relative flex h-6 w-6 cursor-pointer items-center justify-center overflow-hidden rounded-full transition ${
+                isCustom && !isInherited ? "scale-110 border-2 border-zinc-900" : "hover:opacity-80"
+              }`}
+              style={{
+                background: isCustom
+                  ? value
+                  : "conic-gradient(red,yellow,lime,cyan,blue,magenta,red)",
+                outline: isInherited ? "2px dashed #60a5fa" : undefined,
+                outlineOffset: isInherited ? "2px" : undefined,
+              }}
+            >
+              <input
+                type="color"
+                value={isCustom ? value : "#000000"}
+                onChange={(e) => onChange(e.target.value)}
+                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+              />
+            </label>
+          );
+        })()}
       </div>
     </div>
   );
@@ -106,7 +153,7 @@ export function OptionToggle({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex min-h-7 items-center gap-2">
       <label className="flex-1 text-xs text-zinc-500">{label}</label>
       <button
         type="button"

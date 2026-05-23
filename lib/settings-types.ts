@@ -34,6 +34,9 @@ export interface SiteSettings {
   description?: string;
   siteUrl?: string;
   logoUrl?: string;
+  // Integrations
+  instagramAccessToken?: string;
+  flickrApiKey?: string;
   // Existing settings
   disabledBlocks: string[];
   paletteColors: PaletteColor[];

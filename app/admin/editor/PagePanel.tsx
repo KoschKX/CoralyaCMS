@@ -1,7 +1,7 @@
 "use client";
 
 import { PanelSection } from "@/components/ui/PanelSection";
-import { COLOR_PALETTE } from "@/lib/color-palette";
+import { OptionColor } from "@/components/ui/PanelControls";
 import { autoSlug } from "@/lib/utils/slug";
 
 interface PagePanelProps {
@@ -49,38 +49,10 @@ export default function PagePanel({
         </div>
       </PanelSection>
       <PanelSection title="Background Color">
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-wrap gap-1.5 mb-2">
-            {COLOR_PALETTE.map(({ label, value }) => (
-              <button
-                key={label}
-                title={label}
-                onClick={() => setPageBgColor(value || "#ffffff")}
-                className={`h-6 w-6 rounded-full transition ${pageBgColor === value || (!value && pageBgColor === "#ffffff") ? "border-2 border-zinc-900 scale-110" : "hover:opacity-80"}`}
-                style={{
-                  background: value === "" ? "linear-gradient(135deg,#e5e7eb 50%,#fff 50%)" : value,
-                  outline: value === "#ffffff" ? "1px solid #e5e7eb" : undefined,
-                }}
-              />
-            ))}
-            <label
-              title="Custom color"
-              className={`relative flex h-6 w-6 cursor-pointer items-center justify-center rounded-full overflow-hidden transition ${!COLOR_PALETTE.some((c) => c.value === pageBgColor) ? "border-2 border-zinc-900 scale-110" : "hover:opacity-80"}`}
-              style={{
-                background: !COLOR_PALETTE.some((c) => c.value === pageBgColor)
-                  ? pageBgColor
-                  : "conic-gradient(red,yellow,lime,cyan,blue,magenta,red)",
-              }}
-            >
-              <input
-                type="color"
-                value={pageBgColor || "#ffffff"}
-                onChange={(e) => setPageBgColor(e.target.value)}
-                className="absolute inset-0 cursor-pointer opacity-0 w-full h-full"
-              />
-            </label>
-          </div>
-        </div>
+        <OptionColor
+          value={pageBgColor}
+          onChange={setPageBgColor}
+        />
       </PanelSection>
     </>
   );

@@ -54,7 +54,6 @@ function YoutubeEmbed({ data }: { data: Record<string, unknown> }) {
         title={title}
         src={src}
         allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-        allowFullScreen
         loading="lazy"
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none" }}
       />
@@ -82,7 +81,6 @@ function VimeoEmbed({ data }: { data: Record<string, unknown> }) {
         title={title}
         src={src}
         allow="autoplay; fullscreen; picture-in-picture"
-        allowFullScreen
         loading="lazy"
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none" }}
       />

@@ -5,9 +5,7 @@ import type { BlockData } from "@/lib/block-types";
 import { ViewportContext } from "./ViewportContext";
 import type { BackgroundBlockData, SpacingBlockData, BorderBlockData, AdvancedBlockData } from "@/lib/block-advanced-css";
 import { getBackgroundData, getSpacingData, getBorderData, getAdvancedData } from "@/lib/block-advanced-css";
-import type { PaletteColor } from "@/lib/color-palette";
-import { COLOR_PALETTE } from "@/lib/color-palette";
-import { useSettings } from "@/hooks/useSettings";
+import { OptionColor } from "@/components/ui/PanelControls";
 
 // ── Internal helpers ─────────────────────────────────────────────────────────
 
@@ -80,73 +78,7 @@ function FourSideInputs({
   );
 }
 
-/** Colour swatch row — same style as ColorPicker. */
-function BgColorSwatches({
-  current,
-  palette,
-  onChange,
-  inheritedColor = null,
-}: {
-  current: string;
-  palette: PaletteColor[];
-  onChange: (v: string) => void;
-  inheritedColor?: string | null;
-}) {
-  const isCustom = current !== "" && !palette.some((c) => c.value === current);
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {palette.map(({ label, value }) => {
-        const isSelected = current === value;
-        const isBlue = inheritedColor !== null && value === inheritedColor;
-        return (
-          <button
-            key={label}
-            title={label}
-            onClick={() => onChange(value)}
-            className={`h-6 w-6 rounded-full transition ${
-              !isBlue && isSelected
-                ? "scale-110 border-2 border-zinc-900"
-                : "hover:opacity-80"
-            }`}
-            style={{
-              background:
-                value === ""
-                  ? "linear-gradient(135deg,#e5e7eb 50%,#fff 50%)"
-                  : value,
-              outline: isBlue
-                ? "2px dashed #60a5fa"
-                : value === "#ffffff" ? "1px solid #e5e7eb" : undefined,
-              outlineOffset: isBlue ? "2px" : undefined,
-            }}
-          />
-        );
-      })}
-      {/* Custom colour */}
-      <label
-        title="Custom colour"
-        className={`relative flex h-6 w-6 cursor-pointer items-center justify-center overflow-hidden rounded-full transition ${
-          isCustom && !(inheritedColor !== null && current === inheritedColor) ? "scale-110 border-2 border-zinc-900" : "hover:opacity-80"
-        }`}
-        style={{
-          background: isCustom
-            ? current
-            : "conic-gradient(red,yellow,lime,cyan,blue,magenta,red)",
-          outline: isCustom && inheritedColor !== null && current === inheritedColor ? "2px dashed #60a5fa" : undefined,
-          outlineOffset: isCustom && inheritedColor !== null && current === inheritedColor ? "2px" : undefined,
-        }}
-      >
-        <input
-          type="color"
-          value={isCustom ? current : "#000000"}
-          onChange={(e) => onChange(e.target.value)}
-          className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-        />
-      </label>
-    </div>
-  );
-}
-
-// ── Section accordion ────────────────────────────────────────────────────────
+// ── Section accordion ────────────────────────────────────────────────────────────────────
 
 function Section({
   title,
@@ -207,11 +139,6 @@ export function BlockAdvancedControls({
   /** Always writes to base level — used for Advanced (CSS ID/class) section. */
   onBaseChange: (d: BlockData) => void;
 }) {
-  const { data: settings } = useSettings();
-  const palette: PaletteColor[] = settings?.paletteColors?.length
-    ? settings.paletteColors
-    : COLOR_PALETTE;
-
   const { viewport, isFieldOverridden, inheritedData } = useContext(ViewportContext);
   const isResponsive = viewport !== "desktop";
   const bgInherited = isResponsive && !isFieldOverridden("background");
@@ -272,15 +199,12 @@ export function BlockAdvancedControls({
     <div className="space-y-0">
       {/* ── Background ──────────────────────────────── */}
       <Section title="Background" defaultOpen={false}>
-        <div>
-          <Label>Background Colour</Label>
-          <BgColorSwatches
-            current={background.bgColor ?? ""}
-            palette={palette}
-            onChange={(v) => updateBackground({ bgColor: v || undefined })}
-            inheritedColor={inheritedBgColor}
-          />
-        </div>
+        <OptionColor
+          label="Background Colour"
+          value={background.bgColor ?? ""}
+          onChange={(v) => updateBackground({ bgColor: v || undefined })}
+          inheritedColor={inheritedBgColor}
+        />
       </Section>
 
       {/* ── Spacing ─────────────────────────────────── */}
@@ -313,15 +237,12 @@ export function BlockAdvancedControls({
       <Section title="Border" defaultOpen={false}>
         <div className="space-y-2">
           <div>
-            <MiniLabel>Color</MiniLabel>
-            <div className="mt-1">
-              <BgColorSwatches
-                current={border.color ?? ""}
-                palette={palette}
-                onChange={(v) => updateBorder({ color: v || undefined })}
-                inheritedColor={borderInherited ? (border.color ?? null) : null}
-              />
-            </div>
+            <OptionColor
+              label="Color"
+              value={border.color ?? ""}
+              onChange={(v) => updateBorder({ color: v || undefined })}
+              inheritedColor={borderInherited ? (border.color ?? null) : null}
+            />
           </div>
           <div className="flex gap-2">
             <div className="flex flex-1 flex-col gap-1">

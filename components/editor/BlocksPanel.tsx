@@ -53,6 +53,15 @@ const CATEGORIES: { id: string; label: string; icon: React.ReactNode }[] = [
       </svg>
     ),
   },
+  {
+    id: "interactive",
+    label: "Interactive",
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M5 3v4M3 5h4M6 17v4M4 19h4M13 3l4 4-4 14-4-4 4-14Z"/>
+      </svg>
+    ),
+  },
 ];
 
 // Blocks without a category fall into "other"
