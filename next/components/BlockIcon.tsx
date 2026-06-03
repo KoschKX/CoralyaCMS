@@ -19,7 +19,7 @@ export function BlockIcon({ name, label, size = 20, color = "#64748b" }: { name:
   }
   return (
     <span
-      style={{ display: "inline-block", width: size, height: size, verticalAlign: "middle" }}
+      style={{ display: "inline-block", width: size, height: size, verticalAlign: "middle", color }}
       aria-label={label}
       title={label}
     >
