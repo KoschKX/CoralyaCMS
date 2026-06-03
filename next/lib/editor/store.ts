@@ -30,21 +30,6 @@ import { blocksToShortcodes } from "@/lib/shortcodes";
 
 const MAX_HISTORY = 50;
 
-function shallowEqualData(
-  a: Readonly<Record<string, unknown>>,
-  b: Readonly<Record<string, unknown>>,
-): boolean {
-  if (a === b) return true;
-  const aKeys = Object.keys(a);
-  const bKeys = Object.keys(b);
-  if (aKeys.length !== bKeys.length) return false;
-  for (const key of aKeys) {
-    if (!Object.prototype.hasOwnProperty.call(b, key)) return false;
-    if (!Object.is(a[key], b[key])) return false;
-  }
-  return true;
-}
-
 export interface ActiveColInfo {
   blockId: string;
   colIdx: number;
@@ -220,7 +205,6 @@ export function createEditorStore() {
         // Validate new data against the block's schema before applying.
         const block = findBlockById(get().present, id);
         if (block) {
-          if (shallowEqualData(block.data as Record<string, unknown>, newData)) return;
           const def = blockMap[block.type];
           if (def?.validate && !def.validate(newData)) {
             console.warn(`[editor] updateBlock: validation failed for block "${id}" (type "${block.type}"). Update ignored.`);
@@ -268,8 +252,6 @@ export function createEditorStore() {
       },
 
       panelUpdateBlock(id, newData) {
-        const current = findBlockById(get().present, id);
-        if (current && shallowEqualData(current.data as Record<string, unknown>, newData)) return;
         const updated = deepUpdateBlock(get().present, id, newData);
         // Fire onChange immediately — same pattern as undo/redo — so React
         // state (visualBlocks, codeText) is in sync before the user saves.

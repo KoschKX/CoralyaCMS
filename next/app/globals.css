@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* Block list — used by BlockRenderer for the public front end */
+.cms-block-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--block-spacing, 1.5rem);
+  color: rgb(39 39 42); /* zinc-800 */
+}
+
 /* Media library tile — selected state */
 .media-tile-selected {
   border-color: #3b82f6;

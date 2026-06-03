@@ -90,7 +90,7 @@ function BlockRenderer({ blocks, disabledBlocks = [] }: Props) {
   );
 
   return (
-    <div className="text-zinc-800" style={{ display: "flex", flexDirection: "column", gap: "var(--block-spacing, 1.5rem)" }}>
+    <div className="cms-block-list">
       {resolved.map((entry) => {
           if (entry.unavailable) {
             return (

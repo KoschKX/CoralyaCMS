@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { listPages } from "@/lib/pages-db";
+import { listPages, getPublishedPageBySlug } from "@/lib/pages-db";
 import { getSettings, buildPageDescription } from "@/lib/settings-db";
 import { ResponsiveStyleInjector } from "@/components/ResponsiveStyleInjector";
 import { buildResponsiveCSS } from "@/lib/responsive-css";
@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function SlugPage({ params }: Props) {
   const { slug } = await params;
-  const page = listPages().find((p) => p.slug === slug && p.status === "published");
+  const page = getPublishedPageBySlug(slug);
 
   if (!page) notFound();
   const { disabledBlocks, layout } = getSettings();

@@ -75,3 +75,11 @@ export function useSettings(): UseSettingsResult {
   return { data, error, refetch };
 }
 
+/**
+ * Imperatively clears the settings cache.
+ * Call on logout so the next authenticated session always fetches fresh data
+ * rather than serving the previous user's cached settings.
+ */
+export function resetSettings(): void {
+  useSettingsStore.getState()._reset();
+}

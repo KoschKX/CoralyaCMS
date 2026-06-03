@@ -182,6 +182,17 @@ export function applyMigrations(blocks: EditorBlock[]): EditorBlock[] {
         current = { ...block, data, version: def.version };
       }
     }
+    // Run validate() after migration to catch bad data produced by a buggy migrate()
+    // implementation. When validation fails, fall back to defaultData so the page can
+    // still render rather than crashing or showing corrupted content.
+    if (def?.validate && !def.validate(current.data)) {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn(
+          `[block-tree] Block ${current.id} (${current.type}) failed validation after migration — resetting to defaultData`,
+        );
+      }
+      current = { ...current, data: def.defaultData ?? {} };
+    }
     const childArrays = getChildArrays(current);
     if (childArrays !== null) {
       return applyChildArrays(current, childArrays.map(applyMigrations));

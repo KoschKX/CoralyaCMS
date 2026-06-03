@@ -1,4 +1,3 @@
-import fs from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
 // Re-export shared types so existing imports of EditorBlock / Page from this
@@ -7,43 +6,17 @@ export type { EditorBlock, Page, PageStatus } from "@/lib/types";
 import type { EditorBlock, Page } from "@/lib/types";
 import { applyMigrations } from "@/lib/block-tree";
 import { createWriteQueue } from "@/lib/utils/write-queue";
+import { createJsonStore } from "@/lib/utils/json-store";
 
 const DATA_FILE = path.join(process.cwd(), "data", "pages.json");
 
-// No in-memory cache: Next.js/Turbopack runs API routes and page renderers
-// in separate worker contexts that each have their own module instance.
-// A module-level cache in one worker is invisible to the other, so writes
-// from the API worker would never be seen by the page-render worker.
-// Always reading from disk is correct and fast enough for small JSON files.
+const { readAll, writeAll } = createJsonStore<Page>(DATA_FILE);
 
 /**
  * Write-queue mutex: all mutating operations are serialised so concurrent API
  * requests cannot interleave their read-modify-write cycles.
  */
 const serialise = createWriteQueue();
-
-function readAll(): Page[] {
-  if (!fs.existsSync(DATA_FILE)) return [];
-  try {
-    const raw = JSON.parse(fs.readFileSync(DATA_FILE, "utf-8"));
-    if (!Array.isArray(raw)) {
-      console.error("[pages-db] pages.json is not an array — resetting to empty.");
-      return [];
-    }
-    return raw as Page[];
-  } catch (err) {
-    console.error("[pages-db] Failed to parse pages.json:", err);
-    return [];
-  }
-}
-
-function writeAll(pages: Page[]): void {
-  fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
-  // Write to a temp file then rename for atomic replacement
-  const tmp = DATA_FILE + ".tmp";
-  fs.writeFileSync(tmp, JSON.stringify(pages, null, 2));
-  fs.renameSync(tmp, DATA_FILE);
-}
 
 export function listPages(): Page[] {
   return readAll();
@@ -62,6 +35,17 @@ export function getPage(id: string): Page | null {
   const page = readAll().find((p) => p.id === id) ?? null;
   if (!page) return null;
   // Apply any pending block data migrations before returning the page.
+  return { ...page, blocks: applyMigrations(page.blocks) };
+}
+
+/**
+ * Looks up a published page by its slug, applying block migrations before returning.
+ * Prefer this over `listPages().find(...)` in page-render paths so migrations are
+ * always applied when blocks are rendered on the front end.
+ */
+export function getPublishedPageBySlug(slug: string): Page | null {
+  const page = readAll().find((p) => p.slug === slug && p.status === "published") ?? null;
+  if (!page) return null;
   return { ...page, blocks: applyMigrations(page.blocks) };
 }
 

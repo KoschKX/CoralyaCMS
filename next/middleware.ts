@@ -69,15 +69,13 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
+  // Deny-by-default: protect every /admin and /api path.
+  // Public exceptions (login / logout) are handled by the early-return at the
+  // top of middleware() — no need to list them here.
+  // This ensures any new API route is protected automatically rather than
+  // accidentally left unauthenticated if it were omitted from an allowlist.
   matcher: [
     "/admin/:path*",
-    "/api/pages/:path*",
-    "/api/settings/:path*",
-    "/api/plugins/:path*",
-    "/api/media",
-    "/api/media/:path*",
-    // Users API is protected so role checks can read headers set above
-    "/api/admin/users",
-    "/api/admin/users/:path*",
+    "/api/:path*",
   ],
 };

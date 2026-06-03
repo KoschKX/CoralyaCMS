@@ -11,6 +11,8 @@ export type BlockOps = {
 };
 
 export interface BlockEditorContextValue {
+  selectedBlockId: string | null;
+  activeColInfo: { blockId: string; colIdx: number } | null;
   setActiveColInfo: (info: { blockId: string; colIdx: number } | null) => void;
   setAnyPickerOpen: (open: boolean) => void;
   onSelectBlock: (id: string | null, data: Record<string, unknown>, type: string) => void;

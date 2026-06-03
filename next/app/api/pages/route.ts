@@ -3,7 +3,6 @@ import { revalidatePath } from "next/cache";
 import { listPagesMeta, createPage } from "@/lib/pages-db";
 import { CreatePageSchema } from "@/lib/api-schemas";
 import { paginateList } from "@/lib/utils/paginate";
-import { parseSchema, readJsonBody } from "@/lib/api/route-utils";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -11,12 +10,22 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const parsedBody = await readJsonBody(req);
-  if (!parsedBody.ok) return parsedBody.response;
-  const parsed = parseSchema(CreatePageSchema, parsedBody.body);
-  if (!parsed.ok) return parsed.response;
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
 
-  const page = await createPage(parsed.data);
+  const result = CreatePageSchema.safeParse(body);
+  if (!result.success) {
+    return NextResponse.json(
+      { error: "Validation failed", issues: result.error.flatten().fieldErrors },
+      { status: 400 },
+    );
+  }
+
+  const page = await createPage(result.data);
   if (page.slug) revalidatePath(`/${page.slug}`);
   revalidatePath("/");
   return NextResponse.json(page, { status: 201 });

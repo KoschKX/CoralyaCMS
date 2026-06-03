@@ -21,8 +21,16 @@ export function createJsonStore<T>(filePath: string) {
   function readAll(): T[] {
     if (!fs.existsSync(filePath)) return [];
     try {
-      return JSON.parse(fs.readFileSync(filePath, "utf-8")) as T[];
-    } catch {
+      const parsed = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+      if (!Array.isArray(parsed)) {
+        console.error(
+          `[json-store] ${path.basename(filePath)} is not an array — resetting to empty.`,
+        );
+        return [];
+      }
+      return parsed as T[];
+    } catch (err) {
+      console.error(`[json-store] Failed to parse ${path.basename(filePath)}:`, err);
       return [];
     }
   }

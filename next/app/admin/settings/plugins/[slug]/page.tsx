@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import "@/plugins/index";
+import "@/plugins";
 import { pluginAdminPages } from "@/lib/plugin-registry";
 
 interface Props {

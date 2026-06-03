@@ -4,7 +4,7 @@ import { LogoutButton } from "./LogoutButton";
 import { SidebarContentNav } from "./SidebarContentNav";
 import "../col-editor-overrides.css";
 // Ensure plugins are installed before reading their admin pages
-import "@/plugins/index";
+import "@/plugins";
 import { installedPlugins } from "@/lib/plugin-registry";
 
 export const metadata = {
@@ -46,12 +46,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             Settings
           </p>
           {[
-            { href: "/admin/settings/site",       icon: "/icons/site.svg", label: "Site" },
-            { href: "/admin/settings/navigation",  icon: "/icons/navigation.svg", label: "Navigation" },
-            { href: "/admin/settings/theme",       icon: "/icons/theme.svg", label: "Theme" },
-            { href: "/admin/settings/blocks",      icon: "/icons/blocks.svg", label: "Blocks" },
-            { href: "/admin/settings/plugins",     icon: "/icons/plugins.svg", label: "Plugins" },
-            { href: "/admin/settings/users",       icon: "/icons/users.svg", label: "Users" },
+            { href: "/admin/settings/site",          icon: "/icons/site.svg",         label: "Site" },
+            { href: "/admin/settings/navigation",     icon: "/icons/navigation.svg",   label: "Navigation" },
+            { href: "/admin/settings/theme",          icon: "/icons/theme.svg",         label: "Theme" },
+            { href: "/admin/settings/blocks",         icon: "/icons/blocks.svg",        label: "Blocks" },
+            { href: "/admin/settings/plugins",        icon: "/icons/plugins.svg",       label: "Plugins" },
+            { href: "/admin/settings/integrations",   icon: "/icons/integrations.svg",  label: "Integrations" },
+            { href: "/admin/settings/users",          icon: "/icons/users.svg",         label: "Users" },
           ].map(({ href, icon, label }) => (
             <Link
               key={href}

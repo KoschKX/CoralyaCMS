@@ -38,7 +38,6 @@ function unescapeBrackets(s: string): string {
  * Exported so block definitions can use it inside their `serializeShortcode` hook.
  */
 export function serializeAttr(key: string, v: unknown): string {
-  if (v === undefined || v === null) return "";
   if (typeof v === "string") {
     const encoded = escapeBrackets(v).replace(/"/g, "&quot;");
     return `${key}="${encoded}"`;
@@ -46,14 +45,16 @@ export function serializeAttr(key: string, v: unknown): string {
   if (typeof v === "number" || typeof v === "boolean") {
     return `${key}="${v}"`;
   }
-  // Array or object — single-quote delimiter so JSON's own " stay readable
-  const json = escapeBrackets(JSON.stringify(v));
+  // Array or object — single-quote delimiter so JSON's own " stay readable.
+  // Also escape bare single quotes (apostrophes in text) so the regex parser
+  // doesn't terminate on them.
+  const json = escapeBrackets(JSON.stringify(v)).replace(/'/g, "&#39;");
   return `${key}='${json}'`;
 }
 
 function decodeAttrValue(raw: string, singleQuoted: boolean): unknown {
   const s = singleQuoted
-    ? unescapeBrackets(raw)
+    ? unescapeBrackets(raw).replace(/&#39;/g, "'")
     : unescapeBrackets(raw).replace(/&quot;/g, '"');
   try { return JSON.parse(s); } catch { return s; }
 }
@@ -68,11 +69,11 @@ function parseAttrsStr(raw: string): Record<string, unknown> {
   let m: RegExpExecArray | null;
   ATTR_RE_DOUBLE.lastIndex = 0;
   while ((m = ATTR_RE_DOUBLE.exec(raw)) !== null) {
-    attrs[m[1].toLowerCase()] = decodeAttrValue(m[2], false);
+    attrs[m[1]] = decodeAttrValue(m[2], false);
   }
   ATTR_RE_SINGLE.lastIndex = 0;
   while ((m = ATTR_RE_SINGLE.exec(raw)) !== null) {
-    attrs[m[1].toLowerCase()] = decodeAttrValue(m[2], true);
+    attrs[m[1]] = decodeAttrValue(m[2], true);
   }
   return attrs;
 }
@@ -207,7 +208,7 @@ function buildBlocks(
 
     if (tok.type === "open" && tok.name === "columns") {
       pos++;
-      const cols: Array<Record<string, unknown>> = [];
+      const cols: Array<{ blocks: EditorBlock[]; width?: string }> = [];
       let responsive: Record<string, Record<string, unknown>> | undefined = undefined;
 
       // Read responsive attribute from columns block
@@ -225,28 +226,17 @@ function buildBlocks(
         if (t.type === "open" && t.name === "column") {
           const width = t.attrs.width as string | undefined;
           // Per-column responsive overrides stored as JSON
-          let colResponsive: Record<string, Record<string, unknown>> | undefined;
+          let colResponsive: Record<string, { width?: string }> | undefined;
           if (t.attrs.responsive) {
             try {
               colResponsive = typeof t.attrs.responsive === "string"
                 ? JSON.parse(t.attrs.responsive as string)
-                : (t.attrs.responsive as Record<string, Record<string, unknown>>);
+                : (t.attrs.responsive as Record<string, { width?: string }>);
             } catch {}
-          }
-          // Per-column advanced CSS properties
-          const COL_ADVANCED_KEYS = ["background", "spacing", "border", "display", "advanced"] as const;
-          const colAdvanced: Record<string, unknown> = {};
-          for (const key of COL_ADVANCED_KEYS) {
-            if (t.attrs[key] !== undefined) colAdvanced[key] = t.attrs[key];
           }
           pos++;
           const inner = buildBlocks(tokens, pos, "column", counter);
-          cols.push({
-            ...(width ? { width } : {}),
-            ...(colResponsive ? { responsive: colResponsive } : {}),
-            ...colAdvanced,
-            blocks: inner.blocks,
-          });
+          cols.push({ ...(width ? { width } : {}), ...(colResponsive ? { responsive: colResponsive } : {}), blocks: inner.blocks });
           pos = inner.pos;
         } else { pos++; }
       }
@@ -314,11 +304,20 @@ function blockToShortcode(type: string, data: Record<string, unknown>, depth = 0
     return def.serializeShortcode(data, depth, blocksToShortcodes, serializeAttr);
   }
 
-  // All properties — scalar and complex — are serialised
+  // All properties — scalar and complex — are serialised.
+  // Skip any all-lowercase key that has a camelCase counterpart in the same
+  // data object (legacy artefact from the old case-folding parser).
+  const dataKeys = Object.keys(data);
   const attrs = Object.entries(data)
-    .filter(([k, v]) => k !== "id" && v !== undefined && v !== null)
+    .filter(([k]) => {
+      if (k === "id") return false;
+      if (k === k.toLowerCase()) {
+        const hasCamelVersion = dataKeys.some((k2) => k2 !== k && k2.toLowerCase() === k);
+        if (hasCamelVersion) return false;
+      }
+      return true;
+    })
     .map(([k, v]) => serializeAttr(k, v))
-    .filter(Boolean)
     .join(" ");
   return attrs ? `${pad}[${type} ${attrs}]` : `${pad}[${type}]`;
 }

@@ -10,6 +10,9 @@
  *   Cookie = HMAC-SHA256(SESSION_SECRET, ADMIN_PASSWORD)
  *   Still accepted by middleware to avoid locking out existing deployments until
  *   they log in again after the user system is bootstrapped.
+ *   DEPRECATED: This path has no `iat` claim, so tokens cannot expire
+ *   individually. It will be removed in a future version. Users should log out
+ *   and back in to receive the new signed-payload token format.
  *
  * Set env vars in .env.local (never commit them):
  *   SESSION_SECRET=<random 32+ char string>
@@ -18,6 +21,24 @@
 
 export const COOKIE_NAME = "admin-session";
 export const COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
+
+// ── Secret accessor ───────────────────────────────────────────────────────────
+
+/**
+ * Returns SESSION_SECRET, hard-failing in production when the insecure default
+ * is still set. Call this instead of reading process.env directly so every
+ * token operation inherits the same production guard.
+ */
+function getSecret(): string {
+  const secret = process.env.SESSION_SECRET ?? "dev-secret-change-me";
+  if (process.env.NODE_ENV === "production" && secret === "dev-secret-change-me") {
+    throw new Error(
+      "[auth] SESSION_SECRET must be set in production. " +
+        "Add SESSION_SECRET=<random 32+ char string> to your .env or hosting environment.",
+    );
+  }
+  return secret;
+}
 
 // ── Session payload ───────────────────────────────────────────────────────────
 
@@ -51,16 +72,14 @@ async function hmacSHA256(keyStr: string, msgStr: string): Promise<string> {
  * requests without server-side session storage.
  */
 export async function getSessionToken(): Promise<string> {
-  const secret = process.env.SESSION_SECRET ?? "dev-secret-change-me";
+  const secret = getSecret();
   const password = process.env.ADMIN_PASSWORD ?? "admin";
 
-  if (process.env.NODE_ENV === "production") {
-    if (secret === "dev-secret-change-me" || password === "admin") {
-      console.warn(
-        "[auth] WARNING: Using default SESSION_SECRET or ADMIN_PASSWORD in production. " +
-          "Set SESSION_SECRET and ADMIN_PASSWORD in your environment.",
-      );
-    }
+  if (process.env.NODE_ENV === "production" && password === "admin") {
+    console.warn(
+      "[auth] WARNING: Using default ADMIN_PASSWORD in production. " +
+        "Set ADMIN_PASSWORD in your environment.",
+    );
   }
 
   return hmacSHA256(secret, password);
@@ -102,7 +121,7 @@ function fromB64url(str: string): string {
  * Create a signed session cookie value for a logged-in user.
  */
 export async function createUserSession(payload: SessionPayload): Promise<string> {
-  const secret = process.env.SESSION_SECRET ?? "dev-secret-change-me";
+  const secret = getSecret();
   const data = toB64url(JSON.stringify(payload));
   const sig = await hmacSHA256(secret, data);
   return `${data}.${sig}`;
@@ -113,7 +132,7 @@ export async function createUserSession(payload: SessionPayload): Promise<string
  * Returns null if the token is invalid or tampered.
  */
 export async function verifyUserSession(token: string): Promise<SessionPayload | null> {
-  const secret = process.env.SESSION_SECRET ?? "dev-secret-change-me";
+  const secret = getSecret();
   const lastDot = token.lastIndexOf(".");
   if (lastDot < 0) return null;
 

@@ -3,7 +3,6 @@
 import { blockMap } from "@/blocks/index";
 import { ViewportContext, type Viewport } from "@/components/ui/ViewportContext";
 import { BlockAdvancedControls } from "@/components/ui/BlockAdvancedControls";
-import { mergeViewportOverrides } from "@/lib/responsive-css";
 import type { SelectedBlock } from "@/lib/types";
 
 interface BlockPanelProps {
@@ -69,65 +68,6 @@ export default function BlockPanel({
   const displayData = controlsDisplayData(selectedBlock.data);
   const inheritedData = controlsInheritedData(selectedBlock.data);
 
-  // When a column is actively selected within a columns block, redirect the
-  // advanced controls to that specific column's data rather than the whole block.
-  const isColumnSelected = selectedBlock.name === "columns" && activeColIdx !== null;
-  const rawCols = isColumnSelected
-    ? ((selectedBlock.data.cols as Record<string, unknown>[]) ?? [])
-    : null;
-  // Base (desktop) col data — used as the write target for desktop viewport.
-  const baseColData = (rawCols && activeColIdx !== null)
-    ? (rawCols[activeColIdx] as Record<string, unknown> ?? {})
-    : null;
-  // Viewport-merged col data — what the panel should display.
-  const activeColData = baseColData !== null
-    ? mergeViewportOverrides(baseColData, activeViewport)
-    : null;
-
-  const advancedData = (activeColData ?? displayData) as typeof displayData;
-  const advancedOnChange = (baseColData !== null && rawCols !== null)
-    ? (patch: Record<string, unknown>) => {
-        const newCols = rawCols.map((col, i) => {
-          if (i !== activeColIdx) return col;
-          if (activeViewport === "desktop") {
-            return { ...col, ...patch };
-          }
-          // Non-desktop: write into the column's own responsive overrides.
-          const colResponsive = { ...((col.responsive as Record<string, unknown>) ?? {}) };
-          colResponsive[activeViewport] = { ...((colResponsive[activeViewport] as Record<string, unknown>) ?? {}), ...patch };
-          return { ...col, responsive: colResponsive };
-        });
-        onControlsChange({ cols: newCols });
-      }
-    : onControlsChange;
-  const advancedOnBaseChange = (baseColData !== null && rawCols !== null)
-    ? (patch: Record<string, unknown>) => {
-        const newCols = rawCols.map((col, i) =>
-          i === activeColIdx ? { ...col, ...patch } : col
-        );
-        onBaseControlsChange({ cols: newCols });
-      }
-    : onBaseControlsChange;
-
-  // When a column is selected, compute column-specific viewport context values
-  // so BlockAdvancedControls shows the correct inherited/overridden indicators.
-  const colIsFieldOverridden = baseColData !== null
-    ? (field: string): boolean => {
-        if (activeViewport === "desktop") return false;
-        const colResponsive = (baseColData.responsive as Record<string, Record<string, unknown>>) ?? {};
-        const colOverrides = colResponsive[activeViewport] ?? {};
-        return field in colOverrides;
-      }
-    : isFieldOverridden;
-
-  const colInheritedData = baseColData !== null
-    ? (() => {
-        if (activeViewport === "desktop") return baseColData;
-        const parentViewport: Viewport = activeViewport === "mobile" ? "tablet" : "desktop";
-        return mergeViewportOverrides(baseColData, parentViewport, true);
-      })()
-    : inheritedData;
-
   return (
     <>
       <div className="flex items-center">
@@ -147,13 +87,11 @@ export default function BlockPanel({
             onChange={onControlsChange}
           />
         )}
-        <ViewportContext.Provider value={{ viewport: activeViewport, isSectionEnabled, isFieldOverridden: colIsFieldOverridden, toggleSection, inheritedData: colInheritedData }}>
-          <BlockAdvancedControls
-            data={advancedData}
-            onChange={advancedOnChange}
-            onBaseChange={advancedOnBaseChange}
-          />
-        </ViewportContext.Provider>
+        <BlockAdvancedControls
+          data={displayData}
+          onChange={onControlsChange}
+          onBaseChange={onBaseControlsChange}
+        />
       </ViewportContext.Provider>
     </>
   );

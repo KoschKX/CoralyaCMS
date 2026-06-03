@@ -14,7 +14,15 @@ echo "📦 Backing up to: $OUT"
 
 cd "$ROOT"
 
-zip -r "$OUT" next start.sh backup.sh \
+zip -r "$OUT" \
+  next \
+  data \
+  start.sh start.bat \
+  start-prod.sh \
+  build.sh \
+  backup.sh backup.bat \
+  setup.sh setup.bat \
+  .gitignore \
   --exclude "*/node_modules/*" \
   --exclude "next/.next/*" \
   --exclude "*/package-lock.json" \

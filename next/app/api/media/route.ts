@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import { checkRateLimit } from "@/lib/utils/rate-limit";
+
+// Max 20 uploads per IP per minute
+const UPLOAD_RATE_LIMIT = 20;
 
 export const dynamic = "force-dynamic";
 
@@ -96,6 +100,15 @@ export function GET() {
 }
 
 export async function POST(req: Request) {
+  // Rate-limit uploads per client IP to prevent abuse
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    req.headers.get("x-real-ip") ??
+    "unknown";
+  if (!checkRateLimit(ip, UPLOAD_RATE_LIMIT)) {
+    return NextResponse.json({ error: "Too many uploads. Please wait before trying again." }, { status: 429 });
+  }
+
   let formData: FormData;
   try {
     formData = await req.formData();

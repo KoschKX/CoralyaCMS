@@ -41,9 +41,7 @@ export default function ColumnsGrid({ colWidths, responsive, children, selectedC
   const [editorViewport, setEditorViewport] = useState<string>("desktop");
 
   useLayoutEffect(() => {
-    // Initial read: schedule as a micro-task so the setState
-    // does not run synchronously during the layout phase.
-    const initId = setTimeout(() => setEditorViewport(calcViewport()), 0);
+    setEditorViewport(calcViewport());
 
     let rafId: ReturnType<typeof requestAnimationFrame> | null = null;
     function update() {
@@ -56,7 +54,6 @@ export default function ColumnsGrid({ colWidths, responsive, children, selectedC
 
     window.addEventListener("resize", update);
     return () => {
-      clearTimeout(initId);
       window.removeEventListener("resize", update);
       if (rafId !== null) cancelAnimationFrame(rafId);
     };

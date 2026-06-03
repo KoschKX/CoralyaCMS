@@ -2,38 +2,9 @@ import type { EditorBlock } from "@/lib/pages-db";
 import { blockMap } from "@/blocks/index";
 
 /**
- * Keys whose values are nested objects that must be deep-merged rather than
- * replaced wholesale when applying responsive overrides.
- */
-const DEEP_MERGE_KEYS = new Set(["background", "spacing", "border", "display"]);
-
-/** Merge two override objects, deep-merging known nested sub-objects. */
-function mergeOverrides(
-  base: Record<string, unknown>,
-  overrides: Record<string, unknown>,
-): Record<string, unknown> {
-  const result: Record<string, unknown> = { ...base };
-  for (const [key, val] of Object.entries(overrides)) {
-    if (
-      DEEP_MERGE_KEYS.has(key) &&
-      base[key] !== undefined &&
-      typeof base[key] === "object" && base[key] !== null &&
-      typeof val === "object" && val !== null
-    ) {
-      result[key] = { ...(base[key] as Record<string, unknown>), ...(val as Record<string, unknown>) };
-    } else {
-      result[key] = val;
-    }
-  }
-  return result;
-}
-
-/**
  * Merge responsive overrides for the given viewport onto data.
  * - On desktop, returns data unchanged.
- * - On tablet/mobile, spreads responsive[viewport] on top of data,
- *   deep-merging known nested sub-objects (background, spacing, border, display)
- *   so a partial override (e.g. bgColor only) doesn't wipe sibling fields (e.g. bgImage).
+ * - On tablet/mobile, spreads responsive[viewport] on top of data.
  * - If stripResponsive is true, the `responsive` key is removed from the result
  *   (useful when passing data to panel controls that shouldn't see it).
  */
@@ -47,7 +18,7 @@ export function mergeViewportOverrides(
   const responsive = (_r as Record<string, Record<string, unknown>>) ?? {};
   const overrides = responsive[viewport];
   if (!overrides) return stripResponsive ? rest : data;
-  return mergeOverrides(stripResponsive ? rest : data, overrides);
+  return { ...(stripResponsive ? rest : data), ...overrides };
 }
 
 function rulesFor(overrides: Record<string, unknown>): string {
@@ -59,39 +30,6 @@ function rulesFor(overrides: Record<string, unknown>): string {
     align    && `text-align: ${align} !important;`,
     fontSize && `font-size: var(--font-size-${fontSize}) !important;`,
   ].filter(Boolean).join(" ");
-}
-
-/** CSS properties that apply only to the block wrapper (not cascaded to children). */
-function wrapperRulesFor(overrides: Record<string, unknown>): string {
-  const spacing    = (overrides.spacing    as Record<string, string> | undefined) ?? {};
-  const background = (overrides.background as Record<string, string> | undefined) ?? {};
-  const border     = (overrides.border     as Record<string, string> | undefined) ?? {};
-  const rules: string[] = [];
-  if (spacing.pt) rules.push(`padding-top: ${spacing.pt} !important;`);
-  if (spacing.pr) rules.push(`padding-right: ${spacing.pr} !important;`);
-  if (spacing.pb) rules.push(`padding-bottom: ${spacing.pb} !important;`);
-  if (spacing.pl) rules.push(`padding-left: ${spacing.pl} !important;`);
-  if (spacing.mt) rules.push(`margin-top: ${spacing.mt} !important;`);
-  if (spacing.mr) rules.push(`margin-right: ${spacing.mr} !important;`);
-  if (spacing.mb) rules.push(`margin-bottom: ${spacing.mb} !important;`);
-  if (spacing.ml) rules.push(`margin-left: ${spacing.ml} !important;`);
-  if (background.bgColor) rules.push(`background-color: ${background.bgColor} !important;`);
-  if (background.bgImage === "none") {
-    rules.push(`background-image: none !important;`);
-  } else if (background.bgImage) {
-    rules.push(`background-image: url(${background.bgImage}) !important;`);
-    rules.push(`background-size: ${background.bgSize || "cover"} !important;`);
-    rules.push(`background-position: ${background.bgPosition || "center"} !important;`);
-    rules.push(`background-repeat: ${background.bgRepeat || "no-repeat"} !important;`);
-  }
-  const hasBorder = border.color || border.width || border.style;
-  if (hasBorder) {
-    rules.push(`border-width: ${border.width || "1px"} !important;`);
-    rules.push(`border-style: ${border.style || "solid"} !important;`);
-    rules.push(`border-color: ${border.color || "currentColor"} !important;`);
-  }
-  if (border.radius) rules.push(`border-radius: ${border.radius} !important;`);
-  return rules.join(" ");
 }
 
 /**
@@ -147,10 +85,10 @@ export function buildResponsiveCSS(
       const responsive = data?.responsive as Record<string, Record<string, unknown>> | undefined;
 
       // Cascade: mobile inherits from tablet, tablet inherits from desktop (base).
-      // Deep-merge parent overrides first so child overrides win per-property.
+      // Merge parent overrides first, then child overrides win.
       const cascaded: Record<string, unknown> =
         forcedViewport === "mobile"
-          ? mergeOverrides(responsive?.tablet ?? {}, responsive?.mobile ?? {})
+          ? { ...(responsive?.tablet ?? {}), ...(responsive?.mobile ?? {}) }
           : { ...(responsive?.tablet ?? {}) };
 
       if (block.type === "columns" && Array.isArray(data.cols)) {
@@ -161,21 +99,12 @@ export function buildResponsiveCSS(
         if (cascaded["stack"]) {
           css += `${colSel} { width: 100% !important; padding-left: 0 !important; }\n`;
         } else {
-          (data.cols as Array<{ width?: string; responsive?: Record<string, Record<string, unknown>> }>).forEach((col, i) => {
+          (data.cols as Array<{ width?: string; responsive?: Record<string, { width?: string }> }>).forEach((col, i) => {
             const w = forcedViewport === "mobile"
               ? (col.responsive?.mobile?.width ?? col.responsive?.tablet?.width)
               : col.responsive?.tablet?.width;
             if (w) {
               css += `${colSelBase(`:nth-child(${i + 1})`)} { width: ${w} !important; }\n`;
-            }
-            // Per-column advanced CSS overrides (background, spacing, border, etc.)
-            const colCascaded: Record<string, unknown> =
-              forcedViewport === "mobile"
-                ? mergeOverrides(col.responsive?.tablet ?? {}, col.responsive?.mobile ?? {})
-                : { ...(col.responsive?.tablet ?? {}) };
-            const colWrapperRules = wrapperRulesFor(colCascaded);
-            if (colWrapperRules) {
-              css += `${colSelBase(`:nth-child(${i + 1})`)} { ${colWrapperRules} }\n`;
             }
           });
         }
@@ -186,10 +115,6 @@ export function buildResponsiveCSS(
         if (rules) {
           const sel = `[data-block-id="${block.id}"], [data-block-id="${block.id}"] *`;
           css += `${sel} { ${rules} }\n`;
-        }
-        const wrapperRules = wrapperRulesFor(cascaded);
-        if (wrapperRules) {
-          css += `[data-block-id="${block.id}"] { ${wrapperRules} }\n`;
         }
       }
 
@@ -220,7 +145,7 @@ export function buildResponsiveCSS(
     const responsive = data?.responsive as Record<string, Record<string, unknown>> | undefined;
 
     if (block.type === "columns" && Array.isArray(data.cols)) {
-      const cols = data.cols as Array<{ width?: string; responsive?: Record<string, Record<string, unknown>> }>;
+      const cols = data.cols as Array<{ width?: string; responsive?: Record<string, { width?: string }> }>;
       const colSelBase = (nth: string) =>
         `[data-block-id="${block.id}"] > .block-columns > .block-columns__col-wrapper${nth},` +
         `[data-block-id="${block.id}"] > div > .block-columns > .block-columns__col-wrapper${nth}`;
@@ -244,28 +169,14 @@ export function buildResponsiveCSS(
       } else {
         css += colWidthCSS(block.id, cols, "mobile", mobileQuery);
       }
-
-      // Per-column advanced CSS overrides (background, spacing, border, etc.) at each breakpoint
-      cols.forEach((col, i) => {
-        const colResponsive = col.responsive as Record<string, Record<string, unknown>> | undefined;
-        const tabletColRules = colResponsive?.tablet ? wrapperRulesFor(colResponsive.tablet) : "";
-        const mobileColRules = colResponsive?.mobile ? wrapperRulesFor(colResponsive.mobile) : "";
-        if (tabletColRules) css += `${tabletQuery} { ${colSelBase(`:nth-child(${i + 1})`)} { ${tabletColRules} } }\n`;
-        if (mobileColRules) css += `${mobileQuery} { ${colSelBase(`:nth-child(${i + 1})`)} { ${mobileColRules} } }\n`;
-      });
     }
 
     if (responsive) {
       const sel = `[data-block-id="${block.id}"], [data-block-id="${block.id}"] *`;
-      const wrapperSel = `[data-block-id="${block.id}"]`;
       const tabletRules = responsive.tablet ? rulesFor(responsive.tablet) : "";
       const mobileRules = responsive.mobile ? rulesFor(responsive.mobile) : "";
-      const tabletWrapperRules = responsive.tablet ? wrapperRulesFor(responsive.tablet) : "";
-      const mobileWrapperRules = responsive.mobile ? wrapperRulesFor(responsive.mobile) : "";
       if (tabletRules) css += `${tabletQuery} { ${sel} { ${tabletRules} } }\n`;
       if (mobileRules) css += `${mobileQuery} { ${sel} { ${mobileRules} } }\n`;
-      if (tabletWrapperRules) css += `${tabletQuery} { ${wrapperSel} { ${tabletWrapperRules} } }\n`;
-      if (mobileWrapperRules) css += `${mobileQuery} { ${wrapperSel} { ${mobileWrapperRules} } }\n`;
     }
 
     // Recurse into child blocks of container blocks (e.g. columns)

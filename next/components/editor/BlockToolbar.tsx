@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState } from "react";
+import { memo } from "react";
 import type { EditorBlock } from "@/lib/pages-db";
 import type { BlockDefinition } from "@/lib/block-types";
 import { BlockIcon } from "@/components/BlockIcon";
@@ -45,7 +45,6 @@ export const BlockToolbar = memo(function BlockToolbar({
     parentInfo || (isColBlock && activeColInfo?.blockId === block.id);
 
   const activeColOnThisBlock = isColBlock && activeColInfo?.blockId === block.id;
-  const [trashHovered, setTrashHovered] = useState(false);
 
   return (
     <div
@@ -69,7 +68,7 @@ export const BlockToolbar = memo(function BlockToolbar({
               ? parentInfo.onSelect
               : onDeselectCol
           }
-          className="flex items-center justify-center w-9 rounded-md border border-zinc-200 bg-white shadow-md hover:bg-zinc-100 transition"
+          className="flex items-center justify-center w-9 rounded-md border border-zinc-200 bg-white shadow-md text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 transition"
           style={{ minHeight: 36 }}
         >
           <BlockIcon
@@ -88,7 +87,7 @@ export const BlockToolbar = memo(function BlockToolbar({
         <button
           title={activeColOnThisBlock ? "Column" : (def?.label ?? block.type)}
           aria-label={activeColOnThisBlock ? "Column block" : (def?.label ?? block.type)}
-          className="flex items-center justify-center w-9 text-lg rounded-l-md transition cursor-default"
+          className="flex items-center justify-center w-9 text-lg text-zinc-700 rounded-l-md transition cursor-default"
           tabIndex={-1}
         >
           <BlockIcon
@@ -105,7 +104,7 @@ export const BlockToolbar = memo(function BlockToolbar({
           disabled={idx === 0}
           title="Move up"
           aria-label="Move block up"
-          className="flex w-8 items-center justify-center hover:bg-zinc-100 transition disabled:opacity-25 disabled:cursor-not-allowed"
+          className="flex w-8 items-center justify-center text-zinc-500 hover:bg-zinc-100 transition disabled:opacity-25 disabled:cursor-not-allowed"
         >
           <ChevronUpIcon />
         </button>
@@ -115,7 +114,7 @@ export const BlockToolbar = memo(function BlockToolbar({
           disabled={idx === listLength - 1}
           title="Move down"
           aria-label="Move block down"
-          className="flex w-8 items-center justify-center hover:bg-zinc-100 transition disabled:opacity-25 disabled:cursor-not-allowed"
+          className="flex w-8 items-center justify-center text-zinc-500 hover:bg-zinc-100 transition disabled:opacity-25 disabled:cursor-not-allowed"
         >
           <ChevronDownIcon />
         </button>
@@ -126,11 +125,9 @@ export const BlockToolbar = memo(function BlockToolbar({
           onClick={() => ops.remove(block.id)}
           title="Delete block"
           aria-label="Delete block"
-          className="flex w-8 items-center justify-center hover:bg-red-50 transition"
-          onMouseEnter={() => setTrashHovered(true)}
-          onMouseLeave={() => setTrashHovered(false)}
+          className="flex w-8 items-center justify-center text-zinc-400 hover:bg-red-50 hover:text-red-500 transition"
         >
-          <TrashIcon hovered={trashHovered} />
+          <TrashIcon />
         </button>
       </div>
     </div>

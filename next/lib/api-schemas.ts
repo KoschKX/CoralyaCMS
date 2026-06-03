@@ -124,6 +124,8 @@ export const UpdateSettingsSchema = z.object({
   description: z.string().max(2000).optional(),
   siteUrl: z.string().url().max(500).optional().or(z.literal("")),
   logoUrl: z.string().url().max(500).optional().or(z.literal("")),
+  instagramAccessToken: z.string().max(500).optional(),
+  flickrApiKey: z.string().max(500).optional(),
   disabledBlocks: z.array(z.string()).optional(),
   paletteColors: z.array(PaletteColorSchema).optional(),
   typography: TypographySchema.optional(),

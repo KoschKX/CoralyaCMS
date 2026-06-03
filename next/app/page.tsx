@@ -1,4 +1,4 @@
-import { listPages } from "@/lib/pages-db";
+import { getPublishedPageBySlug } from "@/lib/pages-db";
 import { getSettings, buildPageDescription } from "@/lib/settings-db";
 import { ResponsiveStyleInjector } from "@/components/ResponsiveStyleInjector";
 import { PluginPageInjections } from "@/components/PluginPageInjections";
@@ -28,9 +28,7 @@ export default function Home() {
   const { tablet: tabletBp, mobile: mobileBp } = layout.breakpoints;
 
   // Serve the page with slug "" or "home" as the front page, if published
-  const homePage = listPages().find(
-    (p) => (p.slug === "" || p.slug === "home") && p.status === "published",
-  );
+  const homePage = getPublishedPageBySlug("") ?? getPublishedPageBySlug("home");
 
   const mainStyle = {
     width: "100%",

@@ -71,9 +71,28 @@ export const installedPlugins: PluginDefinition[] = [];
 
 /**
  * Names of plugins that have been disabled via the admin UI.
- * Checked at request time by filters and the plugins page.
+ * Used by the generated plugin installer to seed initial state and by the
+ * admin API to update in-process state.
  */
 export const disabledPlugins = new Set<string>();
+
+// ── Pluggable disabled checker ────────────────────────────────────────────────
+// This module is imported by both Server Components and Client Components, so
+// it must not contain any Node.js built-ins.  Server-only code (the generated
+// plugin installer) calls `setDisabledChecker()` to install a file-reading
+// implementation.  Until then the check falls back to the in-memory Set.
+
+let _disabledChecker: (name: string) => boolean = (name) => disabledPlugins.has(name);
+
+/**
+ * Override the plugin-disabled check with a custom function.
+ * Call this once from server-only code (e.g. the generated plugin installer)
+ * to install a persistent, file-backed check that works across separate
+ * module contexts (RSC vs Route Handler).
+ */
+export function setDisabledChecker(fn: (name: string) => boolean): void {
+  _disabledChecker = fn;
+}
 
 /**
  * All admin pages contributed by plugins, keyed by slug for O(1) lookup.
@@ -90,7 +109,7 @@ export function installPlugin(plugin: PluginDefinition): void {
     // Wrap so the disabled check is evaluated at call time, not install time.
     const pluginName = plugin.name;
     const guarded = (value: unknown, ...args: unknown[]) => {
-      if (disabledPlugins.has(pluginName)) return value;
+      if (_disabledChecker(pluginName)) return value;
       return (callback as (v: unknown, ...a: unknown[]) => unknown)(value, ...args);
     };
     addFilter(hook, guarded, priority);

@@ -34,10 +34,16 @@ if errorlevel 1 (
 ::       EnableDelayedExpansion is NOT set so ! has no special meaning.
 "%SEVENZIP%" a -tzip "%OUT%" ^
     "%ROOT%\next" ^
+    "%ROOT%\data" ^
     "%ROOT%\start.bat" ^
     "%ROOT%\start.sh" ^
+    "%ROOT%\start-prod.sh" ^
+    "%ROOT%\build.sh" ^
     "%ROOT%\backup.bat" ^
     "%ROOT%\backup.sh" ^
+    "%ROOT%\setup.bat" ^
+    "%ROOT%\setup.sh" ^
+    "%ROOT%\.gitignore" ^
     -xr!"node_modules" ^
     -xr!".next" ^
     -x!"package-lock.json" >nul

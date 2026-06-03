@@ -12,6 +12,21 @@ import ColumnsIcon from '../../public/icons/columns.svg';
 import ColumnIcon from '../../public/icons/column.svg';
 import MediaIcon from '../../public/icons/media.svg';
 import HtmlIcon from '../../public/icons/html.svg';
+import ButtonIcon from '../../public/icons/button.svg';
+import CounterIcon from '../../public/icons/counter.svg';
+import CarouselIcon    from '../../public/icons/carousel.svg';
+import ShareIcon       from '../../public/icons/share.svg';
+import CountdownIcon   from '../../public/icons/countdown.svg';
+import TestimonialsIcon from '../../public/icons/testimonials.svg';
+import StarFilledIcon         from '../../public/icons/star-filled.svg';
+import SyntaxHighlighterIcon  from '../../public/icons/syntax-highlighter.svg';
+import VideoFileIcon          from '../../public/icons/video-file.svg';
+import AudioIcon              from '../../public/icons/audio.svg';
+import NewsTickerIcon         from '../../public/icons/news-ticker.svg';
+import InstagramIcon          from '../../public/icons/instagram.svg';
+import FlickrIcon             from '../../public/icons/flickr.svg';
+import GalleryIcon            from '../../public/icons/gallery.svg';
+import ChartIcon              from '../../public/icons/chart.svg';
 
 export const ICON_COMPONENTS: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   paragraph: ParagraphIcon,
@@ -25,5 +40,23 @@ export const ICON_COMPONENTS: Record<string, React.FC<React.SVGProps<SVGSVGEleme
   column: ColumnIcon,
   embed: MediaIcon,
   image: MediaIcon,
-  html: HtmlIcon,
+  html:      HtmlIcon,
+  button:    ButtonIcon,
+  counter:         CounterIcon,
+  carousel:         CarouselIcon,
+  share:            ShareIcon,
+  "social-sharing": ShareIcon,
+  countdown:          CountdownIcon,
+  testimonials:       TestimonialsIcon,
+  "star":               StarFilledIcon,
+  "star-rating":        StarFilledIcon,
+  "syntax-highlighter": SyntaxHighlighterIcon,
+  "video":              VideoFileIcon,
+  "video-file":         VideoFileIcon,
+  "audio":              AudioIcon,
+  "news-ticker":        NewsTickerIcon,
+  "instagram":          InstagramIcon,
+  "flickr":             FlickrIcon,
+  "gallery":            GalleryIcon,
+  "chart":              ChartIcon,
 };

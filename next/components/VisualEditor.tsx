@@ -25,7 +25,6 @@ import {
 } from "react";
 import type { EditorBlock } from "@/lib/pages-db";
 import { EditorStoreProvider, useEditorStore, useEditorActions } from "@/lib/editor/EditorStoreContext";
-import { useEditorBlocks } from "@/lib/editor/selectors";
 import { AddZone } from "@/components/editor/BlockPickerAndAddZone";
 import { BlockEditorContext } from "@/components/editor/BlockEditorContext";
 import BlockList from "@/components/editor/BlockList";
@@ -55,7 +54,7 @@ function VisualEditorInner({
   initialBlocks,
   onChange,
   onSelectBlock,
-  selectedBlockId: _selectedBlockId,
+  selectedBlockId,
   registerUpdateHandler,
   registerAddBlockHandler,
   onColSelect,
@@ -152,7 +151,8 @@ function VisualEditorInner({
   }, []);
 
   // Subscribe to store slices — each selector is narrow to minimise re-renders
-  const blocks = useEditorBlocks();
+  const blocks = useEditorStore((s) => s.present);
+  const activeColInfo = useEditorStore((s) => s.activeColInfo);
 
   // Drag-and-drop handling delegated to useDragDrop hook.
   const { containerRef: blocksContainerRef, dropState, handleDragOver, handleDrop, handleDragLeave } =
@@ -167,13 +167,15 @@ function VisualEditorInner({
   }), [actions]);
 
   const contextValue = useMemo(() => ({
+    selectedBlockId,
+    activeColInfo,
     setActiveColInfo: actions.setActiveColInfo,
     setAnyPickerOpen,
     onSelectBlock,
     onColSelect,
     makeNewBlock: actions.makeNewBlock,
     disabledBlocks,
-  }), [setAnyPickerOpen, onSelectBlock, onColSelect, actions, disabledBlocks]);
+  }), [selectedBlockId, activeColInfo, setAnyPickerOpen, onSelectBlock, onColSelect, actions, disabledBlocks]);
 
   return (
     <BlockEditorContext.Provider value={contextValue}>

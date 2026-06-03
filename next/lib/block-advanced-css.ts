@@ -3,10 +3,6 @@ import type { CSSProperties } from "react";
 /** Stored as `background` on block data. */
 export interface BackgroundBlockData {
   bgColor?: string;
-  bgImage?: string;       // URL
-  bgSize?: string;        // cover | contain | auto | custom
-  bgPosition?: string;    // center | top | bottom | left | right | custom
-  bgRepeat?: string;      // no-repeat | repeat | repeat-x | repeat-y
 }
 
 /** Stored as `spacing` on block data. */
@@ -26,20 +22,6 @@ export interface AdvancedBlockData {
   cssId?: string;
 }
 
-/** Stored as `display` on block data. */
-export interface DisplayBlockData {
-  display?: string;
-  // flex
-  flexDirection?: string;
-  flexWrap?: string;
-  justifyContent?: string;
-  alignItems?: string;
-  gap?: string;
-  // grid
-  gridTemplateColumns?: string;
-  gridGap?: string;
-}
-
 export function getBackgroundData(data: Record<string, unknown>): BackgroundBlockData {
   return (data.background as BackgroundBlockData) ?? {};
 }
@@ -51,9 +33,6 @@ export function getBorderData(data: Record<string, unknown>): BorderBlockData {
 }
 export function getAdvancedData(data: Record<string, unknown>): AdvancedBlockData {
   return (data.advanced as AdvancedBlockData) ?? {};
-}
-export function getDisplayData(data: Record<string, unknown>): DisplayBlockData {
-  return (data.display as DisplayBlockData) ?? {};
 }
 
 /**
@@ -70,19 +49,10 @@ export function getBlockWrapperProps(data: Record<string, unknown>): {
   const background = getBackgroundData(data);
   const spacing    = getSpacingData(data);
   const border     = getBorderData(data);
-  const display    = getDisplayData(data);
   const adv        = getAdvancedData(data);
   const style: CSSProperties = {};
 
   if (background.bgColor) style.backgroundColor = background.bgColor;
-  if (background.bgImage === "none") {
-    style.backgroundImage = "none";
-  } else if (background.bgImage) {
-    style.backgroundImage = `url(${background.bgImage})`;
-    style.backgroundSize     = background.bgSize     || "cover";
-    style.backgroundPosition = background.bgPosition || "center";
-    style.backgroundRepeat   = (background.bgRepeat  || "no-repeat") as CSSProperties["backgroundRepeat"];
-  }
 
   if (spacing.pt) style.paddingTop    = spacing.pt;
   if (spacing.pr) style.paddingRight  = spacing.pr;
@@ -102,19 +72,6 @@ export function getBlockWrapperProps(data: Record<string, unknown>): {
   }
   if (border.radius) style.borderRadius = border.radius;
 
-  if (display.display) style.display = display.display as CSSProperties["display"];
-  if (display.display === "flex" || display.display === "inline-flex") {
-    if (display.flexDirection)  style.flexDirection  = display.flexDirection  as CSSProperties["flexDirection"];
-    if (display.flexWrap)       style.flexWrap       = display.flexWrap       as CSSProperties["flexWrap"];
-    if (display.justifyContent) style.justifyContent = display.justifyContent as CSSProperties["justifyContent"];
-    if (display.alignItems)     style.alignItems     = display.alignItems     as CSSProperties["alignItems"];
-    if (display.gap)            style.gap            = display.gap;
-  }
-  if (display.display === "grid" || display.display === "inline-grid") {
-    if (display.gridTemplateColumns) style.gridTemplateColumns = display.gridTemplateColumns;
-    if (display.gridGap)             style.gap                = display.gridGap;
-  }
-
   return {
     style,
     extraClass: adv.cssClass ?? "",
@@ -128,7 +85,6 @@ export function hasAdvancedStyles(data: Record<string, unknown>): boolean {
     ...Object.values(getBackgroundData(data)),
     ...Object.values(getSpacingData(data)),
     ...Object.values(getBorderData(data)),
-    ...Object.values(getDisplayData(data)),
     ...Object.values(getAdvancedData(data)),
   ].some((v) => !!v);
 }

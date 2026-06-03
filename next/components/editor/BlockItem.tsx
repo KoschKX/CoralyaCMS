@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, useCallback, type ReactNode } from "react";
+import React, { memo, useCallback, useRef, type ReactNode } from "react";
 import type { EditorBlock } from "@/lib/pages-db";
 import { blockMap } from "@/blocks/index";
 import { isDescendant, insertBlockAfter } from "@/lib/block-tree";
@@ -11,8 +11,6 @@ import { AddZone } from "@/components/editor/BlockPickerAndAddZone";
 import { BlockToolbar } from "@/components/editor/BlockToolbar";
 import { ContainerDropZone } from "@/components/editor/ContainerDropZone";
 import { useBlockEditor, type BlockOps } from "@/components/editor/BlockEditorContext";
-import { useEditorStore } from "@/lib/editor/EditorStoreContext";
-import { useIsBlockSelected, useActiveColForBlock } from "@/lib/editor/selectors";
 import { useEditorViewport } from "@/components/editor/EditorHooks";
 import { getBlockWrapperProps } from "@/lib/block-advanced-css";
 import { mergeViewportOverrides } from "@/lib/responsive-css";
@@ -22,6 +20,7 @@ interface ColViewportToolbarProps {
   ci: number;
   cols: Array<{ blocks: EditorBlock[]; width?: string; responsive?: Record<string, { width?: string }> }>;
   colData: Record<string, unknown>;
+  colResp: Record<string, Record<string, unknown>>;
   ops: BlockOps;
   setActiveColInfo: (info: { blockId: string; colIdx: number } | null) => void;
 }
@@ -30,7 +29,7 @@ interface ColViewportToolbarProps {
  * Isolated component so only it subscribes to EditorViewportContext.
  * Rendered only when a column is actively selected — never causes other blocks to re-render.
  */
-function ColViewportToolbar({ blockId, ci, cols, colData, ops, setActiveColInfo }: ColViewportToolbarProps) {
+function ColViewportToolbar({ blockId, ci, cols, colData, colResp, ops, setActiveColInfo }: ColViewportToolbarProps) {
   const editorViewport = useEditorViewport();
   const col = cols[ci];
   const effectiveColWidth = resolveColWidth(col ?? {}, editorViewport);
@@ -134,11 +133,9 @@ function BlockItem({
   isInColumn = false,
   parentInfo,
 }: BlockItemProps) {
-  const selectedBlockId = useEditorStore((s) => s.selectedBlockId);
-  const isSelected = useIsBlockSelected(block.id);
-  const activeColIdx = useActiveColForBlock(block.id);
-  const activeColInfo = useEditorStore((s) => s.activeColInfo);
   const {
+    selectedBlockId,
+    activeColInfo,
     setActiveColInfo,
     setAnyPickerOpen,
     onSelectBlock,
@@ -146,6 +143,19 @@ function BlockItem({
     makeNewBlock,
     disabledBlocks,
   } = useBlockEditor();
+
+  // Keep a ref to the current block so renderChildBlocks doesn't need block.data /
+  // block.type in its dependency array. Without this, Immer would cause
+  // renderChildBlocks to be recreated on every publish (even unrelated ones),
+  // forcing all column children to remount.
+  const blockRef = useRef(block);
+  blockRef.current = block;
+
+  // Keep a ref to selectedBlockId so renderChildBlocks doesn't need it as a dep.
+  // Without this, any selection change would recreate renderChildBlocks and force
+  // all column children to re-render even when the columns block itself didn't change.
+  const selectedBlockIdRef = useRef(selectedBlockId);
+  selectedBlockIdRef.current = selectedBlockId;
 
   const def = blockMap[block.type];
   const isUnavailable = !def || disabledBlocks.includes(block.type);
@@ -156,7 +166,7 @@ function BlockItem({
     console.warn(`[editor] BlockItem: unregistered block type "${block.type}" (id: ${block.id}). Check that all plugins are loaded.`);
   }
 
-  // isSelected is already subscribed narrowly via useIsBlockSelected above.
+  const isSelected = block.id === selectedBlockId;
   const isColBlock = block.type === "columns";
   const isContainerBlock = !!(def?.isContainer);
   const descendantSelected =
@@ -169,8 +179,12 @@ function BlockItem({
     onUpdateAll: (newBlocks: EditorBlock[]) => void,
     colIdx?: number,
   ): ReactNode => {
-    const { id: blockId, data: blockData, type: blockType } = block;
-    const colOps = makeColOps(colBlocks, onUpdateAll, selectedBlockId, onSelectBlock, makeNewBlock);
+    // Read from refs so the closure sees the latest values without adding them
+    // to the dependency array. This prevents renderChildBlocks from being
+    // recreated on every selection change, which would cause all column
+    // children to re-render unnecessarily.
+    const { id: blockId, data: blockData, type: blockType } = blockRef.current;
+    const colOps = makeColOps(colBlocks, onUpdateAll, selectedBlockIdRef.current, onSelectBlock, makeNewBlock);
     const parentLabel = blockType === "table" && colIdx !== undefined
       ? `Cell ${colIdx + 1}`
       : `Column ${colIdx !== undefined ? colIdx + 1 : ""}`;
@@ -213,7 +227,10 @@ function BlockItem({
         )}
       </ContainerDropZone>
     );
-  }, [block, selectedBlockId, onSelectBlock, makeNewBlock, setAnyPickerOpen, setActiveColInfo, onColSelect]);
+  // block.id / block.data / block.type intentionally omitted — read from blockRef.current.
+  // selectedBlockId intentionally omitted — read from selectedBlockIdRef.current.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onSelectBlock, makeNewBlock, setAnyPickerOpen, setActiveColInfo, onColSelect]);
 
   const isLast = idx === listLength - 1;
   const colBlockParentSelected = isSelected && isContainerBlock && activeColInfo?.blockId !== block.id;
@@ -227,23 +244,12 @@ function BlockItem({
     : (isSelected && isContainerBlock) || descendantSelected    ? "ring-2 ring-blue-200"
     : "ring-1 ring-transparent";
 
-  // Margins go on the outer div so they create transparent space (CSS spec).
-  // backgroundColor and all other styles stay on the inner div.
-  // Block spacing is a dedicated div below the inner content that shares the
-  // backgroundColor — so the background extends through the gap between blocks.
-  const { marginTop, marginRight, marginBottom, marginLeft, backgroundColor, ...innerStyle } = wrapperStyle;
-  const hasMargin = marginTop || marginRight || marginBottom || marginLeft;
-  const outerExtraStyle: React.CSSProperties = hasMargin
-    ? { marginTop, marginRight, marginBottom, marginLeft }
-    : {};
-  const finalInnerStyle = { ...(backgroundColor ? { backgroundColor } : {}), ...innerStyle };
-
   return (
     <div
       key={block.id}
       data-block-id={block.id}
       className={`relative transition ${ringClass}`}
-      style={Object.keys(outerExtraStyle).length ? outerExtraStyle : undefined}
+      style={{ paddingBottom: isUnavailable ? 0 : "var(--block-spacing, 1.5rem)" }}
       onClick={(e) => {
         if (isSelected) { e.stopPropagation(); return; }
         if (isContainerBlock) { e.stopPropagation(); onSelectBlock(block.id, block.data as Record<string, unknown>, block.type); }
@@ -252,7 +258,7 @@ function BlockItem({
       <div
         className={`group/block relative${wrapperExtraClass ? ` ${wrapperExtraClass}` : ""}`}
         id={wrapperId}
-        style={Object.keys(finalInnerStyle).length ? finalInnerStyle : undefined}
+        style={Object.keys(wrapperStyle).length ? wrapperStyle : undefined}
       >
         <EditableBlock
           block={block}
@@ -262,7 +268,7 @@ function BlockItem({
             if (!isContainerBlock) setActiveColInfo(null);
             onSelectBlock(block.id, block.data as Record<string, unknown>, block.type);
           }}
-          activeColIdx={activeColIdx}
+          activeColIdx={activeColInfo?.blockId === block.id ? activeColInfo.colIdx : null}
           onActiveColChange={(ci) => {
             if (ci !== null) {
               setActiveColInfo({ blockId: block.id, colIdx: ci });
@@ -308,6 +314,7 @@ function BlockItem({
               const ci = activeColInfo.colIdx;
               const cols = ((block.data as Record<string, unknown>).cols as Array<{ blocks: EditorBlock[]; width?: string; responsive?: Record<string, { width?: string }> }>) ?? [];
               const colData = block.data as Record<string, unknown>;
+              const colResp = (colData.responsive as Record<string, Record<string, unknown>>) ?? {};
               return (
                 <ColViewportToolbar
                   key={`coltoolbar-${ci}`}
@@ -315,6 +322,7 @@ function BlockItem({
                   ci={ci}
                   cols={cols}
                   colData={colData}
+                  colResp={colResp}
                   ops={ops}
                   setActiveColInfo={setActiveColInfo}
                 />
@@ -323,12 +331,6 @@ function BlockItem({
           </>
         )}
       </div>
-
-      {/* Spacer: extends backgroundColor across the block-spacing gap so the
-          background is contiguous. Transparent when no backgroundColor is set. */}
-      {!isUnavailable && backgroundColor && (
-        <div style={{ height: "var(--block-spacing, 1.5rem)", backgroundColor, marginTop: "-var(--block-spacing, 1.5rem)" }} aria-hidden />
-      )}
 
       {(!isLast || isInColumn || isSelected) && (
         <AddZone

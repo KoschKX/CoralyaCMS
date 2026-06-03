@@ -14,7 +14,8 @@
  */
 
 import type { ReactNode } from "react";
-import { blockMap } from "@/blocks/index";
+import "@/blocks/index"; // side-effect: populates plugin-registry blockMap used by shortcodes.ts
+import { publicBlockMap } from "@/blocks/layout-registry";
 import { tokenise, buildBlocks } from "@/lib/shortcodes";
 import { getBlockWrapperProps } from "@/lib/block-advanced-css";
 import type { EditorBlock } from "@/lib/pages-db";
@@ -38,7 +39,7 @@ function RenderBlocks({
     >
       {blocks.map((block) => {
         if (disabledBlocks.includes(block.type)) return null;
-        const def = blockMap[block.type];
+        const def = publicBlockMap[block.type];
         if (!def) {
           return (
             <span key={block.id} className="font-mono text-xs text-red-400">

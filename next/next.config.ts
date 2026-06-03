@@ -1,8 +1,51 @@
 
 import type { NextConfig } from "next";
 import path from "path";
+import { execFileSync } from "child_process";
+import { watch } from "fs";
 
 const isDev = process.env.NODE_ENV !== "production";
+
+// ── Block auto-discovery ──────────────────────────────────────────────────────
+// Run codegen synchronously so generated files are ready before compilation.
+try {
+  execFileSync(
+    process.execPath,
+    [path.join(__dirname, "lib/codegen.mjs")],
+    { cwd: __dirname, stdio: ["ignore", "inherit", "inherit"] },
+  );
+} catch (e) {
+  console.error("[codegen] startup failed:", (e as Error).message);
+}
+
+// In dev, re-run codegen whenever a block or plugin entry file is added/removed.
+if (isDev) {
+  let debounce: ReturnType<typeof setTimeout> | null = null;
+  const rerun = () => {
+    if (debounce) clearTimeout(debounce);
+    debounce = setTimeout(() => {
+      try {
+        execFileSync(
+          process.execPath,
+          [path.join(__dirname, "lib/codegen.mjs")],
+          { cwd: __dirname, stdio: ["ignore", "inherit", "inherit"] },
+        );
+      } catch (e) {
+        console.error("[codegen] watch failed:", (e as Error).message);
+      }
+    }, 200);
+  };
+
+  // Watch blocks/ for config.tsx / layout.tsx changes
+  watch(path.join(__dirname, "blocks"), { recursive: true }, (_e, f) => {
+    if (f && /(config|layout)\.tsx$/.test(f)) rerun();
+  });
+
+  // Watch plugins/ for index.ts changes (new/removed plugins)
+  watch(path.join(__dirname, "plugins"), { recursive: true }, (_e, f) => {
+    if (f && /index\.ts$/.test(f)) rerun();
+  });
+}
 
 /**
  * Content-Security-Policy header value.

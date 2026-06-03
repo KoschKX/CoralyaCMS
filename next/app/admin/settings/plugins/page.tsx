@@ -1,5 +1,5 @@
 // Side-effect import: ensures plugins are registered before reading them.
-import "@/plugins/index";
+import "@/plugins";
 import Link from "next/link";
 import { installedPlugins } from "@/lib/plugin-registry";
 import { PluginToggle } from "./PluginToggle";

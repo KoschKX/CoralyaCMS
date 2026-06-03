@@ -1,14 +1,21 @@
 {
-  "name": "next",
+  "name": "coralyacms",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
+    "codegen": "node lib/codegen.mjs",
     "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
+    "chart.js": "^4.5.1",
     "immer": "^11.1.4",
     "next": "16.2.0",
     "prismjs": "^1.30.0",
@@ -28,6 +35,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.4"
   }
 }

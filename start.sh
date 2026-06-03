@@ -1,4 +1,10 @@
 #!/bin/bash
+# start.sh — start Next.js in development mode.
+#
+# Usage: bash start.sh
+#
+# Kills any process on port 3000, installs deps if missing, then runs
+# `next dev --turbo`. Press Ctrl+C to stop.
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 
 # Free port 3000 if something else is holding it

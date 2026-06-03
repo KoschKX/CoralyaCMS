@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import "@/plugins/index";
+import "@/plugins";
 import { installedPlugins, disabledPlugins } from "@/lib/plugin-registry";
 
 const STATES_FILE = path.join(process.cwd(), "data", "plugin-settings", "plugin-states.json");

@@ -1,4 +1,10 @@
 #!/bin/bash
+# start-prod.sh — build and serve Next.js in production mode.
+#
+# Usage: bash start-prod.sh
+#
+# Kills any process on port 3000, runs `next build`, then starts
+# `next start` on http://localhost:3000. Press Ctrl+C to stop.
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 
 # Free port 3000 if something else is holding it

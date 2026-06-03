@@ -44,6 +44,8 @@ const eslintConfig = defineConfig([
       "no-dupe-keys": "error",
       // Enforce === over == to avoid implicit coercion.
       "eqeqeq": ["error", "always", { null: "ignore" }],
+      // Fail on unhandled Promise rejections (silent async bugs on the data layer).
+      "@typescript-eslint/no-floating-promises": "error",
     },
   },
 ]);
