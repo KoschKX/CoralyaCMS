@@ -1,0 +1,67 @@
+flowchart TD
+    Visitor([Visitor]) -->|HTTP request| Router
+    Admin([Admin]) -->|login| AdminPanel
+
+    subgraph Router["Next.js App Router"]
+        Home["page.tsx\n(Home / front page)"]
+        SlugPage["[slug]/page.tsx\n(Dynamic pages)"]
+        PostsPage["posts/page.tsx\n(Blog posts)"]
+    end
+
+    subgraph AdminPanel["Admin Panel  /admin"]
+        Login["login/"]
+        Dashboard["Dashboard"]
+        VisualEditor["Visual Editor\n(VisualEditor.tsx)"]
+        MediaManager["media/"]
+        SettingsUI["settings/"]
+    end
+
+    subgraph API["REST API  /api"]
+        PagesAPI["pages/"]
+        PostsAPI["posts/"]
+        SettingsAPI["settings/"]
+        MediaAPI["media/"]
+        TaxAPI["taxonomies/"]
+        PluginsAPI["plugins/"]
+    end
+
+    subgraph DataStore["JSON Data Store"]
+        PagesJSON[("pages.json")]
+        PostsJSON[("posts.json")]
+        SettingsJSON[("settings.json")]
+        TaxJSON[("taxonomies.json")]
+        MediaFiles[("public/media/")]
+    end
+
+    subgraph Rendering["Rendering Pipeline"]
+        BlockRenderer["BlockRenderer"]
+        HTMLRenderer["HTMLRenderer"]
+        ResponsiveCSS["ResponsiveStyleInjector"]
+        Filters["Filters\n(block-html · page-html · block-picker)"]
+        BlockTypes["Block Types\nparagraph · header · image · code\nlist · table · quote · columns\nembed · html · delimiter"]
+    end
+
+    subgraph Plugins["Plugin System"]
+        PluginIndex["plugins/index.ts"]
+        PageInjections["PluginPageInjections"]
+    end
+
+    Router -->|getSettings / listPages| DataStore
+    AdminPanel -->|CRUD via fetch| API
+    API -->|read / write| DataStore
+    API -->|on save| ISR["ISR Revalidation\n(revalidatePath)"]
+    ISR --> Router
+
+    Home & SlugPage & PostsPage -->|blocks| BlockRenderer
+    Home & SlugPage & PostsPage -->|raw html| HTMLRenderer
+    BlockRenderer --> BlockTypes --> Filters
+    HTMLRenderer --> Filters
+    Home & SlugPage & PostsPage --> ResponsiveCSS
+
+    PluginIndex --> PageInjections
+    PageInjections -->|injected| Home
+    PageInjections -->|injected| SlugPage
+
+    Dashboard --> VisualEditor
+    VisualEditor -->|block data| PagesAPI
+    VisualEditor -->|block data| PostsAPI

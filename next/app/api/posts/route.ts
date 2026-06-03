@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { listPostsMeta, createPost } from "@/lib/posts-db";
 import { CreatePostSchema } from "@/lib/api-schemas";
 import { paginateList } from "@/lib/utils/paginate";
+import { parseSchema, readJsonBody } from "@/lib/api/route-utils";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -10,22 +11,12 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
+  const parsedBody = await readJsonBody(req);
+  if (!parsedBody.ok) return parsedBody.response;
+  const parsed = parseSchema(CreatePostSchema, parsedBody.body);
+  if (!parsed.ok) return parsed.response;
 
-  const result = CreatePostSchema.safeParse(body);
-  if (!result.success) {
-    return NextResponse.json(
-      { error: "Validation failed", issues: result.error.flatten().fieldErrors },
-      { status: 400 },
-    );
-  }
-
-  const post = await createPost(result.data);
+  const post = await createPost(parsed.data);
   if (post.slug) revalidatePath(`/posts/${post.slug}`);
   revalidatePath("/posts");
   return NextResponse.json(post, { status: 201 });

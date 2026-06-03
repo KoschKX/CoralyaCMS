@@ -3,3 +3,6 @@
 /next/node_modules
 /setup/cache
 /next/.next/
+/app/next/node_modules
+/app/next/.next
+/app/setup/cache

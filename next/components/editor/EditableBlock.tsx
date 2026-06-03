@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useContext, useRef } from "react";
+import { useCallback, useContext } from "react";
 import { blockMap } from "@/blocks/index";
 import BlockRenderer from "@/components/BlockRenderer";
 import type { EditorBlock } from "@/lib/pages-db";
@@ -65,6 +65,38 @@ export function EditableBlock({
   const def = blockMap[block.type];
   const viewport = useEditorViewport();
 
+  const blockData = block.data as Record<string, unknown>;
+
+  // Wrap onUpdate: restore the original desktop values for any fields that were
+  // injected by the viewport merge, so inline content edits (e.g. typing text)
+  // don't accidentally overwrite desktop style values with responsive ones.
+  // Must be declared before any conditional return to satisfy rules-of-hooks.
+  const safeOnUpdate = useCallback(
+    (newData: Record<string, unknown>) => {
+      if (viewport === "desktop") {
+        onUpdate(newData);
+        return;
+      }
+      const responsive = (blockData.responsive as Record<string, Record<string, unknown>>) ?? {};
+      const viewportOverrides = responsive[viewport] ?? {};
+      const restored: Record<string, unknown> = { ...newData };
+      for (const key of Object.keys(viewportOverrides)) {
+        if (key in restored) {
+          if (key in blockData) {
+            restored[key] = blockData[key];
+          } else {
+            delete restored[key];
+          }
+        }
+      }
+      onUpdate(restored);
+    },
+    // blockData changes identity on every Immer update; using block.data
+    // (same reference) instead to keep the dep array stable for text typing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [viewport, onUpdate, block.data],
+  );
+
   // Show placeholder for disabled or unregistered block types.
   if (disabledBlocks.includes(block.type)) {
     return <UnavailablePlaceholder type={block.type} reason="disabled" />;
@@ -73,41 +105,7 @@ export function EditableBlock({
     return <UnavailablePlaceholder type={block.type} reason="unknown" />;
   }
 
-  const blockData = block.data as Record<string, unknown>;
   const displayData = mergeViewportOverrides(blockData, viewport);
-
-  // Keep a ref so safeOnUpdate can read the latest blockData without adding
-  // blockData itself to the dep array (which would recreate the callback on
-  // every keystroke, causing unnecessary child re-renders).
-  const blockDataRef = useRef(blockData);
-  blockDataRef.current = blockData;
-
-  // Wrap onUpdate: restore the original desktop values for any fields that were
-  // injected by the viewport merge, so inline content edits (e.g. typing text)
-  // don't accidentally overwrite desktop style values with responsive ones.
-  const safeOnUpdate = useCallback(
-    (newData: Record<string, unknown>) => {
-      if (viewport === "desktop") {
-        onUpdate(newData);
-        return;
-      }
-      const currentData = blockDataRef.current;
-      const responsive = (currentData.responsive as Record<string, Record<string, unknown>>) ?? {};
-      const viewportOverrides = responsive[viewport] ?? {};
-      const restored: Record<string, unknown> = { ...newData };
-      for (const key of Object.keys(viewportOverrides)) {
-        if (key in restored) {
-          if (key in currentData) {
-            restored[key] = currentData[key];
-          } else {
-            delete restored[key];
-          }
-        }
-      }
-      onUpdate(restored);
-    },
-    [viewport, onUpdate],
-  );
 
   if (def.Editable) {
     return (

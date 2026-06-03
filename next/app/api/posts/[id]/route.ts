@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { getPost, updatePost, deletePost } from "@/lib/posts-db";
 import { UpdatePostSchema } from "@/lib/api-schemas";
+import { parseSchema, readJsonBody } from "@/lib/api/route-utils";
 
 export async function GET(
   _: Request,
@@ -18,22 +19,12 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
+  const parsedBody = await readJsonBody(req);
+  if (!parsedBody.ok) return parsedBody.response;
+  const parsed = parseSchema(UpdatePostSchema, parsedBody.body);
+  if (!parsed.ok) return parsed.response;
 
-  const result = UpdatePostSchema.safeParse(body);
-  if (!result.success) {
-    return NextResponse.json(
-      { error: "Validation failed", issues: result.error.flatten().fieldErrors },
-      { status: 400 },
-    );
-  }
-
-  const updated = await updatePost(id, result.data);
+  const updated = await updatePost(id, parsed.data);
   if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (updated.slug) revalidatePath(`/posts/${updated.slug}`);
   revalidatePath("/posts");

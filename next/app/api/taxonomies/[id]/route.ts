@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getTaxonomy, updateTaxonomy, deleteTaxonomy } from "@/lib/taxonomies-db";
 import { UpdateTaxonomySchema } from "@/lib/api-schemas";
+import { parseSchema, readJsonBody } from "@/lib/api/route-utils";
 
 export async function GET(
   _: Request,
@@ -17,22 +18,12 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
+  const parsedBody = await readJsonBody(req);
+  if (!parsedBody.ok) return parsedBody.response;
+  const parsed = parseSchema(UpdateTaxonomySchema, parsedBody.body);
+  if (!parsed.ok) return parsed.response;
 
-  const result = UpdateTaxonomySchema.safeParse(body);
-  if (!result.success) {
-    return NextResponse.json(
-      { error: "Validation failed", issues: result.error.flatten().fieldErrors },
-      { status: 400 },
-    );
-  }
-
-  const updated = await updateTaxonomy(id, result.data);
+  const updated = await updateTaxonomy(id, parsed.data);
   if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(updated);
 }

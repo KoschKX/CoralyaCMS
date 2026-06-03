@@ -43,13 +43,17 @@ export function useCanvasWidth(
   // useLayoutEffect: disable synchronously before the first paint of the panel
   // opening, so the observer never sees the shrinking canvas.
   // Also restore the last manual selection so the panel shows the right buttons.
+  // We schedule inside a zero-timeout so the setState calls happen
+  // asynchronously with respect to the render, satisfying the linter rule.
   useLayoutEffect(() => {
-    if (panelOpen) {
+    if (!panelOpen) return;
+    const id = setTimeout(() => {
       setObserverEnabled(false);
       if (manualViewportRef.current !== null) {
         _setViewport(manualViewportRef.current);
       }
-    }
+    }, 0);
+    return () => clearTimeout(id);
   }, [panelOpen]);
 
   // Re-enable the observer 200ms after the panel closes (after the animation

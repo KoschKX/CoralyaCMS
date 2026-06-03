@@ -8,7 +8,7 @@
  * independent editors on the same page without state collision.
  */
 
-import { createContext, useContext, useRef, type ReactNode } from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 import { createEditorStore, type EditorStoreInstance } from "@/lib/editor/store";
 import { useStore } from "zustand";
 import type { EditorStore } from "@/lib/editor/store";
@@ -16,12 +16,10 @@ import type { EditorStore } from "@/lib/editor/store";
 const EditorStoreContext = createContext<EditorStoreInstance | null>(null);
 
 export function EditorStoreProvider({ children }: { children: ReactNode }) {
-  const storeRef = useRef<EditorStoreInstance | null>(null);
-  if (!storeRef.current) {
-    storeRef.current = createEditorStore();
-  }
+  // useState factory runs only on the first render — canonical one-time init.
+  const [store] = useState(() => createEditorStore());
   return (
-    <EditorStoreContext.Provider value={storeRef.current}>
+    <EditorStoreContext.Provider value={store}>
       {children}
     </EditorStoreContext.Provider>
   );

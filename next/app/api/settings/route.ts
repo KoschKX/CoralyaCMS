@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { getSettings, saveSettings } from "@/lib/settings-db";
 import { UpdateSettingsSchema } from "@/lib/api-schemas";
+import { parseSchema, readJsonBody } from "@/lib/api/route-utils";
 
 export const dynamic = "force-dynamic";
 
@@ -10,22 +11,12 @@ export function GET() {
 }
 
 export async function PATCH(req: Request) {
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
+  const parsedBody = await readJsonBody(req);
+  if (!parsedBody.ok) return parsedBody.response;
+  const parsed = parseSchema(UpdateSettingsSchema, parsedBody.body);
+  if (!parsed.ok) return parsed.response;
 
-  const result = UpdateSettingsSchema.safeParse(body);
-  if (!result.success) {
-    return NextResponse.json(
-      { error: "Validation failed", issues: result.error.flatten().fieldErrors },
-      { status: 400 },
-    );
-  }
-
-  const updated = await saveSettings(result.data);
+  const updated = await saveSettings(parsed.data);
   // Bust the layout cache so the new CSS custom properties take effect site-wide.
   revalidatePath("/", "layout");
   return NextResponse.json(updated);
