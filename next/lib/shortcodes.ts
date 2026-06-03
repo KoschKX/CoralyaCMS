@@ -24,6 +24,7 @@ const SYNTHETIC_CONTAINERS = new Set(["column"]);
 
 /** Escape the two chars that would confuse the tokeniser regex. */
 function escapeBrackets(s: string): string {
+  if (s == null) return "";
   return s.replace(/\[/g, "&#91;").replace(/\]/g, "&#93;");
 }
 function unescapeBrackets(s: string): string {
@@ -38,6 +39,7 @@ function unescapeBrackets(s: string): string {
  * Exported so block definitions can use it inside their `serializeShortcode` hook.
  */
 export function serializeAttr(key: string, v: unknown): string {
+  if (v === undefined || v === null) return "";
   if (typeof v === "string") {
     const encoded = escapeBrackets(v).replace(/"/g, "&quot;");
     return `${key}="${encoded}"`;
@@ -318,6 +320,7 @@ function blockToShortcode(type: string, data: Record<string, unknown>, depth = 0
       return true;
     })
     .map(([k, v]) => serializeAttr(k, v))
+    .filter(Boolean)
     .join(" ");
   return attrs ? `${pad}[${type} ${attrs}]` : `${pad}[${type}]`;
 }
