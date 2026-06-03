@@ -42,8 +42,9 @@ const CIRCULAR_TYPES = new Set(["pie", "doughnut", "polarArea"]);
 // ── Layout ────────────────────────────────────────────────────────────────────
 
 export default function ChartLayout({ data, blockId }: BlockLayoutProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartRef  = useRef<ChartJS | null>(null);
+  const canvasRef    = useRef<HTMLCanvasElement>(null);
+  const chartRef     = useRef<ChartJS | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Read all data props (stable snapshot used inside the effect via JSON.stringify)
   const title          = (data.title         as string) || "";
@@ -191,6 +192,18 @@ export default function ChartLayout({ data, blockId }: BlockLayoutProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(data)]);
 
+  // Force a Chart.js resize whenever the container element changes dimensions.
+  // This catches column-width changes and editor canvas resizes that Chart.js
+  // would otherwise miss.
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const ro = new ResizeObserver(() => {
+      chartRef.current?.resize();
+    });
+    ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, []);
+
   const datasets = safeDatasets(data.datasets);
 
   return (
@@ -201,7 +214,7 @@ export default function ChartLayout({ data, blockId }: BlockLayoutProps) {
         </h4>
       )}
 
-      <div style={{ position: "relative", width: "100%" }}>
+      <div ref={containerRef} style={{ position: "relative", width: "100%" }}>
         <canvas
           ref={canvasRef}
           style={{
