@@ -67,7 +67,7 @@ export function OptionColor({
               style={{
                 background:
                   swatchValue === ""
-                    ? "linear-gradient(135deg,#e5e7eb 50%,#fff 50%)"
+                    ? "linear-gradient(135deg,#9ca3af 50%,#fff 50%)"
                     : swatchValue,
                 outline: isInherited
                   ? "2px dashed #60a5fa"

@@ -463,12 +463,12 @@ function ViewportAndLangSwitcher({
 }) {
   const showLangs = languages.length > 1;
   return (
-    <div className="border-b border-zinc-300 px-4 py-2 flex flex-col gap-2">
+    <div className="border-b border-zinc-300 px-3 py-1.5 flex flex-col gap-1.5">
       {/* Language buttons */}
       {showLangs && (
-        <div className="flex flex-col gap-1">
-          <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Language</span>
-          <div className="flex items-center gap-0.5 flex-wrap" role="group" aria-label="Language">
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Language</span>
+          <div className="flex items-stretch gap-0.5" role="group" aria-label="Language">
             {languages.map((lang) => (
               <button
                 key={lang}
@@ -476,7 +476,7 @@ function ViewportAndLangSwitcher({
                 aria-label={`Switch to ${lang}`}
                 aria-pressed={activeLang === lang}
                 title={lang.toUpperCase()}
-                className={`flex h-7 w-8 items-center justify-center rounded overflow-hidden transition ${
+                className={`flex flex-1 h-6 items-center justify-center rounded overflow-hidden transition ${
                   activeLang === lang
                     ? "ring-2 ring-zinc-900"
                     : "opacity-50 hover:opacity-100"
@@ -485,10 +485,10 @@ function ViewportAndLangSwitcher({
                 <img
                   src={`/flags/${flagFor(lang)}.svg`}
                   alt={lang}
-                  width={22}
-                  height={16}
+                  width={20}
+                  height={14}
                   className="rounded-sm object-cover"
-                  style={{ width: 22, height: 16 }}
+                  style={{ width: 20, height: 14 }}
                 />
               </button>
             ))}
@@ -496,16 +496,16 @@ function ViewportAndLangSwitcher({
         </div>
       )}
       {/* Viewport buttons */}
-      <div className="flex flex-col gap-1">
-        <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Responsive</span>
-        <div className="flex items-center gap-0.5" role="group" aria-label="Preview viewport">
+      <div className="flex flex-col gap-0.5">
+        <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Responsive</span>
+        <div className="flex items-stretch gap-0.5" role="group" aria-label="Preview viewport">
           {VIEWPORT_BUTTONS.map(({ vp, label, icon }) => (
             <button
               key={vp}
               onClick={() => setViewport(vp)}
               aria-label={`${label} viewport`}
               aria-pressed={viewport === vp}
-              className={`flex h-7 w-7 items-center justify-center rounded transition ${
+              className={`flex flex-1 h-6 items-center justify-center rounded transition ${
                 viewport === vp ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100"
               }`}
             >

@@ -45,7 +45,7 @@ export function ColorPicker({
               }`}
               style={{
                 background:
-                  value === "" ? "linear-gradient(135deg,#e5e7eb 50%,#fff 50%)" : value,
+                  value === "" ? "linear-gradient(135deg,#9ca3af 50%,#fff 50%)" : value,
                 outline: isBlue
                   ? "2px dashed #60a5fa"
                   : value === "#ffffff" ? "1px solid #e5e7eb" : undefined,
