@@ -138,6 +138,7 @@ export const UpdateSettingsSchema = z.object({
   typography: TypographySchema.optional(),
   layout: LayoutSchema.optional(),
   languages: z.array(z.string().min(2).max(10)).min(1).optional(),
+  allowedMimeTypes: z.array(z.string().max(100)).optional(),
 });
 
 // ── Auth ──────────────────────────────────────────────────────────────────────

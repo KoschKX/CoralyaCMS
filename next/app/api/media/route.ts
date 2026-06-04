@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { checkRateLimit } from "@/lib/utils/rate-limit";
+import { getSettings } from "@/lib/settings-db";
 
 // Max 20 uploads per IP per minute
 const UPLOAD_RATE_LIMIT = 20;
@@ -11,28 +12,45 @@ export const dynamic = "force-dynamic";
 const MEDIA_DIR = path.join(process.cwd(), "public", "media");
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
-const ALLOWED_TYPES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/gif",
-  "image/webp",
-  "image/svg+xml",
-  "video/mp4",
-  "video/webm",
+// Fallback allowed types used if settings are unavailable
+const DEFAULT_ALLOWED_TYPES = new Set([
+  "image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml",
+  "video/mp4", "video/webm",
+  "audio/mpeg", "audio/ogg", "audio/wav",
   "application/pdf",
 ]);
 
-const ALLOWED_EXTENSIONS = new Set([
-  ".jpg",
-  ".jpeg",
-  ".png",
-  ".gif",
-  ".webp",
-  ".svg",
-  ".mp4",
-  ".webm",
-  ".pdf",
-]);
+// Map from MIME type to valid extensions
+const MIME_TO_EXTS: Record<string, string[]> = {
+  "image/jpeg":       [".jpg", ".jpeg"],
+  "image/png":        [".png"],
+  "image/gif":        [".gif"],
+  "image/webp":       [".webp"],
+  "image/svg+xml":    [".svg"],
+  "video/mp4":        [".mp4"],
+  "video/webm":       [".webm"],
+  "audio/mpeg":       [".mp3"],
+  "audio/ogg":        [".ogg"],
+  "audio/wav":        [".wav"],
+  "application/pdf":  [".pdf"],
+};
+
+function getAllowedTypes(): Set<string> {
+  try {
+    const s = getSettings();
+    if (s.allowedMimeTypes?.length) return new Set(s.allowedMimeTypes);
+  } catch { /* fall through */ }
+  return DEFAULT_ALLOWED_TYPES;
+}
+
+function getAllowedExtensions(): Set<string> {
+  const types = getAllowedTypes();
+  const exts = new Set<string>();
+  for (const mime of types) {
+    for (const ext of (MIME_TO_EXTS[mime] ?? [])) exts.add(ext);
+  }
+  return exts;
+}
 
 // ── Magic-bytes validation ────────────────────────────────────────────────────
 // Verifies the file's actual binary signature matches the declared MIME type,
@@ -53,6 +71,9 @@ const MAGIC_CHECKS = new Map<string, MagicCheck>([
     const text = b.slice(0, 512).toString("utf-8").replace(/^\uFEFF/, "").trimStart();
     return text.startsWith("<svg") || text.startsWith("<?xml") || text.startsWith("<!DOCTYPE svg");
   }],
+  ["audio/mpeg",      (b) => (b[0] === 0xFF && (b[1] & 0xE0) === 0xE0) || (b[0] === 0x49 && b[1] === 0x44 && b[2] === 0x33)], // MP3 sync or ID3
+  ["audio/ogg",       (b) => b[0] === 0x4F && b[1] === 0x67 && b[2] === 0x67 && b[3] === 0x53], // OggS
+  ["audio/wav",       (b) => b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 && b[8] === 0x57 && b[9] === 0x41 && b[10] === 0x56 && b[11] === 0x45], // RIFF WAVE
 ]);
 
 function validateMagicBytes(buf: Buffer, mimeType: string): boolean {
@@ -125,12 +146,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "File too large (max 10 MB)" }, { status: 413 });
   }
 
-  if (!ALLOWED_TYPES.has(file.type)) {
+  if (!getAllowedTypes().has(file.type)) {
     return NextResponse.json({ error: "File type not allowed" }, { status: 415 });
   }
 
   const ext = path.extname(file.name).toLowerCase();
-  if (!ALLOWED_EXTENSIONS.has(ext)) {
+  if (!getAllowedExtensions().has(ext)) {
     return NextResponse.json({ error: "File extension not allowed" }, { status: 415 });
   }
 

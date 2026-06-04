@@ -45,6 +45,9 @@ export interface SiteSettings {
   // Language / i18n
   /** Active locale codes, e.g. ["en", "nl", "fr"]. First entry is the default. */
   languages: string[];
+  // Media
+  /** Allowed MIME types for media uploads. */
+  allowedMimeTypes: string[];
 }
 
 export const DEFAULT_TYPOGRAPHY: TypographySettings = {
@@ -80,4 +83,10 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   typography: DEFAULT_TYPOGRAPHY,
   layout: DEFAULT_LAYOUT,
   languages: ["en"],
+  allowedMimeTypes: [
+    "image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml",
+    "video/mp4", "video/webm",
+    "audio/mpeg", "audio/ogg", "audio/wav",
+    "application/pdf",
+  ],
 };

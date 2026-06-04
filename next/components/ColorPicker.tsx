@@ -25,7 +25,8 @@ export function ColorPicker({
   const inheritedColor = (inheritedData.color as string) ?? "";
 
   const current = (data.color as string) ?? "";
-  const isCustom = current !== "" && !palette.some((c) => c.value === current);
+  const isCustom = current !== "" && current !== "transparent" && !palette.some((c) => c.value === current);
+  const isTransparent = current === "transparent";
 
   return (
     <PanelSection title="Text colour" fields={["color"]}>
@@ -54,6 +55,21 @@ export function ColorPicker({
             />
           );
         })}
+
+        {/* Transparent swatch */}
+        <button
+          title="Transparent"
+          onClick={() => onChange({ color: "transparent" })}
+          className={`h-6 w-6 rounded-full transition border border-zinc-300 overflow-hidden ${
+            isTransparent ? "border-2 border-zinc-900 scale-110" : "hover:opacity-80"
+          }`}
+          style={{
+            backgroundImage: "linear-gradient(45deg,#ccc 25%,transparent 25%),linear-gradient(-45deg,#ccc 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ccc 75%),linear-gradient(-45deg,transparent 75%,#ccc 75%)",
+            backgroundSize: "6px 6px",
+            backgroundPosition: "0 0,0 3px,3px -3px,-3px 0",
+            backgroundColor: "#fff",
+          }}
+        />
 
         {/* Custom colour */}
         <label
