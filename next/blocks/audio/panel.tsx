@@ -238,6 +238,7 @@ export function AudioPanelControls({ data, onChange }: PanelControlProps) {
         open={pickerOpen}
         onClose={() => setPickerOpen(false)}
         onSelect={handleSelect}
+        mediaType="audio"
       />
     </div>
   );

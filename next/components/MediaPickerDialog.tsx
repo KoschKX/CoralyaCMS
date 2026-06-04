@@ -11,19 +11,16 @@ export interface MediaFile {
 }
 
 const IMAGE_EXTS = new Set([".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"]);
-const VIDEO_EXTS = new Set([".mp4", ".webm", ".ogg", ".mov"]);
+const VIDEO_EXTS = new Set([".mp4", ".webm", ".mov"]);
+const AUDIO_EXTS = new Set([".mp3", ".ogg", ".wav", ".flac", ".aac", ".m4a"]);
 
 function extOf(name: string) {
   return name.slice(name.lastIndexOf(".")).toLowerCase();
 }
 
-function isImage(name: string) {
-  return IMAGE_EXTS.has(extOf(name));
-}
-
-function isVideo(name: string) {
-  return VIDEO_EXTS.has(extOf(name));
-}
+function isImage(name: string) { return IMAGE_EXTS.has(extOf(name)); }
+function isVideo(name: string) { return VIDEO_EXTS.has(extOf(name)); }
+function isAudio(name: string) { return AUDIO_EXTS.has(extOf(name)); }
 
 export function MediaPickerDialog({
   open,
@@ -34,7 +31,7 @@ export function MediaPickerDialog({
   open: boolean;
   onClose: () => void;
   onSelect: (url: string) => void;
-  mediaType?: "image" | "video" | "any";
+  mediaType?: "image" | "video" | "audio" | "any";
 }) {
   const [files, setFiles] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(false);
@@ -92,15 +89,18 @@ export function MediaPickerDialog({
 
   const filterFn =
     mediaType === "video" ? isVideo :
+    mediaType === "audio" ? isAudio :
     mediaType === "any"   ? () => true :
     isImage;
   const shownFiles = files.filter((f) => filterFn(f.name));
   const acceptAttr =
     mediaType === "video" ? "video/*" :
+    mediaType === "audio" ? "audio/*" :
     mediaType === "any"   ? "*/*" :
     "image/*";
   const emptyLabel =
     mediaType === "video" ? "No videos uploaded yet." :
+    mediaType === "audio" ? "No audio files uploaded yet." :
     mediaType === "any"   ? "No files uploaded yet." :
     "No images uploaded yet.";
 
@@ -196,6 +196,16 @@ export function MediaPickerDialog({
                         alt={file.name}
                         className="h-full w-full object-cover"
                       />
+                    ) : isAudio(file.name) ? (
+                      <div className="flex h-full w-full flex-col items-center justify-center gap-1 bg-zinc-100 px-1">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#71717a" strokeWidth="1.5">
+                          <path d="M9 18V5l12-2v13" strokeLinecap="round" strokeLinejoin="round"/>
+                          <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                        </svg>
+                        <span className="w-full truncate text-center text-[9px] text-zinc-400">
+                          {file.name}
+                        </span>
+                      </div>
                     ) : (
                       <div className="flex h-full w-full flex-col items-center justify-center gap-1 bg-zinc-800 px-1">
                         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="white" strokeWidth="1.5">
