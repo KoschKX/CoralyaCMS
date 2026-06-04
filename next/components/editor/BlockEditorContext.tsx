@@ -19,6 +19,10 @@ export interface BlockEditorContextValue {
   onColSelect?: (blockId: string, colIdx: number | null) => void;
   makeNewBlock: (type: string) => EditorBlock;
   disabledBlocks: string[];
+  /** Active locale being edited, e.g. "nl". Equals defaultLang when on the primary locale. */
+  activeLang: string;
+  /** The primary/default locale, e.g. "en". */
+  defaultLang: string;
 }
 
 export const BlockEditorContext = createContext<BlockEditorContextValue | null>(null);

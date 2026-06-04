@@ -74,7 +74,8 @@ export default function AdminPage() {
                           : "bg-amber-50 text-amber-600"
                       }`}
                     >
-                      {page.status === "published" ? "? Published" : "? Draft"}
+                      <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full" style={{ background: "currentColor", verticalAlign: "0.05em" }} />
+      {page.status === "published" ? "Published" : "Draft"}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-zinc-400">

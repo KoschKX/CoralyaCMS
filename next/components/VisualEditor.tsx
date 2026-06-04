@@ -47,6 +47,10 @@ export interface VisualEditorProps {
   onColSelect?: (blockId: string, colIdx: number | null) => void;
   /** Block types to hide from the picker and exclude from rendering. */
   disabledBlocks?: string[];
+  /** Active locale currently being edited. */
+  activeLang?: string;
+  /** Primary/default locale. */
+  defaultLang?: string;
 }
 
 /** Inner component — has access to the store provided by EditorStoreProvider. */
@@ -59,6 +63,8 @@ function VisualEditorInner({
   registerAddBlockHandler,
   onColSelect,
   disabledBlocks = [],
+  activeLang = "en",
+  defaultLang = "en",
 }: VisualEditorProps) {
   // Stable refs for callbacks — updated every render, but never cause re-init
   const onChangeRef = useRef(onChange);
@@ -175,7 +181,9 @@ function VisualEditorInner({
     onColSelect,
     makeNewBlock: actions.makeNewBlock,
     disabledBlocks,
-  }), [selectedBlockId, activeColInfo, setAnyPickerOpen, onSelectBlock, onColSelect, actions, disabledBlocks]);
+    activeLang,
+    defaultLang,
+  }), [selectedBlockId, activeColInfo, setAnyPickerOpen, onSelectBlock, onColSelect, actions, disabledBlocks, activeLang, defaultLang]);
 
   return (
     <BlockEditorContext.Provider value={contextValue}>

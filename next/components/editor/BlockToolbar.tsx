@@ -1,12 +1,109 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useState, useCallback } from "react";
 import type { EditorBlock } from "@/lib/pages-db";
 import type { BlockDefinition } from "@/lib/block-types";
 import { BlockIcon } from "@/components/BlockIcon";
 import { ChevronUpIcon, ChevronDownIcon, TrashIcon } from "@/components/editor/ToolbarIcons";
-import type { BlockOps } from "@/components/editor/BlockEditorContext";
+import { useBlockEditor, type BlockOps } from "@/components/editor/BlockEditorContext";
 import type { ActiveColInfo } from "@/lib/editor/store";
+
+const TRANSLATABLE_BLOCKS = new Set(["paragraph", "button", "news-ticker", "header"]);
+
+async function translateText(text: string, from: string, to: string): Promise<string> {
+  const res = await fetch("/api/translate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, from, to }),
+  });
+  if (!res.ok) throw new Error("Translation failed");
+  const data = await res.json() as { translated: string };
+  return data.translated;
+}
+
+function TranslateButton({ block, ops }: { block: EditorBlock; ops: BlockOps }) {
+  const { activeLang, defaultLang } = useBlockEditor();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleTranslate = useCallback(async () => {
+    if (loading || activeLang === defaultLang) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const data = block.data as Record<string, unknown>;
+      let updated: Record<string, unknown> = { ...data };
+
+      if (block.type === "paragraph" || block.type === "button" || block.type === "header") {
+        const src = (data.text as string) ?? "";
+        if (src.trim()) {
+          updated.text = await translateText(src, defaultLang, activeLang);
+        }
+      } else if (block.type === "news-ticker") {
+        const title = (data.tickerTitle as string) ?? "";
+        if (title.trim()) {
+          updated.tickerTitle = await translateText(title, defaultLang, activeLang);
+        }
+        const items = (data.items as Array<{ id: string; text: string; url: string }>) ?? [];
+        if (items.length) {
+          const translated = await Promise.all(
+            items.map(async (item) => ({
+              ...item,
+              text: item.text.trim() ? await translateText(item.text, defaultLang, activeLang) : item.text,
+            }))
+          );
+          updated.items = translated;
+        }
+      }
+
+      ops.update(block.id, updated);
+    } catch {
+      setError("Translation failed");
+      setTimeout(() => setError(null), 3000);
+    } finally {
+      setLoading(false);
+    }
+  }, [block, ops, activeLang, defaultLang, loading]);
+
+  const isOnDefaultLang = activeLang === defaultLang;
+  const titleText = isOnDefaultLang
+    ? "Switch to a non-primary language to auto-translate"
+    : error ?? `Auto-translate to ${activeLang.toUpperCase()}`;
+
+  return (
+    <>
+      <div className="w-px self-stretch bg-zinc-200" />
+      <button
+        onClick={handleTranslate}
+        disabled={loading || isOnDefaultLang}
+        title={titleText}
+        aria-label={titleText}
+        className={`flex w-8 items-center justify-center transition ${
+          isOnDefaultLang
+            ? "cursor-not-allowed text-zinc-300"
+            : error
+            ? "text-red-400 hover:text-red-500"
+            : "text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 disabled:cursor-wait"
+        }`}
+      >
+        {loading ? (
+          <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56" strokeLinecap="round"/>
+          </svg>
+        ) : error ? (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01" strokeLinecap="round"/>
+          </svg>
+        ) : (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M3 5h12M9 3v2m-5 4a10.27 10.27 0 0 0 5 8m-5-8c0 3 2 5.5 5 8M15 11l4 9m-4-9 4 9m-2.5-4h-3" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )}
+      </button>
+    </>
+  );
+}
+
 
 interface BlockToolbarProps {
   block: EditorBlock;
@@ -118,6 +215,10 @@ export const BlockToolbar = memo(function BlockToolbar({
         >
           <ChevronDownIcon />
         </button>
+
+        {TRANSLATABLE_BLOCKS.has(block.type) && (
+          <TranslateButton block={block} ops={ops} />
+        )}
 
         <div className="w-px self-stretch bg-zinc-200" />
 

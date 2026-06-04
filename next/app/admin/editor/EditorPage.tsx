@@ -354,6 +354,8 @@ export default function EditorPage({
                       registerAddBlockHandler={registerAddBlockHandler}
                       onColSelect={handleColSelect}
                       disabledBlocks={disabledBlocks}
+                      activeLang={activeLang}
+                      defaultLang={defaultLang}
                     />
                   </ViewportContext.Provider>
                 </>
