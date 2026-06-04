@@ -54,6 +54,8 @@ export interface EditorStore {
   ) => void;
 
   publish: (newBlocks: readonly EditorBlock[]) => void;
+  /** Cancel any pending debounced onChange and fire it synchronously with the current present blocks. No-op if no pending change. */
+  flushOnChange: () => void;
   undo: () => void;
   redo: () => void;
 
@@ -142,6 +144,14 @@ export function createEditorStore() {
         // Debounce onChange so rapid block updates (e.g. typing in a text field)
         // don't trigger a full blocksToShortcodes() serialization on every keystroke.
         scheduleOnChange(mutable);
+      },
+
+      flushOnChange() {
+        if (publishDebounceTimer !== null) {
+          cancelPublishDebounce();
+          const current = get().present;
+          cb.onChange?.(blocksToShortcodes(current), current);
+        }
       },
 
       undo() {

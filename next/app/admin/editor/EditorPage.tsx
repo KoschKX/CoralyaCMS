@@ -140,6 +140,12 @@ export default function EditorPage({
     (fn: ((type: string) => void) | null) => { addBlockHandlerRef.current = fn; },
     [],
   );
+
+  const flushOnChangeRef = useRef<(() => void) | null>(null);
+  const registerFlushHandler = useCallback(
+    (fn: (() => void) | null) => { flushOnChangeRef.current = fn; },
+    [],
+  );
   const handleAddBlockFromPanel = useCallback((type: string) => {
     addBlockHandlerRef.current?.(type);
   }, []);
@@ -206,41 +212,55 @@ export default function EditorPage({
   const switchLang = useCallback((next: string) => {
     if (next === activeLang) return;
 
-    // Flush any in-progress contenteditable edit. ContentEditable only calls
-    // onSave on blur, so if the user clicks a lang button while a text field is
-    // focused the last keystrokes would be lost. Blurring here triggers onSave
-    // synchronously, which updates latestBlocksRef before we read it below.
+    // Flush any in-progress contenteditable edit (triggers onBlur → ops.update).
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
+    // Flush any pending debounced onChange so latestBlocksRef reflects the very
+    // latest block content before we snapshot the current language's state.
+    flushOnChangeRef.current?.();
 
-    // --- save current locale's state (use refs, not React state, to get the
-    //     freshest value including any just-flushed contenteditable change) ---
+    // Capture the fresh current-lang state from refs (not React state — setters
+    // are async and defaultLangBlocks/codeText may be stale).
+    const currentBlocks = latestBlocksRef.current;
+    const currentCode   = latestCodeRef.current;
+
+    // --- save current locale's state ---
     if (activeLang === defaultLang) {
-      // leaving default: persist its current canvas into dedicated state
-      setDefaultLangBlocks(latestBlocksRef.current);
-      setDefaultLangCode(latestCodeRef.current);
+      setDefaultLangBlocks(currentBlocks);
+      setDefaultLangCode(currentCode);
     } else {
-      // leaving a translation: snapshot it
       setTranslations((prev) => ({
         ...prev,
-        [activeLang]: { blocks: latestBlocksRef.current, html: latestCodeRef.current },
+        [activeLang]: { blocks: currentBlocks, html: currentCode },
       }));
     }
 
     // --- restore next locale's state onto the canvas ---
+    // When leaving defaultLang, its setDefaultLangBlocks update hasn't committed
+    // yet — use the captured currentBlocks as the fallback template instead.
+    const tmplBlocks = activeLang === defaultLang ? currentBlocks : defaultLangBlocks;
+    const tmplCode   = activeLang === defaultLang ? currentCode   : defaultLangCode;
+
+    let restoredBlocks: EditorBlock[];
+    let restoredCode: string;
     if (next === defaultLang) {
-      setCodeText(blocksToShortcodes(defaultLangBlocks) || defaultLangCode);
-      setVisualBlocks(defaultLangBlocks);
+      restoredBlocks = defaultLangBlocks;
+      restoredCode   = blocksToShortcodes(defaultLangBlocks) || defaultLangCode;
     } else {
       const tr = translations[next];
-      // For a language with no translation yet, copy the default lang's current
-      // blocks as a starting template so the user just needs to translate text.
-      const blocks = tr?.blocks ?? defaultLangBlocks;
-      const html   = tr != null ? (tr.html ?? blocksToShortcodes(blocks)) : defaultLangCode;
-      setCodeText(blocksToShortcodes(blocks) || html);
-      setVisualBlocks(blocks.length ? blocks : shortcodesToBlocks(html ?? ""));
+      restoredBlocks = (tr?.blocks?.length ? tr.blocks : null) ?? tmplBlocks;
+      restoredCode   = tr != null
+        ? (tr.html ?? blocksToShortcodes(restoredBlocks))
+        : (blocksToShortcodes(tmplBlocks) || tmplCode);
     }
+    setCodeText(restoredCode);
+    setVisualBlocks(restoredBlocks);
+
+    // Sync refs immediately to the restored blocks so that if the user
+    // switches away again without making any edits, we save the correct data.
+    latestBlocksRef.current = restoredBlocks;
+    latestCodeRef.current   = restoredCode;
 
     setActiveLangRaw(next);
     setSelectedBlock(null);
@@ -371,6 +391,7 @@ export default function EditorPage({
                       selectedBlockId={selectedBlock?.id ?? null}
                       registerUpdateHandler={registerUpdateHandler}
                       registerAddBlockHandler={registerAddBlockHandler}
+                      registerFlushHandler={registerFlushHandler}
                       onColSelect={handleColSelect}
                       disabledBlocks={disabledBlocks}
                       activeLang={activeLang}

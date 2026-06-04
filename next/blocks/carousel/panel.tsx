@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { PanelSection } from "@/components/ui/PanelSection";
@@ -168,7 +168,7 @@ function SlideEditor({
           </div>
 
           {slide.link && (
-            <Toggle
+            <OptionToggle
               label="Open in new tab"
               checked={slide.linkTarget === "_blank"}
               onChange={(v) =>
@@ -368,12 +368,12 @@ export function CarouselPanelControls({ data, onChange }: PanelControlProps) {
       {/* ── Navigation ──────────────────────────────────────────────── */}
       <PanelSection title="Navigation">
         <div className="space-y-2">
-          <Toggle
+          <OptionToggle
             label="Show arrows"
             checked={showArrows}
             onChange={(v) => onChange({ ...data, showArrows: v })}
           />
-          <Toggle
+          <OptionToggle
             label="Show dots"
             checked={showDots}
             onChange={(v) => onChange({ ...data, showDots: v })}
@@ -384,7 +384,7 @@ export function CarouselPanelControls({ data, onChange }: PanelControlProps) {
       {/* ── Playback ────────────────────────────────────────────────── */}
       <PanelSection title="Playback">
         <div className="space-y-2">
-          <Toggle
+          <OptionToggle
             label="Autoplay"
             checked={autoplay}
             onChange={(v) => onChange({ ...data, autoplay: v })}
@@ -410,7 +410,7 @@ export function CarouselPanelControls({ data, onChange }: PanelControlProps) {
               />
             </div>
           )}
-          <Toggle
+          <OptionToggle
             label="Loop"
             checked={loop}
             onChange={(v) => onChange({ ...data, loop: v })}

@@ -51,6 +51,12 @@ export interface VisualEditorProps {
   activeLang?: string;
   /** Primary/default locale. */
   defaultLang?: string;
+  /**
+   * Registers a function that flushes any pending debounced onChange immediately.
+   * Call this before saving editor state (e.g. on language switch) to ensure
+   * the latest block content is captured.
+   */
+  registerFlushHandler?: (fn: (() => void) | null) => void;
 }
 
 /** Inner component — has access to the store provided by EditorStoreProvider. */
@@ -65,6 +71,7 @@ function VisualEditorInner({
   disabledBlocks = [],
   activeLang = "en",
   defaultLang = "en",
+  registerFlushHandler,
 }: VisualEditorProps) {
   // Stable refs for callbacks — updated every render, but never cause re-init
   const onChangeRef = useRef(onChange);
@@ -116,6 +123,15 @@ function VisualEditorInner({
     if (!registerAddBlockHandler) return;
     registerAddBlockHandler((type) => actions.addBlockAfterSelected(type));
     return () => registerAddBlockHandler(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional one-time registration
+  }, []);
+
+  // Register the flush handler so EditorPage can force-flush the debounced onChange
+  // before snapshotting language state (e.g. on language switch).
+  useEffect(() => {
+    if (!registerFlushHandler) return;
+    registerFlushHandler(() => actions.flushOnChange());
+    return () => registerFlushHandler(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional one-time registration
   }, []);
 

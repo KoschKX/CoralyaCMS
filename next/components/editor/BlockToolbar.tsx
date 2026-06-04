@@ -8,13 +8,20 @@ import { ChevronUpIcon, ChevronDownIcon, TrashIcon } from "@/components/editor/T
 import { useBlockEditor, type BlockOps } from "@/components/editor/BlockEditorContext";
 import type { ActiveColInfo } from "@/lib/editor/store";
 
-const TRANSLATABLE_BLOCKS = new Set(["paragraph", "button", "news-ticker", "header"]);
+const TRANSLATABLE_BLOCKS = new Set(["paragraph", "button", "news-ticker", "header", "quote", "testimonials", "list", "carousel"]);
+
+/** Strip HTML tags to get plain text for translation. */
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").trim();
+}
 
 async function translateText(text: string, from: string, to: string): Promise<string> {
+  const plain = stripHtml(text);
+  if (!plain) return text;
   const res = await fetch("/api/translate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text, from, to }),
+    body: JSON.stringify({ text: plain, from, to }),
   });
   if (!res.ok) throw new Error("Translation failed");
   const data = await res.json() as { translated: string };
@@ -36,9 +43,44 @@ function TranslateButton({ block, ops }: { block: EditorBlock; ops: BlockOps }) 
 
       if (block.type === "paragraph" || block.type === "button" || block.type === "header") {
         const src = (data.text as string) ?? "";
-        if (src.trim()) {
+        if (stripHtml(src)) {
           updated.text = await translateText(src, defaultLang, activeLang);
         }
+      } else if (block.type === "quote") {
+        if (stripHtml(data.text as string ?? ""))
+          updated.text = await translateText(data.text as string, defaultLang, activeLang);
+        if (stripHtml(data.caption as string ?? ""))
+          updated.caption = await translateText(data.caption as string, defaultLang, activeLang);
+      } else if (block.type === "list") {
+        const items = (data.items as string[]) ?? [];
+        if (items.length)
+          updated.items = await Promise.all(
+            items.map((item) => item.trim() ? translateText(item, defaultLang, activeLang) : Promise.resolve(item))
+          );
+      } else if (block.type === "testimonials") {
+        type TItem = { id?: string; name?: string; role?: string; company?: string; quote?: string; [k: string]: unknown };
+        const items = (data.items as TItem[]) ?? [];
+        if (items.length)
+          updated.items = await Promise.all(
+            items.map(async (item) => ({
+              ...item,
+              ...(item.quote?.trim()   ? { quote:   await translateText(item.quote,   defaultLang, activeLang) } : {}),
+              ...(item.name?.trim()    ? { name:    await translateText(item.name,    defaultLang, activeLang) } : {}),
+              ...(item.role?.trim()    ? { role:    await translateText(item.role,    defaultLang, activeLang) } : {}),
+              ...(item.company?.trim() ? { company: await translateText(item.company, defaultLang, activeLang) } : {}),
+            }))
+          );
+      } else if (block.type === "carousel") {
+        type CSlide = { id?: string; src?: string; alt?: string; caption?: string; link?: string; linkTarget?: string; [k: string]: unknown };
+        const slides = (data.slides as CSlide[]) ?? [];
+        if (slides.length)
+          updated.slides = await Promise.all(
+            slides.map(async (slide) => ({
+              ...slide,
+              ...(slide.alt?.trim()     ? { alt:     await translateText(slide.alt,     defaultLang, activeLang) } : {}),
+              ...(slide.caption?.trim() ? { caption: await translateText(slide.caption, defaultLang, activeLang) } : {}),
+            }))
+          );
       } else if (block.type === "news-ticker") {
         const title = (data.tickerTitle as string) ?? "";
         if (title.trim()) {
