@@ -169,6 +169,12 @@ export default function EditorPage({
     () => initialHtml || blocksToShortcodes(initialBlocks),
   );
 
+  // Refs that always hold the LATEST blocks/code, even before React commits the
+  // next render. Used by switchLang so it never reads a stale React state value
+  // when saving the current lang's content before switching.
+  const latestBlocksRef = useRef(liveBlocks);
+  const latestCodeRef   = useRef(codeText);
+
   // Keep default-lang state in sync while the user is actually editing it.
   const saveBlocks = activeLang === defaultLang ? liveBlocks : defaultLangBlocks;
   const saveCode   = activeLang === defaultLang ? codeText   : defaultLangCode;
@@ -200,16 +206,25 @@ export default function EditorPage({
   const switchLang = useCallback((next: string) => {
     if (next === activeLang) return;
 
-    // --- save current locale's state ---
+    // Flush any in-progress contenteditable edit. ContentEditable only calls
+    // onSave on blur, so if the user clicks a lang button while a text field is
+    // focused the last keystrokes would be lost. Blurring here triggers onSave
+    // synchronously, which updates latestBlocksRef before we read it below.
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+
+    // --- save current locale's state (use refs, not React state, to get the
+    //     freshest value including any just-flushed contenteditable change) ---
     if (activeLang === defaultLang) {
       // leaving default: persist its current canvas into dedicated state
-      setDefaultLangBlocks(liveBlocks);
-      setDefaultLangCode(codeText);
+      setDefaultLangBlocks(latestBlocksRef.current);
+      setDefaultLangCode(latestCodeRef.current);
     } else {
       // leaving a translation: snapshot it
       setTranslations((prev) => ({
         ...prev,
-        [activeLang]: { blocks: liveBlocks, html: codeText },
+        [activeLang]: { blocks: latestBlocksRef.current, html: latestCodeRef.current },
       }));
     }
 
@@ -229,11 +244,15 @@ export default function EditorPage({
 
     setActiveLangRaw(next);
     setSelectedBlock(null);
-  }, [activeLang, defaultLang, liveBlocks, codeText, translations, defaultLangBlocks, defaultLangCode, setCodeText, setVisualBlocks, setSelectedBlock]);
+  }, [activeLang, defaultLang, translations, defaultLangBlocks, defaultLangCode, setCodeText, setVisualBlocks, setSelectedBlock]);
 
   // Keep translations map in sync as we type (for the active non-default lang)
   // This runs on every block change so the save always has fresh data.
   const handleVisualChange = useCallback((newCode: string, newBlocks: EditorBlock[]) => {
+    // Always keep refs current so switchLang can read the very latest value
+    // before React has committed the state update.
+    latestBlocksRef.current = newBlocks;
+    latestCodeRef.current   = newCode;
     setCodeText(newCode);
     setVisualBlocks(newBlocks);
     if (activeLang !== defaultLang) {
