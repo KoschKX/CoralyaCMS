@@ -189,6 +189,7 @@ export const BlockToolbar = memo(function BlockToolbar({
 
   return (
     <div
+      data-editor-ui
       className="absolute bottom-full left-0 z-20 mb-1.5 flex items-end gap-1.5"
       onClick={(e) => e.stopPropagation()}
     >
