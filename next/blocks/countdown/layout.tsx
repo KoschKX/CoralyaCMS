@@ -178,11 +178,6 @@ export default function CountdownLayout({ data }: BlockLayoutProps) {
         <div className="coralya-countdown-units">
           {units.map((u, i) => (
             <div key={u.label} style={{ display: "contents" }}>
-              {i > 0 && (
-                <span className="coralya-countdown-sep" aria-hidden="true" style={cssVars as React.CSSProperties}>
-                  :
-                </span>
-              )}
               <DigitBox
                 value={u.value}
                 label={u.label}

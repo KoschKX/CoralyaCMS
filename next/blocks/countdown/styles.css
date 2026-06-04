@@ -42,8 +42,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 4.25rem;
-  padding: 1rem 1.25rem;
+  width: 5rem;
+  padding: 1rem 0;
   gap: 0.3rem;
   background: var(--cd-bg, #f4f4f5);
   border-radius: var(--cd-radius, 6px);
