@@ -97,7 +97,7 @@ export function buildResponsiveCSS(
           `[data-block-id="${block.id}"] > div > .block-columns > .block-columns__col-wrapper${nth}`;
         const colSel = colSelBase("");
         if (cascaded["stack"]) {
-          css += `${colSel} { width: 100% !important; padding-left: 0 !important; }\n`;
+          css += `${colSel} { width: 100% !important; padding-left: 0 !important; padding-right: 0 !important; }\n`;
         } else {
           (data.cols as Array<{ width?: string; responsive?: Record<string, { width?: string }> }>).forEach((col, i) => {
             const w = forcedViewport === "mobile"
@@ -155,17 +155,17 @@ export function buildResponsiveCSS(
 
       // Desktop stacking (uncommon, but supported)
       if (data.stack) {
-        css += `${colSel} { width: 100% !important; padding-left: 0 !important; }\n`;
+        css += `${colSel} { width: 100% !important; padding-left: 0 !important; padding-right: 0 !important; }\n`;
       }
       // Tablet: stack takes priority over per-column widths
       if (tabletOverrides["stack"]) {
-        css += `${tabletQuery} { ${colSel} { width: 100% !important; padding-left: 0 !important; } }\n`;
+        css += `${tabletQuery} { ${colSel} { width: 100% !important; padding-left: 0 !important; padding-right: 0 !important; } }\n`;
       } else {
         css += colWidthCSS(block.id, cols, "tablet", tabletQuery);
       }
       // Mobile
       if (mobileOverrides["stack"]) {
-        css += `${mobileQuery} { ${colSel} { width: 100% !important; padding-left: 0 !important; } }\n`;
+        css += `${mobileQuery} { ${colSel} { width: 100% !important; padding-left: 0 !important; padding-right: 0 !important; } }\n`;
       } else {
         css += colWidthCSS(block.id, cols, "mobile", mobileQuery);
       }
