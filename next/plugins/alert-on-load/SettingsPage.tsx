@@ -43,7 +43,7 @@ export default function AlertOnLoadSettingsPage() {
           </label>
           <input
             type="text"
-            className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
+            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
             value={message}
             onChange={(e) => { setMessage(e.target.value); setSaved(false); }}
             placeholder="Hello, world!"

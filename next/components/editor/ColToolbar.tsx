@@ -50,7 +50,7 @@ export function ColToolbar({
           {FRACTION_PRESETS.find((p) => p.value === (width ?? ""))?.label ?? (width || "auto")}
         </button>
         {sizeOpen && (
-          <div className="absolute top-full inset-x-0 z-40 mt-1 rounded-lg border border-zinc-200 bg-white p-1 shadow-lg" onClick={(e) => e.stopPropagation()}>
+          <div className="absolute top-full inset-x-0 z-40 mt-1 rounded-lg border border-zinc-300 bg-white p-1 shadow-lg" onClick={(e) => e.stopPropagation()}>
             <div className="grid grid-cols-6 gap-px">
               {FRACTION_PRESETS.map((p) => (
                 <button

@@ -63,7 +63,7 @@ function ItemEditor({
   const summary = item.name || `Testimonial ${index + 1}`;
 
   return (
-    <div className="rounded border border-zinc-200 bg-white">
+    <div className="rounded border border-zinc-300 bg-white">
       <div className="flex items-center gap-1 px-2 py-1.5">
         <button
           type="button"
@@ -88,7 +88,7 @@ function ItemEditor({
       </div>
 
       {open && (
-        <div className="space-y-3 border-t border-zinc-100 px-2.5 py-2.5">
+        <div className="space-y-3 border-t border-zinc-300 px-2.5 py-2.5">
           {/* Quote */}
           <div>
             <label className="mb-1 block text-xs text-zinc-500">Quote</label>
@@ -96,7 +96,7 @@ function ItemEditor({
               rows={3}
               value={item.quote}
               onChange={(e) => onUpdate({ ...item, quote: e.target.value })}
-              className="w-full resize-y rounded border border-zinc-200 bg-white px-2.5 py-1.5 text-sm text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+              className="w-full resize-y rounded border border-zinc-300 bg-white px-2.5 py-1.5 text-sm text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-400"
               placeholder="Write the testimonial quote…"
             />
           </div>
@@ -144,7 +144,7 @@ function ItemEditor({
                   value={item.photo}
                   placeholder="https://…"
                   onChange={(e) => onUpdate({ ...item, photo: e.target.value })}
-                  className="min-w-0 flex-1 rounded border border-zinc-200 bg-white px-2.5 py-1.5 text-xs text-zinc-900 placeholder:text-zinc-300 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                  className="min-w-0 flex-1 rounded border border-zinc-300 bg-white px-2.5 py-1.5 text-xs text-zinc-900 placeholder:text-zinc-300 focus:outline-none focus:ring-1 focus:ring-zinc-400"
                 />
                 <button
                   type="button"
@@ -219,7 +219,7 @@ function ItemEditor({
                   className={`flex h-7 w-7 items-center justify-center rounded border text-xs font-medium transition ${
                     item.rating === n
                       ? "border-zinc-900 bg-zinc-900 text-white"
-                      : "border-zinc-200 text-zinc-500 hover:border-zinc-400"
+                      : "border-zinc-300 text-zinc-500 hover:border-zinc-400"
                   }`}
                 >
                   {n === 0 ? "—" : n}

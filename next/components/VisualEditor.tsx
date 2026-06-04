@@ -204,7 +204,7 @@ function VisualEditorInner({
           <AddZone onAdd={(type) => actions.addBlockAfter("TOP", type)} onOpenChange={setAnyPickerOpen} />
 
           {blocks.length === 0 && (
-            <div className="my-4 flex min-h-[160px] items-center justify-center rounded-xl border-2 border-dashed border-zinc-200 text-sm text-zinc-400">
+            <div className="my-4 flex min-h-[160px] items-center justify-center rounded-xl border-2 border-dashed border-zinc-300 text-sm text-zinc-400">
               Click + to add your first block
             </div>
           )}

@@ -124,7 +124,7 @@ export default function ThemePage() {
             Define what S, M, L, and XL mean in the block editor. Use any valid CSS value (e.g.{" "}
             <code className="font-mono">1rem</code>, <code className="font-mono">18px</code>).
           </p>
-          <div className="divide-y divide-zinc-100 rounded-lg border border-zinc-200 bg-white">
+          <div className="divide-y divide-zinc-100 rounded-lg border border-zinc-300 bg-white">
             {fontSizeLabels.map(({ key, label }) => (
               <div key={key} className="flex items-center justify-between px-4 py-3">
                 <span className="text-sm text-zinc-700">{label}</span>
@@ -132,7 +132,7 @@ export default function ThemePage() {
                   type="text"
                   value={typography.fontSizes[key]}
                   onChange={(e) => updateFontSize(key, e.target.value)}
-                  className="w-28 rounded-md border border-zinc-200 px-3 py-1.5 text-right font-mono text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
+                  className="w-28 rounded-md border border-zinc-300 px-3 py-1.5 text-right font-mono text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
                   placeholder="1rem"
                 />
               </div>
@@ -146,8 +146,8 @@ export default function ThemePage() {
           <p className="mb-4 text-xs text-zinc-400">
             Controls H1 – H4 across your site and the editor canvas.
           </p>
-          <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white">
-            <div className="grid grid-cols-4 gap-4 border-b border-zinc-100 bg-zinc-50 px-4 py-2">
+          <div className="overflow-hidden rounded-lg border border-zinc-300 bg-white">
+            <div className="grid grid-cols-4 gap-4 border-b border-zinc-300 bg-zinc-50 px-4 py-2">
               <span className="text-xs font-semibold text-zinc-400">Level</span>
               <span className="text-xs font-semibold text-zinc-400">Size</span>
               <span className="text-xs font-semibold text-zinc-400">Weight</span>
@@ -158,28 +158,28 @@ export default function ThemePage() {
               return (
                 <div
                   key={level}
-                  className="grid grid-cols-4 gap-4 border-b border-zinc-100 px-4 py-2.5 last:border-0 items-center"
+                  className="grid grid-cols-4 gap-4 border-b border-zinc-300 px-4 py-2.5 last:border-0 items-center"
                 >
                   <span className="font-mono text-sm font-semibold uppercase text-zinc-700">{level}</span>
                   <input
                     type="text"
                     value={h.size}
                     onChange={(e) => updateHeading(level, "size", e.target.value)}
-                    className="rounded-md border border-zinc-200 px-2 py-1 font-mono text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
+                    className="rounded-md border border-zinc-300 px-2 py-1 font-mono text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
                     placeholder="2rem"
                   />
                   <input
                     type="text"
                     value={h.weight}
                     onChange={(e) => updateHeading(level, "weight", e.target.value)}
-                    className="rounded-md border border-zinc-200 px-2 py-1 font-mono text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
+                    className="rounded-md border border-zinc-300 px-2 py-1 font-mono text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
                     placeholder="700"
                   />
                   <input
                     type="text"
                     value={h.lineHeight}
                     onChange={(e) => updateHeading(level, "lineHeight", e.target.value)}
-                    className="rounded-md border border-zinc-200 px-2 py-1 font-mono text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
+                    className="rounded-md border border-zinc-300 px-2 py-1 font-mono text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
                     placeholder="1.2"
                   />
                 </div>
@@ -195,7 +195,7 @@ export default function ThemePage() {
             Controls spacing and width on public pages. Use any valid CSS value (e.g.{" "}
             <code className="font-mono">48rem</code>, <code className="font-mono">800px</code>).
           </p>
-          <div className="divide-y divide-zinc-100 rounded-lg border border-zinc-200 bg-white">
+          <div className="divide-y divide-zinc-100 rounded-lg border border-zinc-300 bg-white">
             {([
               { key: "contentMaxWidth" as const, label: "Content max width",      hint: "48rem"  },
               { key: "contentPaddingX" as const, label: "Horizontal padding",     hint: "1.5rem" },
@@ -207,7 +207,7 @@ export default function ThemePage() {
                   type="text"
                   value={layout[key] as string}
                   onChange={(e) => setLayout((prev) => ({ ...prev, [key]: e.target.value }))}
-                  className="w-28 rounded-md border border-zinc-200 px-3 py-1.5 text-right font-mono text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
+                  className="w-28 rounded-md border border-zinc-300 px-3 py-1.5 text-right font-mono text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
                   placeholder={hint}
                 />
               </div>
@@ -222,7 +222,7 @@ export default function ThemePage() {
             Screen-width thresholds for responsive behaviour. At mobile width, padding and max-width
             collapse automatically. Use <code className="font-mono">px</code> or <code className="font-mono">em</code>.
           </p>
-          <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white">
+          <div className="overflow-hidden rounded-lg border border-zinc-300 bg-white">
             <div className="grid grid-cols-3 divide-x divide-zinc-100">
               {([
                 { key: "mobile"  as const, label: "Mobile",  hint: "640px",  sub: "max-width" },
@@ -243,7 +243,7 @@ export default function ThemePage() {
                         breakpoints: { ...prev.breakpoints, [key]: e.target.value },
                       }))
                     }
-                    className="rounded-md border border-zinc-200 px-2 py-1.5 font-mono text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
+                    className="rounded-md border border-zinc-300 px-2 py-1.5 font-mono text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
                     placeholder={hint}
                   />
                 </div>
@@ -257,7 +257,7 @@ export default function ThemePage() {
           {saved && <span className="text-xs text-green-600">Saved!</span>}
           <button
             onClick={handleReset}
-            className="rounded-md border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
+            className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
           >
             Reset to default
           </button>

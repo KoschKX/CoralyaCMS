@@ -1,6 +1,6 @@
 "use client";
 
-import type { InjectCode } from "@/lib/types";
+import type { InjectCode, PageTranslation } from "@/lib/types";
 import type { EditorBlock } from "@/lib/types";
 import { useSave } from "@/app/admin/editor/hooks/useSave";
 
@@ -13,12 +13,13 @@ interface UseSavePageOptions {
   mainMode?: "visual" | "code" | "inject";
   pageBgColor: string;
   injectCode?: InjectCode;
+  translations?: Record<string, PageTranslation>;
   onStatusChange: (s: "draft" | "published") => void;
   /** Called after a successful save — used to clear the sessionStorage draft. */
   onSaveSuccess?: () => void;
 }
 
-export function useSavePage({ id, title, slug, codeText, liveBlocks, mainMode, pageBgColor, injectCode, onStatusChange, onSaveSuccess }: UseSavePageOptions) {
+export function useSavePage({ id, title, slug, codeText, liveBlocks, mainMode, pageBgColor, injectCode, translations, onStatusChange, onSaveSuccess }: UseSavePageOptions) {
   return useSave({
     id,
     title,
@@ -26,7 +27,7 @@ export function useSavePage({ id, title, slug, codeText, liveBlocks, mainMode, p
     codeText,
     liveBlocks,
     mainMode,
-    extraPayload: { pageBgColor, injectCode },
+    extraPayload: { pageBgColor, injectCode, translations },
     collectionEndpoint: "/api/pages",
     redirectOnCreate: (newId) => `/admin/editor/${newId}`,
     onStatusChange,

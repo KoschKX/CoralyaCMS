@@ -120,7 +120,7 @@ export default function MediaPage() {
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="flex shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-8 py-5">
+      <div className="flex shrink-0 items-center justify-between border-b border-zinc-300 bg-white px-8 py-5">
         <div>
           <h1 className="text-xl font-semibold text-zinc-900">Media Library</h1>
           <p className="mt-0.5 text-sm text-zinc-400">
@@ -158,7 +158,7 @@ export default function MediaPage() {
 
       {/* Bulk action bar */}
       {bulkMode && selected.size > 0 && (
-        <div className="flex shrink-0 items-center gap-3 border-b border-zinc-200 bg-zinc-50 px-8 py-2.5">
+        <div className="flex shrink-0 items-center gap-3 border-b border-zinc-300 bg-zinc-50 px-8 py-2.5">
           <span className="text-sm font-medium text-zinc-700">{selected.size} selected</span>
           <div className="h-4 w-px bg-zinc-300" />
           <button
@@ -195,7 +195,7 @@ export default function MediaPage() {
             onDragLeave={onDragLeave}
             onDrop={onDrop}
             className={`mx-8 mt-5 shrink-0 flex cursor-default items-center justify-center rounded-lg border-2 border-dashed px-6 py-4 transition ${
-              dragging ? "border-zinc-500 bg-zinc-100" : "border-zinc-200 hover:border-zinc-300"
+              dragging ? "border-zinc-500 bg-zinc-100" : "border-zinc-300 hover:border-zinc-300"
             }`}
           >
             <p className="select-none text-sm text-zinc-400">
@@ -214,7 +214,7 @@ export default function MediaPage() {
           {/* Grid */}
           <div className="flex-1 overflow-y-auto px-8 py-5">
           {loading ? null : files.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-zinc-200 bg-white py-24 text-center">
+            <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-zinc-300 bg-white py-24 text-center">
               <p className="text-sm text-zinc-400">No files uploaded yet.</p>
             </div>
           ) : (
@@ -307,12 +307,12 @@ export default function MediaPage() {
           const date = file ? new Date(file.createdAt).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "";
           return (
             <aside
-              className="absolute right-0 top-0 bottom-0 flex w-64 flex-col border-l border-zinc-200 bg-white overflow-hidden transition-transform duration-200 ease-in-out"
+              className="absolute right-0 top-0 bottom-0 flex w-64 flex-col border-l border-zinc-300 bg-white overflow-hidden transition-transform duration-200 ease-in-out"
               style={{ transform: panelOpen ? "translateX(0)" : "translateX(100%)" }}
             >
               <div className="flex w-64 flex-col h-full">
               {/* Preview */}
-              <div className="flex h-48 shrink-0 items-center justify-center overflow-hidden bg-zinc-50 border-b border-zinc-200 p-4">
+              <div className="flex h-48 shrink-0 items-center justify-center overflow-hidden bg-zinc-50 border-b border-zinc-300 p-4">
                 {file && isImage(file.name) ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={file.url} alt={file.name} className="max-h-full max-w-full object-contain" />
@@ -345,7 +345,7 @@ export default function MediaPage() {
                 <div className="mt-4 space-y-2">
                   <button
                     onClick={() => copyUrl(file.url, file.name)}
-                    className="flex w-full items-center justify-center gap-2 rounded-md border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50"
+                    className="flex w-full items-center justify-center gap-2 rounded-md border border-zinc-300 px-3 py-2 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50"
                   >
                     {copiedUrl === file.name ? "✓ Copied!" : "Copy URL"}
                   </button>
@@ -353,7 +353,7 @@ export default function MediaPage() {
                     href={file.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex w-full items-center justify-center gap-2 rounded-md border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50"
+                    className="flex w-full items-center justify-center gap-2 rounded-md border border-zinc-300 px-3 py-2 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50"
                   >
                     Open file ↗
                   </a>

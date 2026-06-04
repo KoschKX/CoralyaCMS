@@ -26,7 +26,7 @@ const htmlBlock: BlockDefinition = {
           onChange={(e) => onChange({ ...data, content: e.target.value })}
           rows={10}
           spellCheck={false}
-          className="w-full rounded border border-zinc-200 bg-zinc-50 p-2 font-mono text-xs text-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-400 resize-y"
+          className="w-full rounded border border-zinc-300 bg-zinc-50 p-2 font-mono text-xs text-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-400 resize-y"
           placeholder="<div>Raw HTML…</div>"
         />
       </div>

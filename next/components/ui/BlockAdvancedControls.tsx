@@ -50,7 +50,7 @@ function BoxInput({
         className={`w-full rounded border bg-white px-1 py-1 text-center text-[11px] text-zinc-700 focus:outline-none ${
           inherited
             ? "border-dashed border-blue-300 placeholder:text-blue-300 focus:border-blue-400"
-            : "border-zinc-200 placeholder:text-zinc-300 focus:border-zinc-400"
+            : "border-zinc-300 placeholder:text-zinc-300 focus:border-zinc-400"
         }`}
       />
       <MiniLabel>{label}</MiniLabel>
@@ -91,7 +91,7 @@ function Section({
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="border-t border-zinc-100 pt-3">
+    <div className="border-t border-zinc-300 pt-3">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -150,7 +150,7 @@ export function BlockAdvancedControls({
     `rounded border px-1.5 py-1 text-[11px] text-zinc-700 focus:outline-none ${
       borderInherited && !hasValue
         ? "border-dashed border-blue-300 placeholder:text-blue-300 focus:border-blue-400"
-        : "border-zinc-200 placeholder:text-zinc-300 focus:border-zinc-400"
+        : "border-zinc-300 placeholder:text-zinc-300 focus:border-zinc-400"
     }`;
 
   const raw = data as Record<string, unknown>;
@@ -250,7 +250,7 @@ export function BlockAdvancedControls({
               <select
                 value={border.style || "solid"}
                 onChange={(e) => updateBorder({ style: e.target.value || undefined })}
-                className="rounded border border-zinc-200 bg-white px-1.5 py-1 text-[11px] text-zinc-700 focus:border-zinc-400 focus:outline-none"
+                className="rounded border border-zinc-300 bg-white px-1.5 py-1 text-[11px] text-zinc-700 focus:border-zinc-400 focus:outline-none"
               >
                 <option value="solid">Solid</option>
                 <option value="dashed">Dashed</option>
@@ -295,7 +295,7 @@ export function BlockAdvancedControls({
               value={adv.cssId ?? ""}
               onChange={(e) => updateAdv({ cssId: e.target.value || undefined })}
               placeholder="my-section"
-              className="w-full rounded border border-zinc-200 px-2 py-1 text-[11px] text-zinc-700 placeholder:text-zinc-300 focus:border-zinc-400 focus:outline-none"
+              className="w-full rounded border border-zinc-300 px-2 py-1 text-[11px] text-zinc-700 placeholder:text-zinc-300 focus:border-zinc-400 focus:outline-none"
             />
             <p className="mt-0.5 text-[10px] text-zinc-400">
               Creates an <code className="text-[10px]">#anchor</code> link to this block.
@@ -310,7 +310,7 @@ export function BlockAdvancedControls({
               value={adv.cssClass ?? ""}
               onChange={(e) => updateAdv({ cssClass: e.target.value || undefined })}
               placeholder="my-class another-class"
-              className="w-full rounded border border-zinc-200 px-2 py-1 text-[11px] text-zinc-700 placeholder:text-zinc-300 focus:border-zinc-400 focus:outline-none"
+              className="w-full rounded border border-zinc-300 px-2 py-1 text-[11px] text-zinc-700 placeholder:text-zinc-300 focus:border-zinc-400 focus:outline-none"
             />
           </div>
         </div>

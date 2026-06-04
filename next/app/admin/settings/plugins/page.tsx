@@ -49,7 +49,7 @@ export default function PluginsPage() {
       </p>
 
       {plugins.length === 0 ? (
-        <div className="rounded-lg border border-zinc-200 bg-white p-6">
+        <div className="rounded-lg border border-zinc-300 bg-white p-6">
           <p className="text-sm text-zinc-500">No plugins installed.</p>
           <p className="mt-2 text-sm text-zinc-400">
             Create a folder under <code className="font-mono text-xs">plugins/</code> and
@@ -61,7 +61,7 @@ export default function PluginsPage() {
           {plugins.map((plugin) => (
             <div key={plugin.name} className="flex items-stretch gap-1.5">
               {/* Info box — rounded on the left side only */}
-              <div className="flex-1 min-w-0 rounded-l-lg border border-zinc-200 bg-white px-5 py-4">
+              <div className="flex-1 min-w-0 rounded-l-lg border border-zinc-300 bg-white px-5 py-4">
                 <p className="font-medium text-zinc-900">{plugin.name}</p>
                 {plugin.description && (
                   <p className="mt-0.5 text-sm text-zinc-500">{plugin.description}</p>
@@ -72,7 +72,7 @@ export default function PluginsPage() {
               </div>
 
               {/* Controls box — rounded on the right side only */}
-              <div className="flex shrink-0 items-center gap-2 rounded-r-lg border border-zinc-200 bg-white px-4 py-4">
+              <div className="flex shrink-0 items-center gap-2 rounded-r-lg border border-zinc-300 bg-white px-4 py-4">
                 <span className="rounded bg-zinc-100 px-2 py-0.5 font-mono text-[11px] text-zinc-500">
                   v{plugin.version}
                 </span>

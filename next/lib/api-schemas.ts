@@ -38,6 +38,12 @@ const InjectCodeSchema = z.object({
   afterBody:  z.string().optional(),
 });
 
+const PageTranslationSchema = z.object({
+  title: z.string().max(500).optional(),
+  blocks: z.array(EditorBlockSchema).optional().default([]),
+  html: z.string().optional(),
+});
+
 export const CreatePageSchema = z.object({
   title: titleSchema,
   slug: slugSchema,
@@ -46,6 +52,7 @@ export const CreatePageSchema = z.object({
   html: z.string().optional(),
   pageBgColor: cssColorSchema.optional(),
   injectCode: InjectCodeSchema.optional(),
+  translations: z.record(z.string().min(2).max(10), PageTranslationSchema).optional(),
 });
 
 export const UpdatePageSchema = CreatePageSchema;
@@ -130,6 +137,7 @@ export const UpdateSettingsSchema = z.object({
   paletteColors: z.array(PaletteColorSchema).optional(),
   typography: TypographySchema.optional(),
   layout: LayoutSchema.optional(),
+  languages: z.array(z.string().min(2).max(10)).min(1).optional(),
 });
 
 // ── Auth ──────────────────────────────────────────────────────────────────────

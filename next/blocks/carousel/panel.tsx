@@ -54,7 +54,7 @@ function SlideEditor({
     : `Slide ${index + 1}`;
 
   return (
-    <div className="rounded border border-zinc-200 bg-white">
+    <div className="rounded border border-zinc-300 bg-white">
       {/* Header ── */}
       <div className="flex items-center gap-1 px-2 py-1.5">
         <button
@@ -103,7 +103,7 @@ function SlideEditor({
 
       {/* Fields ── */}
       {open && (
-        <div className="space-y-2 border-t border-zinc-100 px-2.5 py-2.5">
+        <div className="space-y-2 border-t border-zinc-300 px-2.5 py-2.5">
           <div>
             <label className="mb-1 block text-xs text-zinc-500">Image URL</label>
             <div className="flex gap-1.5">
@@ -112,13 +112,13 @@ function SlideEditor({
                 value={slide.src}
                 placeholder="https://example.com/image.jpg"
                 onChange={(e) => onUpdate({ ...slide, src: e.target.value })}
-                className="min-w-0 flex-1 rounded border border-zinc-200 bg-white px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                className="min-w-0 flex-1 rounded border border-zinc-300 bg-white px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
               />
               <button
                 type="button"
                 onClick={onBrowse}
                 title="Browse media library"
-                className="shrink-0 rounded border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-500 transition hover:border-zinc-400 hover:text-zinc-900"
+                className="shrink-0 rounded border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-500 transition hover:border-zinc-400 hover:text-zinc-900"
               >
                 Browse
               </button>
@@ -141,7 +141,7 @@ function SlideEditor({
               value={slide.alt}
               placeholder="Describe the image"
               onChange={(e) => onUpdate({ ...slide, alt: e.target.value })}
-              className="w-full rounded border border-zinc-200 bg-white px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
+              className="w-full rounded border border-zinc-300 bg-white px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
             />
           </div>
 
@@ -152,7 +152,7 @@ function SlideEditor({
               value={slide.caption}
               placeholder="Overlay caption text"
               onChange={(e) => onUpdate({ ...slide, caption: e.target.value })}
-              className="w-full rounded border border-zinc-200 bg-white px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
+              className="w-full rounded border border-zinc-300 bg-white px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
             />
           </div>
 
@@ -163,7 +163,7 @@ function SlideEditor({
               value={slide.link}
               placeholder="https://…"
               onChange={(e) => onUpdate({ ...slide, link: e.target.value })}
-              className="w-full rounded border border-zinc-200 bg-white px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
+              className="w-full rounded border border-zinc-300 bg-white px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
             />
           </div>
 
@@ -268,7 +268,7 @@ export function CarouselPanelControls({ data, onChange }: PanelControlProps) {
                   className={`flex flex-1 items-center justify-center rounded border py-1.5 text-xs font-medium capitalize transition ${
                     effect === e
                       ? "border-zinc-900 bg-zinc-900 text-white"
-                      : "border-zinc-200 text-zinc-500 hover:border-zinc-400"
+                      : "border-zinc-300 text-zinc-500 hover:border-zinc-400"
                   }`}
                 >
                   {e}
@@ -289,7 +289,7 @@ export function CarouselPanelControls({ data, onChange }: PanelControlProps) {
                   className={`rounded border py-1 text-xs font-medium transition ${
                     aspectRatio === r
                       ? "border-zinc-900 bg-zinc-900 text-white"
-                      : "border-zinc-200 text-zinc-500 hover:border-zinc-400"
+                      : "border-zinc-300 text-zinc-500 hover:border-zinc-400"
                   }`}
                 >
                   {r}
@@ -335,7 +335,7 @@ export function CarouselPanelControls({ data, onChange }: PanelControlProps) {
                     className={`flex flex-1 items-center justify-center rounded border py-1.5 text-xs font-medium transition ${
                       perView === n
                         ? "border-zinc-900 bg-zinc-900 text-white"
-                        : "border-zinc-200 text-zinc-500 hover:border-zinc-400"
+                        : "border-zinc-300 text-zinc-500 hover:border-zinc-400"
                     }`}
                   >
                     {n}

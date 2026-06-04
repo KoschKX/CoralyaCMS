@@ -103,7 +103,7 @@ function ImageEditor({
     : `Image ${index + 1}`;
 
   return (
-    <div className="rounded border border-zinc-200 bg-white">
+    <div className="rounded border border-zinc-300 bg-white">
       {/* Header */}
       <div className="flex items-center gap-1 px-2 py-1.5">
         {/* Thumbnail */}
@@ -138,7 +138,7 @@ function ImageEditor({
 
       {/* Fields */}
       {open && (
-        <div className="space-y-2 border-t border-zinc-100 px-2.5 py-2.5">
+        <div className="space-y-2 border-t border-zinc-300 px-2.5 py-2.5">
           {/* Image URL */}
           <div>
             <label className="mb-1 block text-xs text-zinc-500">Image URL</label>
@@ -148,10 +148,10 @@ function ImageEditor({
                 value={image.src}
                 placeholder="https://example.com/photo.jpg"
                 onChange={(e) => onUpdate({ ...image, src: e.target.value })}
-                className="min-w-0 flex-1 rounded border border-zinc-200 bg-white px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                className="min-w-0 flex-1 rounded border border-zinc-300 bg-white px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
               />
               <button type="button" onClick={onBrowse}
-                className="shrink-0 rounded border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-500 transition hover:border-zinc-400 hover:text-zinc-900">
+                className="shrink-0 rounded border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-500 transition hover:border-zinc-400 hover:text-zinc-900">
                 Browse
               </button>
             </div>
@@ -168,7 +168,7 @@ function ImageEditor({
             <label className="mb-1 block text-xs text-zinc-500">Alt text</label>
             <input type="text" value={image.alt} placeholder="Describe the image"
               onChange={(e) => onUpdate({ ...image, alt: e.target.value })}
-              className="w-full rounded border border-zinc-200 bg-white px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
+              className="w-full rounded border border-zinc-300 bg-white px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
             />
           </div>
 
@@ -177,7 +177,7 @@ function ImageEditor({
             <label className="mb-1 block text-xs text-zinc-500">Title (lightbox heading)</label>
             <input type="text" value={image.title} placeholder="Photo title"
               onChange={(e) => onUpdate({ ...image, title: e.target.value })}
-              className="w-full rounded border border-zinc-200 bg-white px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
+              className="w-full rounded border border-zinc-300 bg-white px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
             />
           </div>
 
@@ -186,7 +186,7 @@ function ImageEditor({
             <label className="mb-1 block text-xs text-zinc-500">Caption</label>
             <input type="text" value={image.caption} placeholder="Short description"
               onChange={(e) => onUpdate({ ...image, caption: e.target.value })}
-              className="w-full rounded border border-zinc-200 bg-white px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
+              className="w-full rounded border border-zinc-300 bg-white px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
             />
           </div>
 
@@ -195,7 +195,7 @@ function ImageEditor({
             <label className="mb-1 block text-xs text-zinc-500">Custom link (overrides lightbox)</label>
             <input type="url" value={image.link} placeholder="https://…"
               onChange={(e) => onUpdate({ ...image, link: e.target.value })}
-              className="w-full rounded border border-zinc-200 bg-white px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
+              className="w-full rounded border border-zinc-300 bg-white px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
             />
           </div>
 
@@ -320,7 +320,7 @@ export function GalleryPanelControls({ data, onChange }: PanelControlProps) {
                 className={`rounded border py-1.5 text-xs font-medium transition ${
                   (str(data.aspectRatio) || "1/1") === value
                     ? "border-zinc-900 bg-zinc-900 text-white"
-                    : "border-zinc-200 text-zinc-500 hover:border-zinc-400"
+                    : "border-zinc-300 text-zinc-500 hover:border-zinc-400"
                 }`}
               >
                 {label}

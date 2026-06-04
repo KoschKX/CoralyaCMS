@@ -15,7 +15,7 @@ import type { PaletteColor } from "@/lib/color-palette";
 // ── Shared Tailwind strings ───────────────────────────────────────────────────
 
 const PILL_ACTIVE = "border-zinc-900 bg-zinc-900 text-white";
-const PILL_IDLE   = "border-zinc-200 text-zinc-500 hover:border-zinc-400";
+const PILL_IDLE   = "border-zinc-300 text-zinc-500 hover:border-zinc-400";
 const PILL_BASE   = "rounded border text-xs font-medium transition";
 
 // ── OptionColor ───────────────────────────────────────────────────────────────
@@ -327,7 +327,7 @@ export function OptionText({
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className={`w-full rounded border border-zinc-200 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400${
+        className={`w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400${
           mono ? " font-mono text-xs" : ""
         }`}
       />
@@ -357,7 +357,7 @@ export function OptionSelect({
       aria-label={label}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="flex-1 rounded border border-zinc-200 bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
+      className="flex-1 rounded border border-zinc-300 bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
     >
       {options.map((opt) => (
         <option key={opt.value} value={opt.value}>

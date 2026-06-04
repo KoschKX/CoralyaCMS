@@ -86,7 +86,7 @@ function ItemsEditor({ items, onChange }: {
   return (
     <div className="space-y-2">
       {items.map((item, i) => (
-        <div key={item.id} className="rounded border border-zinc-200 bg-zinc-50 p-2 space-y-1.5">
+        <div key={item.id} className="rounded border border-zinc-300 bg-zinc-50 p-2 space-y-1.5">
           <div className="flex items-center gap-1.5">
             <span className="text-xs text-zinc-400 font-medium w-4 shrink-0 text-center">{i + 1}</span>
             <input
@@ -96,7 +96,7 @@ function ItemsEditor({ items, onChange }: {
               value={item.text}
               placeholder="Headline text…"
               onChange={(e) => update(i, "text", e.target.value)}
-              className="min-w-0 flex-1 rounded border border-zinc-200 bg-white px-2.5 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
+              className="min-w-0 flex-1 rounded border border-zinc-300 bg-white px-2.5 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
             />
             <button
               type="button"
@@ -117,7 +117,7 @@ function ItemsEditor({ items, onChange }: {
               value={item.url}
               placeholder="https://… (optional)"
               onChange={(e) => update(i, "url", e.target.value)}
-              className="min-w-0 flex-1 rounded border border-zinc-200 bg-white px-2.5 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
+              className="min-w-0 flex-1 rounded border border-zinc-300 bg-white px-2.5 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
             />
           </div>
         </div>

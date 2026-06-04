@@ -119,9 +119,9 @@ export function MediaPickerDialog({
       />
 
       {/* Panel */}
-      <div className="relative z-10 flex max-h-[80vh] w-full max-w-3xl flex-col rounded-xl border border-zinc-200 bg-white shadow-2xl mx-4">
+      <div className="relative z-10 flex max-h-[80vh] w-full max-w-3xl flex-col rounded-xl border border-zinc-300 bg-white shadow-2xl mx-4">
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-zinc-100 px-5 py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-zinc-300 px-5 py-4">
           <h2 className="text-base font-semibold text-zinc-900">Media Library</h2>
           <div className="flex items-center gap-2">
             <button
@@ -185,7 +185,7 @@ export function MediaPickerDialog({
                   key={file.name}
                   type="button"
                   onClick={() => { onSelect(file.url); onClose(); }}
-                  className="group relative overflow-hidden rounded-lg border-2 border-zinc-200 bg-zinc-50 transition hover:border-zinc-900 focus:border-zinc-900 focus:outline-none"
+                  className="group relative overflow-hidden rounded-lg border-2 border-zinc-300 bg-zinc-50 transition hover:border-zinc-900 focus:border-zinc-900 focus:outline-none"
                   title={file.name}
                 >
                   <div className="aspect-square">

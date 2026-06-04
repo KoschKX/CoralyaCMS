@@ -136,7 +136,7 @@ export default function PostPanel({
             <button
               key={s}
               onClick={() => setStatus(s)}
-              className={`flex-1 rounded-md border py-1.5 text-xs font-medium capitalize transition ${status === s ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-500 hover:border-zinc-400"}`}
+              className={`flex-1 rounded-md border py-1.5 text-xs font-medium capitalize transition ${status === s ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 text-zinc-500 hover:border-zinc-400"}`}
             >
               {s}
             </button>
@@ -145,7 +145,7 @@ export default function PostPanel({
       </PanelSection>
 
       <PanelSection title="URL Slug">
-        <div className="flex items-center gap-1 rounded-md border border-zinc-200 px-2 py-1.5 focus-within:border-zinc-400">
+        <div className="flex items-center gap-1 rounded-md border border-zinc-300 px-2 py-1.5 focus-within:border-zinc-400">
           <span className="shrink-0 text-xs text-zinc-400">/posts/</span>
           <input
             type="text"
@@ -163,7 +163,7 @@ export default function PostPanel({
           onChange={(e) => setExcerpt(e.target.value)}
           placeholder="Short summary shown in post lists…"
           rows={3}
-          className="w-full resize-none rounded-md border border-zinc-200 px-2 py-1.5 text-xs text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none"
+          className="w-full resize-none rounded-md border border-zinc-300 px-2 py-1.5 text-xs text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none"
         />
       </PanelSection>
 
@@ -175,11 +175,11 @@ export default function PostPanel({
           value={catSearch}
           onChange={(e) => setCatSearch(e.target.value)}
           placeholder="Search categories…"
-          className="mb-2 w-full rounded-md border border-zinc-200 px-2 py-1 text-xs text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none"
+          className="mb-2 w-full rounded-md border border-zinc-300 px-2 py-1 text-xs text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none"
         />
 
         {/* Scrollable list */}
-        <div className="max-h-36 overflow-y-auto rounded-md border border-zinc-200 bg-zinc-50">
+        <div className="max-h-36 overflow-y-auto rounded-md border border-zinc-300 bg-zinc-50">
           {filteredCategories.length === 0 ? (
             <p className="px-3 py-2 text-xs text-zinc-400">
               {catSearch ? "No matches." : "No categories yet."}
@@ -221,7 +221,7 @@ export default function PostPanel({
                 if (e.key === "Enter") { e.preventDefault(); void submitNewCategory(); }
               }}
               placeholder="Category name"
-              className="flex-1 rounded-md border border-zinc-200 px-2 py-1 text-xs text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none"
+              className="flex-1 rounded-md border border-zinc-300 px-2 py-1 text-xs text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none"
             />
             <button
               onClick={() => void submitNewCategory()}
@@ -275,12 +275,12 @@ export default function PostPanel({
               }
             }}
             placeholder="Add tag… (Enter or ,)"
-            className="flex-1 rounded-md border border-zinc-200 px-2 py-1 text-xs text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none"
+            className="flex-1 rounded-md border border-zinc-300 px-2 py-1 text-xs text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none"
           />
           <button
             onClick={() => void commitTagInput()}
             disabled={!tagInput.trim()}
-            className="rounded-md border border-zinc-200 px-2.5 py-1 text-xs font-medium text-zinc-600 hover:bg-zinc-50 disabled:opacity-40"
+            className="rounded-md border border-zinc-300 px-2.5 py-1 text-xs font-medium text-zinc-600 hover:bg-zinc-50 disabled:opacity-40"
           >
             Add
           </button>
@@ -298,7 +298,7 @@ export default function PostPanel({
                   <button
                     key={tag.id}
                     onClick={() => addTagById(tag.id)}
-                    className="rounded-full border border-zinc-200 px-2.5 py-0.5 text-[11px] text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50"
+                    className="rounded-full border border-zinc-300 px-2.5 py-0.5 text-[11px] text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50"
                   >
                     {tag.name}
                   </button>

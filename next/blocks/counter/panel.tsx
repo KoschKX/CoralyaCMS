@@ -55,7 +55,7 @@ function ItemEditor({
   const valueDisplay = item.value + item.unit;
 
   return (
-    <div className="rounded border border-zinc-200 bg-white">
+    <div className="rounded border border-zinc-300 bg-white">
       {/* Header row */}
       <div className="flex items-center gap-1 px-2 py-1.5">
         <button
@@ -105,7 +105,7 @@ function ItemEditor({
 
       {/* Fields */}
       {open && (
-        <div className="space-y-2 border-t border-zinc-100 px-2.5 py-2.5">
+        <div className="space-y-2 border-t border-zinc-300 px-2.5 py-2.5">
           {/* Value */}
           <div>
             <label className="mb-1 block text-xs text-zinc-500">
@@ -115,7 +115,7 @@ function ItemEditor({
               type="text"
               value={item.value}
               onChange={(e) => onUpdate({ ...item, value: e.target.value })}
-              className="w-full rounded border border-zinc-200 bg-white px-2.5 py-1.5 font-mono text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
+              className="w-full rounded border border-zinc-300 bg-white px-2.5 py-1.5 font-mono text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
               placeholder={style === "circle" ? "75" : "1250"}
             />
           </div>
@@ -128,7 +128,7 @@ function ItemEditor({
                 type="text"
                 value={item.unit}
                 onChange={(e) => onUpdate({ ...item, unit: e.target.value })}
-                className="w-full rounded border border-zinc-200 bg-white px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                className="w-full rounded border border-zinc-300 bg-white px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
                 placeholder="%"
               />
             </div>
@@ -152,7 +152,7 @@ function ItemEditor({
               type="text"
               value={item.label}
               onChange={(e) => onUpdate({ ...item, label: e.target.value })}
-              className="w-full rounded border border-zinc-200 bg-white px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
+              className="w-full rounded border border-zinc-300 bg-white px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
               placeholder="Description"
             />
           </div>
@@ -165,7 +165,7 @@ function ItemEditor({
                 type="text"
                 value={item.icon}
                 onChange={(e) => onUpdate({ ...item, icon: e.target.value })}
-                className="w-full rounded border border-zinc-200 bg-white px-2.5 py-1.5 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                className="w-full rounded border border-zinc-300 bg-white px-2.5 py-1.5 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
                 placeholder="fa fa-star"
               />
             </div>
@@ -186,7 +186,7 @@ function ItemEditor({
                   onChange={(e) =>
                     onUpdate({ ...item, size: Math.max(40, Math.min(600, Number(e.target.value))) })
                   }
-                  className="w-full rounded border border-zinc-200 bg-white px-2.5 py-1.5 font-mono text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                  className="w-full rounded border border-zinc-300 bg-white px-2.5 py-1.5 font-mono text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
                 />
               </div>
             </>

@@ -30,6 +30,13 @@ export interface InjectCode {
   afterBody?: string;
 }
 
+/** One locale's worth of content for a page. */
+export interface PageTranslation {
+  title?: string;
+  blocks: EditorBlock[];
+  html?: string;
+}
+
 export interface Page {
   id: string;
   title: string;
@@ -43,6 +50,9 @@ export interface Page {
   pageBgColor?: string;
   /** Per-page code injection (tracking, head, body snippets). */
   injectCode?: InjectCode;
+  /** Per-locale content keyed by locale code, e.g. { "nl": { title, blocks, html }, "fr": { ... } }.
+   *  The default/primary locale is stored in the top-level fields above. */
+  translations?: Record<string, PageTranslation>;
   createdAt: string;
   updatedAt: string;
 }

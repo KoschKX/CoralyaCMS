@@ -64,7 +64,7 @@ export function SyntaxHighlighterPanelControls({ data, onChange }: PanelControlP
               value={(data.code as string) ?? ""}
               onChange={(e) => onChange({ ...data, code: e.target.value })}
               spellCheck={false}
-              className="w-full resize-y rounded border border-zinc-200 bg-white px-2.5 py-1.5 font-mono text-xs text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+              className="w-full resize-y rounded border border-zinc-300 bg-white px-2.5 py-1.5 font-mono text-xs text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-400"
               placeholder="Paste your code here…"
             />
           </div>

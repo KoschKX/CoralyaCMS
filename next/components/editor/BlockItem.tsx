@@ -39,7 +39,7 @@ function ColViewportToolbar({ blockId, ci, cols, colData, colResp, ops, setActiv
       onClick={(e) => e.stopPropagation()}
     >
       <div
-        className="flex items-stretch rounded-md border border-zinc-200 bg-white shadow-md"
+        className="flex items-stretch rounded-md border border-zinc-300 bg-white shadow-md"
         style={{ minHeight: 36 }}
       >
         <ColToolbar

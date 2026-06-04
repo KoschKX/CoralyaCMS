@@ -36,7 +36,7 @@ export function FontSizeButtons({
                   ? "border-blue-400 border-dashed bg-white text-blue-500"
                   : isSelected
                   ? "border-zinc-900 bg-zinc-900 text-white"
-                  : "border-zinc-200 text-zinc-500 hover:border-zinc-400"
+                  : "border-zinc-300 text-zinc-500 hover:border-zinc-400"
               }`}
             >
               {label}

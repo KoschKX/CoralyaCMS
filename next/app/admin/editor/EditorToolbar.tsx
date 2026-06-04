@@ -41,7 +41,7 @@ export default function EditorToolbar({
   return (
     <>
       {/* Top toolbar */}
-      <div className="sticky top-0 z-20 flex h-12 items-center border-b border-zinc-200 bg-white px-2">
+      <div className="sticky top-0 z-20 flex h-12 items-center border-b border-zinc-300 bg-white px-2">
         {/* Hamburger — opens the admin nav drawer */}
         <button
           onClick={() => setNavPanelOpen((o) => !o)}
@@ -49,7 +49,7 @@ export default function EditorToolbar({
           aria-pressed={navPanelOpen}
           title="Admin menu"
           className={`flex h-8 w-8 items-center justify-center rounded border transition ${
-            navPanelOpen ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
+            navPanelOpen ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 bg-white text-zinc-600 hover:bg-zinc-50"
           }`}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -67,7 +67,7 @@ export default function EditorToolbar({
             aria-pressed={blocksPanelOpen}
             title="Insert block"
             className={`ml-1 flex h-8 w-8 items-center justify-center rounded border transition ${
-              blocksPanelOpen ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
+              blocksPanelOpen ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 bg-white text-zinc-600 hover:bg-zinc-50"
             }`}
           >
             {/* Plus-in-square icon */}
@@ -90,7 +90,7 @@ export default function EditorToolbar({
               target="_blank"
               rel="noopener noreferrer"
               title="View page"
-              className="flex h-8 w-8 items-center justify-center rounded border border-zinc-200 text-zinc-600 transition hover:bg-zinc-50"
+              className="flex h-8 w-8 items-center justify-center rounded border border-zinc-300 text-zinc-600 transition hover:bg-zinc-50"
             >
               <img src="/icons/external-link.svg" alt="View" className="w-4 h-4" />
             </a>
@@ -99,7 +99,7 @@ export default function EditorToolbar({
             onClick={() => setMainMode(mainMode === "inject" ? "visual" : "inject")}
             aria-label="Code injection"
             aria-pressed={mainMode === "inject"}
-            className={`flex h-8 w-8 items-center justify-center rounded border transition ${mainMode === "inject" ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
+            className={`flex h-8 w-8 items-center justify-center rounded border transition ${mainMode === "inject" ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 bg-white text-zinc-600 hover:bg-zinc-50"}`}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 9h8M8 15h8"/></svg>
           </button>
@@ -107,7 +107,7 @@ export default function EditorToolbar({
             onClick={() => setMainMode(mainMode === "code" ? "visual" : "code")}
             aria-label={mainMode === "code" ? "Back to visual editor" : "Code view"}
             aria-pressed={mainMode === "code"}
-            className={`flex h-8 w-8 items-center justify-center rounded border transition ${mainMode === "code" ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
+            className={`flex h-8 w-8 items-center justify-center rounded border transition ${mainMode === "code" ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 bg-white text-zinc-600 hover:bg-zinc-50"}`}
           >
             {mainMode === "code" ? (
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="currentColor">
@@ -123,15 +123,15 @@ export default function EditorToolbar({
             onClick={() => setPanelOpen((o) => !o)}
             aria-label="Toggle settings panel"
             aria-pressed={panelOpen}
-            className={`flex h-8 w-8 items-center justify-center rounded border transition ${panelOpen ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
+            className={`flex h-8 w-8 items-center justify-center rounded border transition ${panelOpen ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 bg-white text-zinc-600 hover:bg-zinc-50"}`}
           >
             &#8863;
           </button>
-          <div className="ml-1.5 flex items-center gap-2 border-l border-zinc-200 pl-2.5">
+          <div className="ml-1.5 flex items-center gap-2 border-l border-zinc-300 pl-2.5">
             <button
               onClick={() => onSave("draft")}
               disabled={saving}
-              className="h-8 rounded border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-40"
+              className="h-8 rounded border border-zinc-300 bg-white px-3 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-40"
             >
               {saving ? "Saving…" : "Save draft"}
             </button>

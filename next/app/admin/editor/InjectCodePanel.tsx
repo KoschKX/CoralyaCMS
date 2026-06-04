@@ -18,7 +18,7 @@ export default function InjectCodePanel({ fields, onChange, onClose }: InjectCod
     <div className="max-w-2xl mx-auto mt-8 mb-8">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-base font-semibold text-zinc-700">Inject Code</h2>
-        <button onClick={onClose} className="text-xs text-zinc-500 hover:text-zinc-900 px-2 py-1 rounded border border-zinc-200">
+        <button onClick={onClose} className="text-xs text-zinc-500 hover:text-zinc-900 px-2 py-1 rounded border border-zinc-300">
           Back
         </button>
       </div>

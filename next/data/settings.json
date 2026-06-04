@@ -86,5 +86,10 @@
       "tablet": "1024px",
       "desktop": "1280px"
     }
-  }
+  },
+  "languages": [
+    "en",
+    "de",
+    "it"
+  ]
 }

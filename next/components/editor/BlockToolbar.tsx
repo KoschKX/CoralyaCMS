@@ -68,7 +68,7 @@ export const BlockToolbar = memo(function BlockToolbar({
               ? parentInfo.onSelect
               : onDeselectCol
           }
-          className="flex items-center justify-center w-9 rounded-md border border-zinc-200 bg-white shadow-md text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 transition"
+          className="flex items-center justify-center w-9 rounded-md border border-zinc-300 bg-white shadow-md text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 transition"
           style={{ minHeight: 36 }}
         >
           <BlockIcon
@@ -80,7 +80,7 @@ export const BlockToolbar = memo(function BlockToolbar({
       )}
 
       <div
-        className="flex items-stretch overflow-hidden rounded-md border border-zinc-200 bg-white shadow-md"
+        className="flex items-stretch overflow-hidden rounded-md border border-zinc-300 bg-white shadow-md"
         style={{ minHeight: 36 }}
       >
         {/* Block type identifier — non-interactive, screen-reader label via aria-label */}

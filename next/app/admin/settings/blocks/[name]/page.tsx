@@ -18,7 +18,7 @@ export default async function BlockSettingsPage({ params }: Props) {
   return (
     <div>
       {/* Back-link breadcrumb */}
-      <div className="border-b border-zinc-200 bg-white px-8 py-3">
+      <div className="border-b border-zinc-300 bg-white px-8 py-3">
         <Link
           href="/admin/settings/blocks"
           className="text-xs text-zinc-400 hover:text-zinc-700"

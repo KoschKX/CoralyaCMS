@@ -85,7 +85,7 @@ function UserForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-lg border border-zinc-200 bg-zinc-50 p-5 space-y-4"
+      className="rounded-lg border border-zinc-300 bg-zinc-50 p-5 space-y-4"
     >
       <div className="grid grid-cols-2 gap-4">
         {!isEdit && (
@@ -100,7 +100,7 @@ function UserForm({
               required
               autoFocus
               placeholder="john_doe"
-              className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
+              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
             />
           </div>
         )}
@@ -113,7 +113,7 @@ function UserForm({
             value={form.displayName}
             onChange={(e) => set("displayName", e.target.value)}
             placeholder="John Doe"
-            className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
+            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
           />
         </div>
       </div>
@@ -127,7 +127,7 @@ function UserForm({
           value={form.email}
           onChange={(e) => set("email", e.target.value)}
           placeholder="john@example.com"
-          className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
+          className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
         />
       </div>
 
@@ -144,7 +144,7 @@ function UserForm({
           placeholder={isEdit ? "Leave blank to keep current" : "Min. 6 characters"}
           minLength={form.password ? 6 : undefined}
           autoComplete="new-password"
-          className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
+          className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
         />
       </div>
 
@@ -156,7 +156,7 @@ function UserForm({
           value={form.role}
           onChange={(e) => set("role", e.target.value as UserRole)}
           disabled={isSelf}
-          className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none disabled:opacity-50"
+          className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none disabled:opacity-50"
         >
           {USER_ROLES.map((r) => (
             <option key={r} value={r}>
@@ -188,7 +188,7 @@ function UserForm({
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md border border-zinc-200 bg-white px-4 py-2 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50"
+          className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50"
         >
           Cancel
         </button>
@@ -313,7 +313,7 @@ export default function UsersPage() {
       {/* Role legend */}
       <div className="mb-6 grid grid-cols-3 gap-3">
         {USER_ROLES.map((r) => (
-          <div key={r} className="rounded-lg border border-zinc-100 bg-white p-3">
+          <div key={r} className="rounded-lg border border-zinc-300 bg-white p-3">
             <RoleBadge role={r} />
             <p className="mt-1.5 text-xs text-zinc-500">{ROLE_DESCRIPTIONS[r]}</p>
           </div>
@@ -340,7 +340,7 @@ export default function UsersPage() {
       )}
 
       {loading ? (
-        <div className="rounded-lg border border-zinc-200 bg-white p-6 text-sm text-zinc-400">
+        <div className="rounded-lg border border-zinc-300 bg-white p-6 text-sm text-zinc-400">
           Loading users…
         </div>
       ) : fetchError ? (
@@ -348,7 +348,7 @@ export default function UsersPage() {
           {fetchError}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white">
+        <div className="overflow-hidden rounded-lg border border-zinc-300 bg-white">
           {users.length === 0 ? (
             <p className="p-6 text-sm text-zinc-400">No users found.</p>
           ) : (
@@ -400,7 +400,7 @@ export default function UsersPage() {
                           </div>
                           <p className="text-xs text-zinc-400">
                             @{user.username}
-                            {user.email ? ` · ${user.email}` : ""}
+                            {user.email ? ` — ${user.email}` : ""}
                           </p>
                         </div>
 
@@ -416,7 +416,7 @@ export default function UsersPage() {
                               </button>
                               <button
                                 onClick={() => setDeleteConfirmId(null)}
-                                className="rounded-md border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50"
+                                className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50"
                               >
                                 Cancel
                               </button>
@@ -429,7 +429,7 @@ export default function UsersPage() {
                                   setShowAdd(false);
                                   setDeleteConfirmId(null);
                                 }}
-                                className="rounded-md border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50"
+                                className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50"
                               >
                                 Edit
                               </button>
@@ -439,7 +439,7 @@ export default function UsersPage() {
                                     setDeleteConfirmId(user.id);
                                     setEditingId(null);
                                   }}
-                                  className="rounded-md border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                                  className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
                                 >
                                   Delete
                                 </button>

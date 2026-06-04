@@ -105,10 +105,10 @@ export function BlockPicker({
       role="dialog"
       aria-modal="true"
       aria-label="Insert block"
-      className="z-40 w-72 rounded-lg border border-zinc-200 bg-white shadow-xl"
+      className="z-40 w-72 rounded-lg border border-zinc-300 bg-white shadow-xl"
     >
       {/* Search */}
-      <div className="border-b border-zinc-100 p-2">
+      <div className="border-b border-zinc-300 p-2">
         <div className="relative">
           <svg className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -119,7 +119,7 @@ export function BlockPicker({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search blocks…"
-            className="w-full rounded-md border border-zinc-200 bg-zinc-50 py-1.5 pl-7 pr-3 text-xs placeholder:text-zinc-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-400"
+            className="w-full rounded-md border border-zinc-300 bg-zinc-50 py-1.5 pl-7 pr-3 text-xs placeholder:text-zinc-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-400"
           />
         </div>
       </div>
@@ -159,7 +159,7 @@ function BlockTile({ def, onSelect }: { def: { name: string; label: string }; on
       onClick={() => onSelect(def.name)}
       className="flex flex-col items-center gap-1.5 rounded-md p-2 text-center transition hover:bg-zinc-100 focus:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
     >
-      <span className="flex h-10 w-10 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600">
+      <span className="flex h-10 w-10 items-center justify-center rounded-md border border-zinc-300 bg-white text-zinc-600">
         <BlockIcon name={def.name} label={def.label} size={20} />
       </span>
       <span className="w-full line-clamp-2 text-[11px] leading-tight text-zinc-700">{def.label}</span>

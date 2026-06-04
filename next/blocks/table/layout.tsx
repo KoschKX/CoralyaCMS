@@ -22,11 +22,11 @@ export default function TableLayout({ data, blockId, renderBlocks }: BlockLayout
             >
               {row.map((cell, ci) =>
                 ri === 0 && withHeadings ? (
-                  <th key={ci} className="border border-zinc-200 px-3 py-2 text-left align-top">
+                  <th key={ci} className="border border-zinc-300 px-3 py-2 text-left align-top">
                     {renderBlocks ? renderBlocks(cell.blocks ?? []) : null}
                   </th>
                 ) : (
-                  <td key={ci} className="border border-zinc-200 px-3 py-2 align-top">
+                  <td key={ci} className="border border-zinc-300 px-3 py-2 align-top">
                     {renderBlocks ? renderBlocks(cell.blocks ?? []) : null}
                   </td>
                 ),

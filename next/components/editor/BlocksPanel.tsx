@@ -141,12 +141,12 @@ export function BlocksPanel({ onAdd }: BlocksPanelProps) {
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="flex items-center border-b border-zinc-200 px-3 py-2.5">
+      <div className="flex items-center border-b border-zinc-300 px-3 py-2.5">
         <span className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400">Blocks</span>
       </div>
 
       {/* Search */}
-      <div className="px-3 py-2.5 border-b border-zinc-100">
+      <div className="px-3 py-2.5 border-b border-zinc-300">
         <div className="relative">
           <svg
             className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-zinc-400"
@@ -161,7 +161,7 @@ export function BlocksPanel({ onAdd }: BlocksPanelProps) {
             placeholder="Search blocks…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-md border border-zinc-200 bg-zinc-50 py-1.5 pl-7 pr-3 text-xs placeholder:text-zinc-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-400"
+            className="w-full rounded-md border border-zinc-300 bg-zinc-50 py-1.5 pl-7 pr-3 text-xs placeholder:text-zinc-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-400"
           />
         </div>
       </div>
@@ -237,7 +237,7 @@ function BlockTile({
       className="flex flex-col items-center gap-1.5 rounded-md p-2 text-center transition hover:bg-zinc-100 focus:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 cursor-grab active:cursor-grabbing"
       title={`Insert ${def.label}`}
     >
-      <span className="flex h-10 w-10 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600">
+      <span className="flex h-10 w-10 items-center justify-center rounded-md border border-zinc-300 bg-white text-zinc-600">
         <BlockIcon name={def.name} label={def.label} size={20} />
       </span>
       <span className="w-full line-clamp-2 text-[11px] leading-tight text-zinc-700">{def.label}</span>

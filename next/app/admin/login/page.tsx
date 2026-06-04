@@ -42,7 +42,7 @@ function LoginForm() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50">
-      <div className="w-full max-w-sm rounded-xl border border-zinc-200 bg-white p-8 shadow-sm">
+      <div className="w-full max-w-sm rounded-xl border border-zinc-300 bg-white p-8 shadow-sm">
         <div className="mb-6 text-center">
           <p className="text-lg font-semibold tracking-tight text-zinc-900">✦ CORALYA</p>
           <p className="mt-1 text-sm text-zinc-500">Sign in to the admin panel</p>
@@ -60,7 +60,7 @@ function LoginForm() {
               autoComplete="username"
               required
               autoFocus
-              className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
+              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
             />
           </div>
           <div>
@@ -74,7 +74,7 @@ function LoginForm() {
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
               required
-              className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
+              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
             />
           </div>
           {error && (

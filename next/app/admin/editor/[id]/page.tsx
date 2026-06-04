@@ -19,7 +19,7 @@ export default async function EditPage({ params }: Props) {
   const { id } = await params;
   const page = getPage(id);
   if (!page) notFound();
-  const { disabledBlocks } = getSettings();
+  const { disabledBlocks, languages } = getSettings();
 
   return (
     <EditorPage
@@ -31,6 +31,8 @@ export default async function EditPage({ params }: Props) {
       initialHtml={page.html ?? ""}
       initialPageBgColor={page.pageBgColor ?? "#ffffff"}
       initialInjectCode={page.injectCode}
+      initialTranslations={page.translations ?? {}}
+      languages={languages}
       disabledBlocks={disabledBlocks}
     />
   );

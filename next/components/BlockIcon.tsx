@@ -3,7 +3,7 @@ import * as React from "react";
 import { ICON_COMPONENTS } from "./icons";
 import { getPluginIcon } from "@/lib/plugin-registry";
 
-export function BlockIcon({ name, label, size = 20, color = "#64748b" }: { name: string; label: string; size?: number; color?: string }) {
+export function BlockIcon({ name, label, size = 20, color = "#18181b" }: { name: string; label: string; size?: number; color?: string }) {
   const Icon = ICON_COMPONENTS[name] ?? getPluginIcon(name);
   if (!Icon) {
     // Fallback: blank SVG for unknown icon
@@ -23,7 +23,7 @@ export function BlockIcon({ name, label, size = 20, color = "#64748b" }: { name:
       aria-label={label}
       title={label}
     >
-      <Icon width={size} height={size} fill={color} aria-hidden="true" />
+      <Icon width={size} height={size} aria-hidden="true" />
     </span>
   );
 }

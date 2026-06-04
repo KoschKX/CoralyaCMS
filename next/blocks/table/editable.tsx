@@ -29,7 +29,7 @@ export function TableEditable({ data, onUpdate, renderChildBlocks }: EditablePro
                 return (
                   <Tag
                     key={ci}
-                    className="border border-zinc-200 px-3 py-2 align-top"
+                    className="border border-zinc-300 px-3 py-2 align-top"
                   >
                     {renderChildBlocks?.(
                       cell.blocks ?? [],

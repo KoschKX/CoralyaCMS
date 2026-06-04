@@ -29,7 +29,7 @@ export default function AdminPage() {
       </div>
 
       {pages.length === 0 ? (
-        <div className="rounded-xl border-2 border-dashed border-zinc-200 bg-white py-20 text-center">
+        <div className="rounded-xl border-2 border-dashed border-zinc-300 bg-white py-20 text-center">
           <p className="text-zinc-400">No pages yet.</p>
           <Link
             href="/admin/editor/new"
@@ -39,10 +39,10 @@ export default function AdminPage() {
           </Link>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-xs">
+        <div className="overflow-hidden rounded-xl border border-zinc-300 bg-white shadow-xs">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-100 bg-zinc-50 text-left">
+              <tr className="border-b border-zinc-300 bg-zinc-50 text-left">
                 <th className="px-4 py-3 font-medium text-zinc-600">Title</th>
                 <th className="px-4 py-3 font-medium text-zinc-600">Slug</th>
                 <th className="px-4 py-3 font-medium text-zinc-600">Status</th>
@@ -74,7 +74,7 @@ export default function AdminPage() {
                           : "bg-amber-50 text-amber-600"
                       }`}
                     >
-                      {page.status === "published" ? "● Published" : "○ Draft"}
+                      {page.status === "published" ? "? Published" : "? Draft"}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-zinc-400">

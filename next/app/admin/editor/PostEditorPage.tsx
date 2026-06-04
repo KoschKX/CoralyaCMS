@@ -185,7 +185,7 @@ export default function PostEditorPage({
         {/* Block inserter — inline, pushes canvas when open */}
         <aside
           aria-label="Block inserter"
-          className={`shrink-0 overflow-hidden border-r border-zinc-200 bg-white transition-[width] duration-200 ease-in-out ${
+          className={`shrink-0 overflow-hidden border-r border-zinc-300 bg-white transition-[width] duration-200 ease-in-out ${
             blocksPanelOpen && mainMode === "visual" ? "w-64" : "w-0"
           }`}
         >
@@ -262,10 +262,10 @@ export default function PostEditorPage({
         {/* Right panel — animates in/out */}
         <aside
           aria-label="Editor settings"
-          className={`shrink-0 overflow-hidden border-l border-zinc-200 bg-white transition-[width] duration-200 ease-in-out ${panelOpen ? "w-72" : "w-0"}`}
+          className={`shrink-0 overflow-hidden border-l border-zinc-300 bg-white transition-[width] duration-200 ease-in-out ${panelOpen ? "w-72" : "w-0"}`}
         >
           <div className="sticky top-0 h-[calc(100vh-3rem)] w-72 overflow-y-auto">
-            <div className="flex border-b border-zinc-200" role="tablist" aria-label="Panel sections">
+            <div className="flex border-b border-zinc-300" role="tablist" aria-label="Panel sections">
               {(mainMode !== "code" ? ["post", "block"] : ["post"]).map((tab) => (
                 <button
                   key={tab}

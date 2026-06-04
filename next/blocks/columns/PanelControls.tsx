@@ -142,7 +142,7 @@ export default function ColumnsPanelControls({ data, onChange }: Props) {
                           ? "border-blue-400 border-dashed bg-white text-blue-500"
                           : isSelected
                           ? "border-zinc-900 bg-zinc-900 text-white"
-                          : "border-zinc-200 text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50"
+                          : "border-zinc-300 text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50"
                       }`}
                     >
                       {p.label}
@@ -162,11 +162,11 @@ export default function ColumnsPanelControls({ data, onChange }: Props) {
                     })
                   }
                   placeholder={isResponsive && !col?.responsive?.[viewport]?.width ? "—" : "e.g. 40% or 2fr"}
-                  className="flex-1 rounded border border-zinc-200 px-2 py-1 text-xs focus:outline-none focus:border-zinc-400"
+                  className="flex-1 rounded border border-zinc-300 px-2 py-1 text-xs focus:outline-none focus:border-zinc-400"
                 />
                 <button
                   onClick={() => setWidth(colIdx, customWidths[colIdx] ?? "")}
-                  className="rounded border border-zinc-200 px-2 py-1 text-xs text-zinc-600 hover:bg-zinc-50"
+                  className="rounded border border-zinc-300 px-2 py-1 text-xs text-zinc-600 hover:bg-zinc-50"
                 >
                   OK
                 </button>
@@ -174,14 +174,14 @@ export default function ColumnsPanelControls({ data, onChange }: Props) {
               <div className="flex gap-2">
                 <button
                   onClick={addCol}
-                  className="rounded border border-zinc-200 px-2 py-0.5 text-xs text-zinc-600 hover:bg-zinc-50"
+                  className="rounded border border-zinc-300 px-2 py-0.5 text-xs text-zinc-600 hover:bg-zinc-50"
                 >
                   + Add column
                 </button>
                 {cols.length > 1 && (
                   <button
                     onClick={() => removeCol(colIdx)}
-                    className="rounded border border-zinc-200 px-2 py-0.5 text-xs text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50 transition"
+                    className="rounded border border-zinc-300 px-2 py-0.5 text-xs text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50 transition"
                   >
                     Remove column
                   </button>

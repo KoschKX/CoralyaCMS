@@ -18,7 +18,7 @@ export function HtmlEditable({ data, onUpdate, isSelected }: EditableProps) {
   return (
     <div className="block-html">
       <textarea
-        className="w-full resize-y rounded border border-zinc-200 bg-zinc-50 p-2 font-mono text-xs text-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+        className="w-full resize-y rounded border border-zinc-300 bg-zinc-50 p-2 font-mono text-xs text-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-300"
         rows={Math.max(3, content.split("\n").length)}
         defaultValue={content}
         onBlur={(e) => onUpdate({ ...data, content: e.target.value })}

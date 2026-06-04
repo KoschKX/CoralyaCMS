@@ -42,6 +42,9 @@ export interface SiteSettings {
   paletteColors: PaletteColor[];
   typography: TypographySettings;
   layout: LayoutSettings;
+  // Language / i18n
+  /** Active locale codes, e.g. ["en", "nl", "fr"]. First entry is the default. */
+  languages: string[];
 }
 
 export const DEFAULT_TYPOGRAPHY: TypographySettings = {
@@ -76,4 +79,5 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   paletteColors: COLOR_PALETTE,
   typography: DEFAULT_TYPOGRAPHY,
   layout: DEFAULT_LAYOUT,
+  languages: ["en"],
 };

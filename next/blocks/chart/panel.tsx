@@ -101,12 +101,12 @@ function DatasetEditor({
   const swatchColor = dataset.backgroundColor || PALETTE[index % PALETTE.length].bg;
 
   return (
-    <div className="rounded border border-zinc-200 bg-white">
+    <div className="rounded border border-zinc-300 bg-white">
       {/* Header */}
       <div className="flex items-center gap-1 px-2 py-1.5">
         {/* Color swatch */}
         <span
-          className="h-3 w-3 shrink-0 rounded-full border border-zinc-200"
+          className="h-3 w-3 shrink-0 rounded-full border border-zinc-300"
           style={{ background: swatchColor }}
           aria-hidden="true"
         />
@@ -158,7 +158,7 @@ function DatasetEditor({
 
       {/* Fields */}
       {open && (
-        <div className="space-y-2 border-t border-zinc-100 px-2.5 py-2.5">
+        <div className="space-y-2 border-t border-zinc-300 px-2.5 py-2.5">
           {/* Label */}
           <OptionText
             label="Label"
@@ -177,7 +177,7 @@ function DatasetEditor({
               onChange={(e) => onUpdate({ ...dataset, values: e.target.value })}
               placeholder="30,50,40,60,70"
               rows={2}
-              className="w-full resize-none rounded border border-zinc-200 bg-white px-2.5 py-1.5 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
+              className="w-full resize-none rounded border border-zinc-300 bg-white px-2.5 py-1.5 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
             />
           </div>
 

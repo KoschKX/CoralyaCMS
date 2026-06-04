@@ -6,7 +6,7 @@ export default function NavigationPage() {
       <h1 className="mb-1 text-2xl font-semibold text-zinc-900">Navigation</h1>
       <p className="mb-8 text-sm text-zinc-500">Manage your site menus and navigation links.</p>
 
-      <div className="rounded-lg border border-zinc-200 bg-white p-6 text-sm text-zinc-500">
+      <div className="rounded-lg border border-zinc-300 bg-white p-6 text-sm text-zinc-500">
         Navigation management coming soon.
       </div>
     </div>

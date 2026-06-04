@@ -97,7 +97,7 @@ export default function IntegrationsPage() {
       <p className="mb-8 text-sm text-zinc-500">Connect third-party services used by blocks.</p>
 
       {/* ── Instagram ──────────────────────────────────────────────── */}
-      <section className="rounded-xl border border-zinc-200 bg-white p-6">
+      <section className="rounded-xl border border-zinc-300 bg-white p-6">
         <div className="mb-4 flex items-center gap-3">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <rect x="2" y="2" width="20" height="20" rx="5"/>
@@ -118,7 +118,7 @@ export default function IntegrationsPage() {
         </p>
 
         {/* How-to steps */}
-        <details className="mb-5 rounded-lg border border-zinc-100 bg-zinc-50 p-4 text-xs text-zinc-600">
+        <details className="mb-5 rounded-lg border border-zinc-300 bg-zinc-50 p-4 text-xs text-zinc-600">
           <summary className="cursor-pointer font-medium text-zinc-700 hover:text-zinc-900">
             How to get an access token
           </summary>
@@ -143,7 +143,7 @@ export default function IntegrationsPage() {
               value={token}
               onChange={(e) => setToken(e.target.value)}
               placeholder="EAA…"
-              className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 font-mono text-xs text-zinc-800 focus:border-zinc-400 focus:outline-none"
+              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 font-mono text-xs text-zinc-800 focus:border-zinc-400 focus:outline-none"
             />
           </div>
 
@@ -169,7 +169,7 @@ export default function IntegrationsPage() {
               type="button"
               disabled={!token || testing}
               onClick={handleTest}
-              className="rounded-md border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-400 disabled:opacity-40"
+              className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-400 disabled:opacity-40"
             >
               {testing ? "Testing…" : "Test connection"}
             </button>
@@ -178,7 +178,7 @@ export default function IntegrationsPage() {
       </section>
 
       {/* ── Flickr ─────────────────────────────────────────────────── */}
-      <section className="mt-6 rounded-xl border border-zinc-200 bg-white p-6">
+      <section className="mt-6 rounded-xl border border-zinc-300 bg-white p-6">
         <div className="mb-4 flex items-center gap-3">
           <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
             <circle cx="7.5"  cy="12" r="5" fill="currentColor" opacity="0.4"/>
@@ -197,7 +197,7 @@ export default function IntegrationsPage() {
           and never sent to visitors.
         </p>
 
-        <details className="mb-5 rounded-lg border border-zinc-100 bg-zinc-50 p-4 text-xs text-zinc-600">
+        <details className="mb-5 rounded-lg border border-zinc-300 bg-zinc-50 p-4 text-xs text-zinc-600">
           <summary className="cursor-pointer font-medium text-zinc-700 hover:text-zinc-900">
             How to get a Flickr API key
           </summary>
@@ -222,7 +222,7 @@ export default function IntegrationsPage() {
               value={flickrKey}
               onChange={(e) => setFlickrKey(e.target.value)}
               placeholder="c9d2c2fda03a…"
-              className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 font-mono text-xs text-zinc-800 focus:border-zinc-400 focus:outline-none"
+              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 font-mono text-xs text-zinc-800 focus:border-zinc-400 focus:outline-none"
             />
           </div>
 
@@ -248,7 +248,7 @@ export default function IntegrationsPage() {
               type="button"
               disabled={!flickrKey || flickrTesting}
               onClick={handleFlickrTest}
-              className="rounded-md border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-400 disabled:opacity-40"
+              className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-400 disabled:opacity-40"
             >
               {flickrTesting ? "Testing…" : "Test connection"}
             </button>

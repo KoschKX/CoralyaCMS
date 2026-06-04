@@ -106,7 +106,7 @@ export function ButtonPanelControls({ data, onChange }: PanelControlProps) {
           <OptionColor label="Background" value={(data.bgColor          as string) ?? ""} onChange={(v) => onChange({ ...data, bgColor:           v })} />
           <OptionColor label="Text"       value={(data.textColor        as string) ?? ""} onChange={(v) => onChange({ ...data, textColor:         v })} />
           <OptionColor label="Border"     value={(data.borderColor      as string) ?? ""} onChange={(v) => onChange({ ...data, borderColor:       v })} />
-          <div className="my-1.5 border-t border-zinc-100" />
+          <div className="my-1.5 border-t border-zinc-300" />
           <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400">On hover</p>
           <OptionColor label="Background" value={(data.hoverBgColor     as string) ?? ""} onChange={(v) => onChange({ ...data, hoverBgColor:      v })} />
           <OptionColor label="Text"       value={(data.hoverTextColor   as string) ?? ""} onChange={(v) => onChange({ ...data, hoverTextColor:    v })} />

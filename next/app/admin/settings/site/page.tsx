@@ -47,7 +47,7 @@ export default function SiteSettingsPage() {
           <input
             type="text"
             placeholder="My Awesome Site"
-            className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
+            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
             value={title}
             onChange={e => { setTitle(e.target.value); setSaved(false); }}
           />
@@ -57,7 +57,7 @@ export default function SiteSettingsPage() {
           <input
             type="text"
             placeholder="Just another great website"
-            className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
+            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
             value={tagline}
             onChange={e => { setTagline(e.target.value); setSaved(false); }}
           />
@@ -67,7 +67,7 @@ export default function SiteSettingsPage() {
           <input
             type="url"
             placeholder="https://example.com"
-            className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
+            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
             value={siteUrl}
             onChange={e => { setSiteUrl(e.target.value); setSaved(false); }}
           />
@@ -77,7 +77,7 @@ export default function SiteSettingsPage() {
           <textarea
             rows={3}
             placeholder="Describe your site…"
-            className="w-full resize-none rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
+            className="w-full resize-none rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
             value={description}
             onChange={e => { setDescription(e.target.value); setSaved(false); }}
           />
@@ -87,7 +87,7 @@ export default function SiteSettingsPage() {
           <input
             type="url"
             placeholder="https://example.com/logo.png"
-            className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
+            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
             value={logoUrl}
             onChange={e => { setLogoUrl(e.target.value); setSaved(false); }}
           />

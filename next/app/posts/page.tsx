@@ -45,7 +45,7 @@ export default function PostsArchivePage() {
       ) : (
         <div className="flex flex-col gap-10">
           {posts.map((post) => (
-            <article key={post.id} className="border-b border-zinc-100 pb-10">
+            <article key={post.id} className="border-b border-zinc-300 pb-10">
               <Link
                 href={`/posts/${post.slug}`}
                 className="group block"

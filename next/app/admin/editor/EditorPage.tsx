@@ -1,11 +1,11 @@
 
 "use client";
 
-import React, { useRef, useState, useCallback, useMemo, useEffect } from "react";
+import React, { useRef, useState, useCallback, useMemo } from "react";
 
 import { useRouter } from "next/navigation";
 import type { EditorBlock } from "@/lib/pages-db";
-import type { InjectCode } from "@/lib/types";
+import type { InjectCode, PageTranslation } from "@/lib/types";
 import { ViewportContext } from "@/components/ui/ViewportContext";
 import { EditorViewportContext } from "@/components/editor/EditorContext";
 import { ResponsiveStyleInjector } from "@/components/ResponsiveStyleInjector";
@@ -23,6 +23,7 @@ import { useEditorPanel, type PanelTab } from "@/app/admin/editor/hooks/useEdito
 import { usePageMeta } from "@/app/admin/editor/hooks/usePageMeta";
 import { useEditorPageState } from "@/app/admin/editor/hooks/useEditorPageState";
 import { useDirtyTracking } from "@/app/admin/editor/hooks/useDirtyTracking";
+import { blocksToShortcodes, shortcodesToBlocks } from "@/lib/shortcodes";
 import dynamic from "next/dynamic";
 const CodeEditor = dynamic(() => import("@/components/CodeEditor"), {
   ssr: false,
@@ -38,6 +39,16 @@ const VisualEditor = dynamic<VisualEditorProps>(
   },
 );
 
+// locale code → flag file name (without .svg) in /flags/
+const LOCALE_FLAG: Record<string, string> = {
+  en: "gb", nl: "nl", fr: "fr", de: "de", es: "es", it: "it",
+  pt: "pt", pl: "pl", ru: "ru", zh: "cn", ja: "jp", ko: "kr",
+  ar: "sa", tr: "tr", sv: "se", da: "dk", fi: "fi", nb: "no",
+};
+function flagFor(locale: string) {
+  return LOCALE_FLAG[locale] ?? locale.slice(0, 2).toLowerCase();
+}
+
 interface EditorPageProps {
   id?: string;
   initialTitle?: string;
@@ -47,6 +58,9 @@ interface EditorPageProps {
   initialHtml?: string;
   initialPageBgColor?: string;
   initialInjectCode?: InjectCode;
+  initialTranslations?: Record<string, PageTranslation>;
+  /** Active locale codes from settings, e.g. ["en","nl"]. First is default. */
+  languages?: string[];
   disabledBlocks?: string[];
 }
 
@@ -59,8 +73,19 @@ export default function EditorPage({
   initialHtml = "",
   initialPageBgColor = "#ffffff",
   initialInjectCode,
+  initialTranslations = {},
+  languages = ["en"],
   disabledBlocks = [],
 }: EditorPageProps) {
+  // ── Language state ──────────────────────────────────────────────────────────
+  const defaultLang = languages[0] ?? "en";
+  const [activeLang, setActiveLangRaw] = useState(defaultLang);
+  // translations map for non-default locales (default locale lives in the
+  // top-level editor state, not here)
+  const [translations, setTranslations] = useState<Record<string, PageTranslation>>(
+    initialTranslations,
+  );
+
   const {
     mainMode,
     setMainMode,
@@ -68,7 +93,6 @@ export default function EditorPage({
     setSelectedBlock,
     codeText,
     setCodeText,
-    visualBlocks,
     setVisualBlocks,
     liveBlocks,
     clearDraft,
@@ -88,7 +112,7 @@ export default function EditorPage({
   // ── Dirty / unsaved-changes tracking ───────────────────────────────────────
   const { handleSaveSuccess } = useDirtyTracking(codeText, clearDraft);
 
-    const { panelTab, setPanelTab, panelOpen, setPanelOpen } = useEditorPanel(mainMode);
+  const { panelTab, setPanelTab, panelOpen, setPanelOpen } = useEditorPanel(mainMode);
   const { tablet: tabletBp, mobile: mobileBp } = getEditorBreakpoints();
 
   const { canvasRef, viewport, setViewport } = useCanvasWidth(tabletBp, mobileBp, panelOpen);
@@ -133,15 +157,32 @@ export default function EditorPage({
   const handleColSelect = useCallback((_blockId: string, colIdx: number | null) => {
     setActiveColIdx(colIdx);
   }, []);
+
+  // When editing a non-default language the canvas holds that language's
+  // content; we still need to send the default language's content as the
+  // top-level page blocks/html.  `defaultLangBlocks/Code` always reflects the
+  // last-known state of the default locale.
+  const [defaultLangBlocks, setDefaultLangBlocks] = useState<EditorBlock[]>(
+    () => initialBlocks,
+  );
+  const [defaultLangCode, setDefaultLangCode] = useState<string>(
+    () => initialHtml || blocksToShortcodes(initialBlocks),
+  );
+
+  // Keep default-lang state in sync while the user is actually editing it.
+  const saveBlocks = activeLang === defaultLang ? liveBlocks : defaultLangBlocks;
+  const saveCode   = activeLang === defaultLang ? codeText   : defaultLangCode;
+
   const { saving, saved, saveError, handleSave } = useSavePage({
     id,
     title,
     slug,
-    codeText,
-    liveBlocks,
+    codeText: saveCode,
+    liveBlocks: saveBlocks,
     mainMode,
     pageBgColor,
     injectCode: injectFields,
+    translations,
     onStatusChange: setStatus,
     onSaveSuccess: handleSaveSuccess,
   });
@@ -153,6 +194,57 @@ export default function EditorPage({
       updateBlock: (blockId, data) => { updateBlockHandlerRef.current?.(blockId, data); },
       setSelectedBlock,
     });
+
+  // -- Language switching ------------------------------------------------------
+
+  const switchLang = useCallback((next: string) => {
+    if (next === activeLang) return;
+
+    // --- save current locale's state ---
+    if (activeLang === defaultLang) {
+      // leaving default: persist its current canvas into dedicated state
+      setDefaultLangBlocks(liveBlocks);
+      setDefaultLangCode(codeText);
+    } else {
+      // leaving a translation: snapshot it
+      setTranslations((prev) => ({
+        ...prev,
+        [activeLang]: { blocks: liveBlocks, html: codeText },
+      }));
+    }
+
+    // --- restore next locale's state onto the canvas ---
+    if (next === defaultLang) {
+      setCodeText(blocksToShortcodes(defaultLangBlocks) || defaultLangCode);
+      setVisualBlocks(defaultLangBlocks);
+    } else {
+      const tr = translations[next];
+      // For a language with no translation yet, copy the default lang's current
+      // blocks as a starting template so the user just needs to translate text.
+      const blocks = tr?.blocks ?? defaultLangBlocks;
+      const html   = tr != null ? (tr.html ?? blocksToShortcodes(blocks)) : defaultLangCode;
+      setCodeText(blocksToShortcodes(blocks) || html);
+      setVisualBlocks(blocks.length ? blocks : shortcodesToBlocks(html ?? ""));
+    }
+
+    setActiveLangRaw(next);
+    setSelectedBlock(null);
+  }, [activeLang, defaultLang, liveBlocks, codeText, translations, defaultLangBlocks, defaultLangCode, setCodeText, setVisualBlocks, setSelectedBlock]);
+
+  // Keep translations map in sync as we type (for the active non-default lang)
+  // This runs on every block change so the save always has fresh data.
+  const handleVisualChange = useCallback((newCode: string, newBlocks: EditorBlock[]) => {
+    setCodeText(newCode);
+    setVisualBlocks(newBlocks);
+    if (activeLang !== defaultLang) {
+      setTranslations((prev) => ({
+        ...prev,
+        [activeLang]: { blocks: newBlocks, html: newCode },
+      }));
+    }
+  }, [activeLang, defaultLang, setCodeText, setVisualBlocks]);
+
+  const showLangSwitcher = languages.length > 1;
 
   return (
     <EditorViewportContext.Provider value={editorViewportContextValue}>
@@ -182,7 +274,7 @@ export default function EditorPage({
         {/* Block inserter — inline, pushes canvas when open */}
         <aside
           aria-label="Block inserter"
-          className={`shrink-0 overflow-hidden border-r border-zinc-200 bg-white transition-[width] duration-200 ease-in-out ${
+          className={`shrink-0 overflow-hidden border-r border-zinc-300 bg-white transition-[width] duration-200 ease-in-out ${
             blocksPanelOpen && mainMode === "visual" ? "w-64" : "w-0"
           }`}
         >
@@ -193,9 +285,6 @@ export default function EditorPage({
         {/* Editor canvas */}
         <div ref={canvasRef} className="flex-1 overflow-y-auto bg-zinc-100">
           <div className="">
-            {/* When the panel is open, constrain canvas width to the selected
-                viewport breakpoint so responsive CSS fires at the right size.
-                When the panel is closed the ResizeObserver handles this automatically. */}
             <div
               className="mx-auto"
               style={panelOpen && mainMode !== "code" ? {
@@ -256,8 +345,9 @@ export default function EditorPage({
                       forcedViewport={panelOpen && viewport !== "desktop" ? viewport : undefined}
                     />
                     <VisualEditor
+                      key={activeLang}
                       initialBlocks={liveBlocks}
-                      onChange={(newCode, newBlocks) => { setCodeText(newCode); setVisualBlocks(newBlocks); }}
+                      onChange={handleVisualChange}
                       onSelectBlock={handleSelectBlock}
                       selectedBlockId={selectedBlock?.id ?? null}
                       registerUpdateHandler={registerUpdateHandler}
@@ -276,11 +366,17 @@ export default function EditorPage({
         {/* Right panel — animates in/out */}
         <aside
           aria-label="Editor settings"
-          className={`shrink-0 overflow-hidden border-l border-zinc-200 bg-white transition-[width] duration-200 ease-in-out ${panelOpen ? "w-72" : "w-0"}`}
+          className={`shrink-0 overflow-hidden border-l border-zinc-300 bg-white transition-[width] duration-200 ease-in-out ${panelOpen ? "w-72" : "w-0"}`}
         >
           <div className="sticky top-0 h-[calc(100vh-3rem)] w-72 overflow-y-auto">
             {mainMode === "visual" && (
-              <ViewportSwitcher viewport={viewport} setViewport={setViewport} />
+              <ViewportAndLangSwitcher
+                viewport={viewport}
+                setViewport={setViewport}
+                languages={showLangSwitcher ? languages : []}
+                activeLang={activeLang}
+                onLangSwitch={switchLang}
+              />
             )}
             <PanelTabs mainMode={mainMode} panelTab={panelTab} setPanelTab={setPanelTab} />
             <div className="space-y-6 px-4 py-5 text-zinc-900" role="tabpanel">
@@ -352,30 +448,71 @@ const VIEWPORT_BUTTONS: { vp: Viewport; label: string; icon: React.ReactNode }[]
   },
 ];
 
-function ViewportSwitcher({
+function ViewportAndLangSwitcher({
   viewport,
   setViewport,
+  languages,
+  activeLang,
+  onLangSwitch,
 }: {
   viewport: Viewport;
   setViewport: (vp: Viewport) => void;
+  languages: string[];
+  activeLang: string;
+  onLangSwitch: (lang: string) => void;
 }) {
+  const showLangs = languages.length > 1;
   return (
-    <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-2">
-      <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Preview</span>
-      <div className="flex items-center gap-0.5" role="group" aria-label="Preview viewport">
-        {VIEWPORT_BUTTONS.map(({ vp, label, icon }) => (
-          <button
-            key={vp}
-            onClick={() => setViewport(vp)}
-            aria-label={`${label} viewport`}
-            aria-pressed={viewport === vp}
-            className={`flex h-7 w-7 items-center justify-center rounded transition ${
-              viewport === vp ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100"
-            }`}
-          >
-            {icon}
-          </button>
-        ))}
+    <div className="border-b border-zinc-300 px-4 py-2 flex flex-col gap-2">
+      {/* Language buttons */}
+      {showLangs && (
+        <div className="flex flex-col gap-1">
+          <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Language</span>
+          <div className="flex items-center gap-0.5 flex-wrap" role="group" aria-label="Language">
+            {languages.map((lang) => (
+              <button
+                key={lang}
+                onClick={() => onLangSwitch(lang)}
+                aria-label={`Switch to ${lang}`}
+                aria-pressed={activeLang === lang}
+                title={lang.toUpperCase()}
+                className={`flex h-7 w-8 items-center justify-center rounded overflow-hidden transition ${
+                  activeLang === lang
+                    ? "ring-2 ring-zinc-900"
+                    : "opacity-50 hover:opacity-100"
+                }`}
+              >
+                <img
+                  src={`/flags/${flagFor(lang)}.svg`}
+                  alt={lang}
+                  width={22}
+                  height={16}
+                  className="rounded-sm object-cover"
+                  style={{ width: 22, height: 16 }}
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      {/* Viewport buttons */}
+      <div className="flex flex-col gap-1">
+        <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Responsive</span>
+        <div className="flex items-center gap-0.5" role="group" aria-label="Preview viewport">
+          {VIEWPORT_BUTTONS.map(({ vp, label, icon }) => (
+            <button
+              key={vp}
+              onClick={() => setViewport(vp)}
+              aria-label={`${label} viewport`}
+              aria-pressed={viewport === vp}
+              className={`flex h-7 w-7 items-center justify-center rounded transition ${
+                viewport === vp ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100"
+              }`}
+            >
+              {icon}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -392,7 +529,7 @@ function PanelTabs({
 }) {
   const tabs = mainMode === "visual" ? (["page", "block"] as PanelTab[]) : (["page"] as PanelTab[]);
   return (
-    <div className="flex border-b border-zinc-200" role="tablist" aria-label="Panel sections">
+    <div className="flex border-b border-zinc-300" role="tablist" aria-label="Panel sections">
       {tabs.map((tab) => (
         <button
           key={tab}

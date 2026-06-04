@@ -90,7 +90,7 @@ export function SocialSharingPanelControls({ data, onChange }: PanelControlProps
                 className={`inline-flex h-8 w-8 items-center justify-center rounded border transition ${
                   active
                     ? "border-zinc-900 bg-zinc-900 text-white"
-                    : "border-zinc-200 text-zinc-400 hover:border-zinc-400 hover:text-zinc-700"
+                    : "border-zinc-300 text-zinc-400 hover:border-zinc-400 hover:text-zinc-700"
                 }`}
               >
                 <svg
@@ -119,7 +119,7 @@ export function SocialSharingPanelControls({ data, onChange }: PanelControlProps
               const active = networks.includes(custom.id);
               const isEditing = editingId === custom.id;
               return (
-                <div key={custom.id} className="rounded border border-zinc-200 bg-zinc-50">
+                <div key={custom.id} className="rounded border border-zinc-300 bg-zinc-50">
                   {/* Row */}
                   <div className="flex items-center gap-2 px-2 py-1.5">
                     {/* Color swatch / toggle */}
@@ -163,14 +163,14 @@ export function SocialSharingPanelControls({ data, onChange }: PanelControlProps
                   </div>
                   {/* Inline edit form */}
                   {isEditing && (
-                    <div className="border-t border-zinc-200 px-2 pb-2 pt-2 space-y-2">
+                    <div className="border-t border-zinc-300 px-2 pb-2 pt-2 space-y-2">
                       <div>
                         <label className="mb-0.5 block text-[11px] text-zinc-500">Label</label>
                         <input
                           type="text"
                           value={custom.label}
                           onChange={(e) => saveEditCustomNetwork(custom.id, { label: e.target.value })}
-                          className="w-full rounded border border-zinc-200 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                          className="w-full rounded border border-zinc-300 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
                         />
                       </div>
                       <div className="flex items-center gap-2">
@@ -179,13 +179,13 @@ export function SocialSharingPanelControls({ data, onChange }: PanelControlProps
                           type="color"
                           value={custom.color}
                           onChange={(e) => saveEditCustomNetwork(custom.id, { color: e.target.value })}
-                          className="h-6 w-6 cursor-pointer rounded border border-zinc-200 bg-transparent p-0.5"
+                          className="h-6 w-6 cursor-pointer rounded border border-zinc-300 bg-transparent p-0.5"
                         />
                         <input
                           type="text"
                           value={custom.color}
                           onChange={(e) => saveEditCustomNetwork(custom.id, { color: e.target.value })}
-                          className="flex-1 rounded border border-zinc-200 bg-white px-2 py-1 font-mono text-[11px] focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                          className="flex-1 rounded border border-zinc-300 bg-white px-2 py-1 font-mono text-[11px] focus:outline-none focus:ring-1 focus:ring-zinc-400"
                         />
                       </div>
                       <div>
@@ -194,7 +194,7 @@ export function SocialSharingPanelControls({ data, onChange }: PanelControlProps
                           type="text"
                           value={custom.shareUrlTemplate}
                           onChange={(e) => saveEditCustomNetwork(custom.id, { shareUrlTemplate: e.target.value })}
-                          className="w-full rounded border border-zinc-200 bg-white px-2 py-1 font-mono text-[11px] focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                          className="w-full rounded border border-zinc-300 bg-white px-2 py-1 font-mono text-[11px] focus:outline-none focus:ring-1 focus:ring-zinc-400"
                           placeholder="https://…?url={URL}&title={TITLE}"
                         />
                       </div>
@@ -208,7 +208,7 @@ export function SocialSharingPanelControls({ data, onChange }: PanelControlProps
                               logoUrl: e.target.value || undefined,
                             })
                           }
-                          className="w-full rounded border border-zinc-200 bg-white px-2 py-1 font-mono text-[11px] focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                          className="w-full rounded border border-zinc-300 bg-white px-2 py-1 font-mono text-[11px] focus:outline-none focus:ring-1 focus:ring-zinc-400"
                           placeholder="https://…/logo.svg"
                         />
                         {custom.logoUrl && (
@@ -226,7 +226,7 @@ export function SocialSharingPanelControls({ data, onChange }: PanelControlProps
 
         {/* Add custom network */}
         {addOpen ? (
-          <div className="mt-3 rounded border border-zinc-200 bg-zinc-50 p-2 space-y-2">
+          <div className="mt-3 rounded border border-zinc-300 bg-zinc-50 p-2 space-y-2">
             <p className="text-[11px] font-medium text-zinc-600">New custom network</p>
             <div>
               <label className="mb-0.5 block text-[11px] text-zinc-500">Label</label>
@@ -235,7 +235,7 @@ export function SocialSharingPanelControls({ data, onChange }: PanelControlProps
                 value={newLabel}
                 onChange={(e) => setNewLabel(e.target.value)}
                 placeholder="e.g. Hacker News"
-                className="w-full rounded border border-zinc-200 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                className="w-full rounded border border-zinc-300 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
               />
             </div>
             <div className="flex items-center gap-2">
@@ -244,13 +244,13 @@ export function SocialSharingPanelControls({ data, onChange }: PanelControlProps
                 type="color"
                 value={newColor}
                 onChange={(e) => setNewColor(e.target.value)}
-                className="h-6 w-6 cursor-pointer rounded border border-zinc-200 bg-transparent p-0.5"
+                className="h-6 w-6 cursor-pointer rounded border border-zinc-300 bg-transparent p-0.5"
               />
               <input
                 type="text"
                 value={newColor}
                 onChange={(e) => setNewColor(e.target.value)}
-                className="flex-1 rounded border border-zinc-200 bg-white px-2 py-1 font-mono text-[11px] focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                className="flex-1 rounded border border-zinc-300 bg-white px-2 py-1 font-mono text-[11px] focus:outline-none focus:ring-1 focus:ring-zinc-400"
               />
             </div>
             <div>
@@ -260,7 +260,7 @@ export function SocialSharingPanelControls({ data, onChange }: PanelControlProps
                 value={newTemplate}
                 onChange={(e) => setNewTemplate(e.target.value)}
                 placeholder="https://…?url={URL}&title={TITLE}&desc={DESC}"
-                className="w-full rounded border border-zinc-200 bg-white px-2 py-1 font-mono text-[11px] focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                className="w-full rounded border border-zinc-300 bg-white px-2 py-1 font-mono text-[11px] focus:outline-none focus:ring-1 focus:ring-zinc-400"
               />
               <p className="mt-1 text-[10px] text-zinc-400">
                 Placeholders: <code>{"{URL}"}</code> <code>{"{TITLE}"}</code> <code>{"{DESC}"}</code>
@@ -272,7 +272,7 @@ export function SocialSharingPanelControls({ data, onChange }: PanelControlProps
                 value={newLogoUrl}
                 onChange={(e) => setNewLogoUrl(e.target.value)}
                 placeholder="https://…/logo.svg"
-                className="w-full rounded border border-zinc-200 bg-white px-2 py-1 font-mono text-[11px] focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                className="w-full rounded border border-zinc-300 bg-white px-2 py-1 font-mono text-[11px] focus:outline-none focus:ring-1 focus:ring-zinc-400"
               />
               {newLogoUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -290,7 +290,7 @@ export function SocialSharingPanelControls({ data, onChange }: PanelControlProps
               <button
                 type="button"
                 onClick={() => { setAddOpen(false); setNewLabel(""); setNewColor("#555555"); setNewTemplate(""); setNewLogoUrl(""); }}
-                className="rounded border border-zinc-200 px-3 py-1.5 text-xs text-zinc-500 hover:border-zinc-400"
+                className="rounded border border-zinc-300 px-3 py-1.5 text-xs text-zinc-500 hover:border-zinc-400"
               >
                 Cancel
               </button>
@@ -318,7 +318,7 @@ export function SocialSharingPanelControls({ data, onChange }: PanelControlProps
               value={(data.tagline as string) ?? ""}
               placeholder="Share this:"
               onChange={(e) => onChange({ ...data, tagline: e.target.value })}
-              className="w-full rounded border border-zinc-200 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
+              className="w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
             />
           </div>
           <OptionSegment
@@ -422,7 +422,7 @@ export function SocialSharingPanelControls({ data, onChange }: PanelControlProps
               value={(data.url as string) ?? ""}
               placeholder="https://…"
               onChange={(e) => onChange({ ...data, url: e.target.value })}
-              className="w-full rounded border border-zinc-200 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
+              className="w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
             />
           </div>
           <div>
@@ -433,7 +433,7 @@ export function SocialSharingPanelControls({ data, onChange }: PanelControlProps
               value={(data.title as string) ?? ""}
               placeholder="Page title…"
               onChange={(e) => onChange({ ...data, title: e.target.value })}
-              className="w-full rounded border border-zinc-200 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
+              className="w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
             />
           </div>
           <div>
@@ -444,7 +444,7 @@ export function SocialSharingPanelControls({ data, onChange }: PanelControlProps
               placeholder="Optional description for some networks…"
               rows={3}
               onChange={(e) => onChange({ ...data, description: e.target.value })}
-              className="w-full rounded border border-zinc-200 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
+              className="w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-400"
             />
           </div>
         </div>

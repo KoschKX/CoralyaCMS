@@ -29,7 +29,7 @@ export default function PagePanel({
             <button
               key={s}
               onClick={() => setStatus(s)}
-              className={`flex-1 rounded-md border py-1.5 text-xs font-medium capitalize transition ${status === s ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-500 hover:border-zinc-400"}`}
+              className={`flex-1 rounded-md border py-1.5 text-xs font-medium capitalize transition ${status === s ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 text-zinc-500 hover:border-zinc-400"}`}
             >
               {s}
             </button>
@@ -37,7 +37,7 @@ export default function PagePanel({
         </div>
       </PanelSection>
       <PanelSection title="URL Slug">
-        <div className="flex items-center gap-1 rounded-md border border-zinc-200 px-2 py-1.5 text-sm focus-within:border-zinc-400">
+        <div className="flex items-center gap-1 rounded-md border border-zinc-300 px-2 py-1.5 text-sm focus-within:border-zinc-400">
           <span className="text-zinc-400">/</span>
           <input
             type="text"

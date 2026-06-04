@@ -50,7 +50,7 @@ export function ImageEditable({ data, onUpdate, blockId }: EditableProps) {
   if (mode === "choose") {
     return (
       <>
-        <div className="flex min-h-44 w-full flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-zinc-200 bg-zinc-50 p-6">
+        <div className="flex min-h-44 w-full flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-zinc-300 bg-zinc-50 p-6">
           <span className="text-sm font-medium text-zinc-500">Add an image</span>
           <div className="flex gap-2">
             <button
@@ -80,7 +80,7 @@ export function ImageEditable({ data, onUpdate, blockId }: EditableProps) {
 
   // URL input mode
   return (
-    <div className="flex min-h-44 w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-zinc-200 bg-zinc-50 p-6">
+    <div className="flex min-h-44 w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-zinc-300 bg-zinc-50 p-6">
       <span className="text-sm font-medium text-zinc-500">Enter image URL</span>
       <input
         type="url"
