@@ -57,6 +57,11 @@ export interface VisualEditorProps {
    * the latest block content is captured.
    */
   registerFlushHandler?: (fn: (() => void) | null) => void;
+  /**
+   * Registers a function that replaces the block tree in-place (no unmount).
+   * Call this instead of changing `key` to avoid flicker on language switch.
+   */
+  registerReinitHandler?: (fn: ((blocks: EditorBlock[]) => void) | null) => void;
 }
 
 /** Inner component — has access to the store provided by EditorStoreProvider. */
@@ -72,6 +77,7 @@ function VisualEditorInner({
   activeLang = "en",
   defaultLang = "en",
   registerFlushHandler,
+  registerReinitHandler,
 }: VisualEditorProps) {
   // Stable refs for callbacks — updated every render, but never cause re-init
   const onChangeRef = useRef(onChange);
@@ -132,6 +138,15 @@ function VisualEditorInner({
     if (!registerFlushHandler) return;
     registerFlushHandler(() => actions.flushOnChange());
     return () => registerFlushHandler(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional one-time registration
+  }, []);
+
+  // Register the reinit handler so EditorPage can swap the block tree in-place
+  // on language switch without unmounting/remounting the editor (avoids flicker).
+  useEffect(() => {
+    if (!registerReinitHandler) return;
+    registerReinitHandler((blocks) => actions.reinit(blocks));
+    return () => registerReinitHandler(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional one-time registration
   }, []);
 
