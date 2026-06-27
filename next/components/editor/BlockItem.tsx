@@ -241,7 +241,7 @@ function BlockItem({
 
   const ringClass =
     (isSelected && !isContainerBlock) || colBlockParentSelected ? "ring-2 ring-blue-500"
-    : (isSelected && isContainerBlock) || descendantSelected    ? "border-2 border-dashed border-blue-200"
+    : (isSelected && isContainerBlock) || descendantSelected    ? "outline-2 outline-dashed outline-blue-200"
     : "ring-1 ring-transparent";
 
   return (
