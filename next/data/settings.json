@@ -32,7 +32,7 @@
     },
     {
       "label": "Yellow",
-      "value": "#ca8a04"
+      "value": "#ffa500"
     },
     {
       "label": "Green",
@@ -91,5 +91,18 @@
     "en",
     "de",
     "it"
+  ],
+  "allowedMimeTypes": [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+    "image/svg+xml",
+    "video/mp4",
+    "video/webm",
+    "audio/mpeg",
+    "audio/ogg",
+    "audio/wav",
+    "application/pdf"
   ]
 }
