@@ -1,0 +1,165 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      GITEA_URL: https://your-gitea-instance.com
+      REPORT_DIR: "_REPORTS"
+    
+    steps:
+      # -------------------------
+      # Checkout
+      # -------------------------
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # -------------------------
+      # Node setup
+      # -------------------------
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # -------------------------
+      # Find project
+      # -------------------------
+      - name: Find project
+        run: |
+          PROJECT_DIR=$(find . -name package.json -not -path "*/node_modules/*" | head -n 1 | xargs dirname)
+          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
+
+      # -------------------------
+      # Install
+      # -------------------------
+      - name: Install dependencies
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: npm install
+
+      # -------------------------
+      # Run Fallow
+      # -------------------------
+      - name: Run Fallow
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          mkdir -p fallow-out
+
+          npx fallow dead-code --format json \
+            > fallow-out/fallow-report.json 2>&1 || true
+
+      # -------------------------
+      # Create REPORTS folder
+      # -------------------------
+      - name: Prepare reports folder
+        run: mkdir -p "- REPORTS -"
+
+      # -------------------------
+      # Save JSON into - REPORTS -
+      # -------------------------
+      - name: Store JSON report
+        run: |
+          cp "${{ env.PROJECT_DIR }}/fallow-out/fallow-report.json" "- REPORTS -/fallow-report.json" || true
+
+          if [ ! -s "- REPORTS -/fallow-report.json" ]; then
+            echo '{"message":"No output"}' > "- REPORTS -/fallow-report.json"
+          fi
+
+      # -------------------------
+      # Generate Markdown (FIXED OBJECT RENDERING)
+      # -------------------------
+      - name: Generate Markdown report
+        run: |
+          node <<'EOF'
+          const fs = require("fs");
+
+          const dir = "- REPORTS -";
+          const jsonPath = `${dir}/fallow-report.json`;
+          const mdPath = `${dir}/fallow-report.md`;
+
+          let data = {};
+
+          try {
+            data = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
+          } catch (e) {
+            data = {};
+          }
+
+          const renderItem = (item) => {
+            if (item === null || item === undefined) return "_empty_";
+
+            if (typeof item === "string" || typeof item === "number") {
+              return `\`${item}\``;
+            }
+
+            if (Array.isArray(item)) {
+              return item.map(renderItem).join("\n");
+            }
+
+            return Object.entries(item)
+              .map(([k, v]) => `**${k}:** ${renderItem(v)}`)
+              .join("\n");
+          };
+
+          const renderList = (arr) => {
+            if (!Array.isArray(arr) || arr.length === 0) {
+              return "_No issues found_\n";
+            }
+
+            return arr.map(x => `- ${renderItem(x)}`).join("\n") + "\n";
+          };
+
+          const count = (arr) => (Array.isArray(arr) ? arr.length : 0);
+
+          let md = "# Fallow Report\n\n";
+
+          md += "## 📊 Summary\n\n";
+          md += `- Unused Files: ${count(data.unused_files)}\n`;
+          md += `- Unused Exports: ${count(data.unused_exports)}\n`;
+          md += `- Unused Types: ${count(data.unused_types)}\n`;
+          md += `- Unused Dependencies: ${count(data.unused_dependencies)}\n`;
+          md += `- Unresolved Imports: ${count(data.unresolved_imports)}\n\n`;
+
+          md += "## 🗂 Unused Files\n\n" + renderList(data.unused_files);
+          md += "## 📦 Unused Exports\n\n" + renderList(data.unused_exports);
+          md += "## 🧬 Unused Types\n\n" + renderList(data.unused_types);
+          md += "## 📦 Unused Dependencies\n\n" + renderList(data.unused_dependencies);
+          md += "## 🔌 Unresolved Imports\n\n" + renderList(data.unresolved_imports);
+
+          fs.writeFileSync(mdPath, md);
+          EOF
+
+      # -------------------------
+      # Debug
+      # -------------------------
+      - name: Debug output
+        run: ls -R "${REPORT_DIR}" || true
+
+      # -------------------------
+      # Commit reports
+      # -------------------------
+      - name: Commit reports
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "gitea-actions[bot]"
+          git config user.email "gitea-actions@users.noreply.local"
+
+          git add "${REPORT_DIR}/fallow-report.json" "${REPORT_DIR}/fallow-report.md"
+
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+
+          git commit -m "chore: update fallow report"
+
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main

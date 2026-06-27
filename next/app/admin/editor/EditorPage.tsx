@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useRef, useState, useCallback, useMemo } from "react";
+import { flushSync } from "react-dom";
 
 import { useRouter } from "next/navigation";
 import type { EditorBlock } from "@/lib/pages-db";
@@ -146,6 +147,12 @@ export default function EditorPage({
     (fn: (() => void) | null) => { flushOnChangeRef.current = fn; },
     [],
   );
+
+  const reinitEditorRef = useRef<((blocks: EditorBlock[]) => void) | null>(null);
+  const registerReinitHandler = useCallback(
+    (fn: ((blocks: EditorBlock[]) => void) | null) => { reinitEditorRef.current = fn; },
+    [],
+  );
   const handleAddBlockFromPanel = useCallback((type: string) => {
     addBlockHandlerRef.current?.(type);
   }, []);
@@ -216,28 +223,19 @@ export default function EditorPage({
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
-    // Flush any pending debounced onChange so latestBlocksRef reflects the very
-    // latest block content before we snapshot the current language's state.
+    // Flush any pending debounced onChange so latestBlocksRef is up to date.
     flushOnChangeRef.current?.();
+
+    // Capture scroll position AFTER blur (blur can itself shift scroll).
+    const scrollEl  = canvasRef.current;
+    const scrollTop = scrollEl?.scrollTop ?? 0;
 
     // Capture the fresh current-lang state from refs (not React state — setters
     // are async and defaultLangBlocks/codeText may be stale).
     const currentBlocks = latestBlocksRef.current;
     const currentCode   = latestCodeRef.current;
 
-    // --- save current locale's state ---
-    if (activeLang === defaultLang) {
-      setDefaultLangBlocks(currentBlocks);
-      setDefaultLangCode(currentCode);
-    } else {
-      setTranslations((prev) => ({
-        ...prev,
-        [activeLang]: { blocks: currentBlocks, html: currentCode },
-      }));
-    }
-
-    // --- restore next locale's state onto the canvas ---
-    // When leaving defaultLang, its setDefaultLangBlocks update hasn't committed
+    // When leaving defaultLang, its setDefaultLangBlocks update hasn’t committed
     // yet — use the captured currentBlocks as the fallback template instead.
     const tmplBlocks = activeLang === defaultLang ? currentBlocks : defaultLangBlocks;
     const tmplCode   = activeLang === defaultLang ? currentCode   : defaultLangCode;
@@ -254,16 +252,38 @@ export default function EditorPage({
         ? (tr.html ?? blocksToShortcodes(restoredBlocks))
         : (blocksToShortcodes(tmplBlocks) || tmplCode);
     }
-    setCodeText(restoredCode);
-    setVisualBlocks(restoredBlocks);
 
-    // Sync refs immediately to the restored blocks so that if the user
-    // switches away again without making any edits, we save the correct data.
+    // flushSync forces React to commit ALL state changes synchronously (before
+    // the next browser paint). We then restore scrollTop immediately after so
+    // the browser never sees the wrong scroll position.
+    flushSync(() => {
+      // --- save current locale’s state ---
+      if (activeLang === defaultLang) {
+        setDefaultLangBlocks(currentBlocks);
+        setDefaultLangCode(currentCode);
+      } else {
+        setTranslations((prev) => ({
+          ...prev,
+          [activeLang]: { blocks: currentBlocks, html: currentCode },
+        }));
+      }
+
+      setCodeText(restoredCode);
+      setActiveLangRaw(next);
+      setSelectedBlock(null);
+    });
+
+    // Reinit the Zustand store (runs outside flushSync to avoid nesting issues).
+    // This triggers one more synchronous Zustand→React render pass.
+    reinitEditorRef.current?.(restoredBlocks);
+
+    // Restore scroll — at this point all React + Zustand DOM mutations have
+    // committed; restore before the browser paints.
+    if (scrollEl) scrollEl.scrollTop = scrollTop;
+
+    // Sync refs immediately so a quick successive switch reads correct data.
     latestBlocksRef.current = restoredBlocks;
     latestCodeRef.current   = restoredCode;
-
-    setActiveLangRaw(next);
-    setSelectedBlock(null);
   }, [activeLang, defaultLang, translations, defaultLangBlocks, defaultLangCode, setCodeText, setVisualBlocks, setSelectedBlock]);
 
   // Keep translations map in sync as we type (for the active non-default lang)
@@ -322,7 +342,7 @@ export default function EditorPage({
           </div>
         </aside>
         {/* Editor canvas */}
-        <div ref={canvasRef} className="flex-1 overflow-y-auto bg-zinc-100">
+        <div ref={canvasRef} className="flex-1 overflow-y-auto bg-zinc-100" style={{ overflowAnchor: "none" }}>
           <div className="">
             <div
               className="mx-auto"
@@ -384,7 +404,6 @@ export default function EditorPage({
                       forcedViewport={panelOpen && viewport !== "desktop" ? viewport : undefined}
                     />
                     <VisualEditor
-                      key={activeLang}
                       initialBlocks={liveBlocks}
                       onChange={handleVisualChange}
                       onSelectBlock={handleSelectBlock}
@@ -392,6 +411,7 @@ export default function EditorPage({
                       registerUpdateHandler={registerUpdateHandler}
                       registerAddBlockHandler={registerAddBlockHandler}
                       registerFlushHandler={registerFlushHandler}
+                      registerReinitHandler={registerReinitHandler}
                       onColSelect={handleColSelect}
                       disabledBlocks={disabledBlocks}
                       activeLang={activeLang}

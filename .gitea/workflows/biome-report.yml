@@ -1,0 +1,196 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      GITEA_URL: https://your-gitea-instance.com
+      REPORT_DIR: "_REPORTS"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Find project
+        run: |
+          PROJECT_DIR=$(find . -name package.json -not -path "*/node_modules/*" | head -n 1 | xargs dirname)
+
+          if [ -z "$PROJECT_DIR" ]; then
+            echo "No package.json found" >&2
+            exit 1
+          fi
+
+          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: npm install
+
+      - name: Run Biome (JSON)
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          set +e
+          npx biome check . --reporter json > biome-report.json
+          set -e
+
+      - name: Create report directory
+        run: mkdir -p "${GITHUB_WORKSPACE}/${REPORT_DIR}"
+
+      - name: Move report
+        run: |
+          mv \
+            "${{ env.PROJECT_DIR }}/biome-report.json" \
+            "${GITHUB_WORKSPACE}/${REPORT_DIR}/biome-report.json"
+
+      - name: Generate Markdown report
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
+          const path = require('path');
+
+          const reportDir = path.join(
+            process.env.GITHUB_WORKSPACE,
+            process.env.REPORT_DIR
+          );
+
+          const report = JSON.parse(
+            fs.readFileSync(
+              path.join(reportDir, 'biome-report.json'),
+              'utf8'
+            )
+          );
+
+          const diagnostics = report.diagnostics ?? [];
+
+          const repo = process.env.GITHUB_REPOSITORY;
+          const sha = process.env.GITHUB_SHA;
+          const base = process.env.GITEA_URL;
+
+          const [owner, repoName] = repo.split('/');
+
+          const byFile = new Map();
+
+          function getFile(d) {
+            return (
+              d.location?.path ??
+              d.filePath ??
+              d.advices?.[0]?.location?.path ??
+              null
+            );
+          }
+
+          function getPos(d) {
+            const loc = d.location ?? d.advices?.[0]?.location;
+            if (!loc?.start) return null;
+
+            return {
+              line: loc.start.line,
+              column: loc.start.column
+            };
+          }
+
+          function isFormatter(d) {
+            return (d.message || '').includes('Formatter would have printed');
+          }
+
+          function makeLink(file, line) {
+            if (!file) return null;
+            const linePart = line ? `#L${line}` : '';
+            return `${base}/${owner}/${repoName}/src/commit/${sha}/${file}${linePart}`;
+          }
+
+          function add(file, type, entry) {
+            const key = file ?? 'project-level';
+
+            if (!byFile.has(key)) {
+              byFile.set(key, { lint: [], format: [] });
+            }
+
+            byFile.get(key)[type].push(entry);
+          }
+
+          for (const d of diagnostics) {
+            const file = getFile(d);
+            const msg = (d.message || '').replace(/\n/g, ' ');
+            const pos = getPos(d);
+
+            let icon = '🔵';
+            const sev = String(d.severity || '').toLowerCase();
+
+            if (sev.includes('error')) icon = '🔴';
+            else if (sev.includes('warn')) icon = '🟡';
+
+            if (isFormatter(d)) {
+              add(file, 'format', {
+                msg: 'File needs formatting (run biome format)'
+              });
+              continue;
+            }
+
+            add(file, 'lint', {
+              icon,
+              line: pos?.line ?? '—',
+              column: pos?.column ?? '—',
+              link: makeLink(file, pos?.line),
+              msg
+            });
+          }
+
+          const lines = [];
+          lines.push('# Biome Report\n');
+
+          for (const [file, data] of byFile.entries()) {
+            lines.push(`## 📄 ${file}\n`);
+
+            if (data.lint.length) {
+              lines.push('### Lint issues\n');
+              lines.push('| | Line | Column | Message |');
+              lines.push('|--|------|--------|---------|');
+
+              for (const e of data.lint) {
+                const lineCell = e.link ? `[${e.line}](${e.link})` : e.line;
+                lines.push(`| ${e.icon} | ${lineCell} | ${e.column} | ${e.msg} |`);
+              }
+
+              lines.push('');
+            }
+
+            if (data.format.length) {
+              lines.push('### Formatting\n');
+              lines.push('- 🟣 File is not formatted. Run `biome format`\n');
+            }
+          }
+
+          fs.writeFileSync(
+            path.join(reportDir, 'biome-report.md'),
+            lines.join('\n')
+          );
+          EOF
+
+      - name: Commit reports
+        run: |
+          git config user.name "gitea-actions[bot]"
+          git config user.email "gitea-actions[bot]@users.noreply.local"
+
+          git add -- "${REPORT_DIR}/biome-report.json"
+          git add -- "${REPORT_DIR}/biome-report.md"
+
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+
+          git commit -m "chore: update biome reports"
+          git push 
