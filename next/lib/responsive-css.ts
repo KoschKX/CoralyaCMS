@@ -113,10 +113,7 @@ export function buildResponsiveCSS(
       if (Object.keys(cascaded).length > 0) {
         const rules = rulesFor(cascaded);
         if (rules) {
-          // Exclude editor UI overlays (toolbars, pickers) so responsive color
-          // overrides don't tint editor chrome. :not([data-editor-ui] *) requires
-          // CSS4 :not() with complex selectors — supported in all modern browsers.
-          const sel = `[data-block-id="${block.id}"], [data-block-id="${block.id}"] *:not([data-editor-ui]):not([data-editor-ui] *)`;
+          const sel = `[data-block-id="${block.id}"], [data-block-id="${block.id}"] *`;
           css += `${sel} { ${rules} }\n`;
         }
       }
@@ -175,9 +172,7 @@ export function buildResponsiveCSS(
     }
 
     if (responsive) {
-      // Exclude editor UI overlays (toolbars, pickers) so responsive color
-      // overrides don't tint editor chrome.
-      const sel = `[data-block-id="${block.id}"], [data-block-id="${block.id}"] *:not([data-editor-ui]):not([data-editor-ui] *)`;
+      const sel = `[data-block-id="${block.id}"], [data-block-id="${block.id}"] *`;
       const tabletRules = responsive.tablet ? rulesFor(responsive.tablet) : "";
       const mobileRules = responsive.mobile ? rulesFor(responsive.mobile) : "";
       if (tabletRules) css += `${tabletQuery} { ${sel} { ${tabletRules} } }\n`;

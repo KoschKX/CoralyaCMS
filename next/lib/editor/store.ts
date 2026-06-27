@@ -56,13 +56,6 @@ export interface EditorStore {
   publish: (newBlocks: readonly EditorBlock[]) => void;
   /** Cancel any pending debounced onChange and fire it synchronously with the current present blocks. No-op if no pending change. */
   flushOnChange: () => void;
-  /**
-   * Replace the block tree without recreating the store/component.
-   * Clears undo/redo history, cancels any pending debounce, and does NOT
-   * fire onChange — the caller already knows the new block content.
-   * Use this for language switching to avoid the flicker of unmount/remount.
-   */
-  reinit: (newBlocks: readonly EditorBlock[]) => void;
   undo: () => void;
   redo: () => void;
 
@@ -159,18 +152,6 @@ export function createEditorStore() {
           const current = get().present;
           cb.onChange?.(blocksToShortcodes(current), current);
         }
-      },
-
-      reinit(newBlocks) {
-        cancelPublishDebounce();
-        const mutable = [...newBlocks];
-        set((s) => {
-          s.present = mutable;
-          s.past = [];
-          s.future = [];
-          s.selectedBlockId = null;
-          s.activeColInfo = null;
-        });
       },
 
       undo() {

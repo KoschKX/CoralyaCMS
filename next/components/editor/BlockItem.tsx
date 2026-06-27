@@ -35,7 +35,6 @@ function ColViewportToolbar({ blockId, ci, cols, colData, colResp, ops, setActiv
   const effectiveColWidth = resolveColWidth(col ?? {}, editorViewport);
   return (
     <div
-      data-editor-ui
       className="absolute bottom-full right-0 z-20 mb-1.5"
       onClick={(e) => e.stopPropagation()}
     >

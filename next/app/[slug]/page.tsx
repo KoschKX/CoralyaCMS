@@ -112,7 +112,6 @@ export default async function SlugPage({ params, searchParams }: Props) {
                     ? "opacity-100"
                     : "opacity-50 hover:opacity-100"
                 }`}
-                
               >
                 <img
                   src={`/flags/${flagFor(lang)}.svg`}
