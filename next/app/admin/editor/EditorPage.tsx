@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useRef, useState, useCallback, useMemo } from "react";
+import React, { useRef, useState, useCallback, useMemo, useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 import type { EditorBlock } from "@/lib/pages-db";
@@ -180,6 +180,10 @@ export default function EditorPage({
   // when saving the current lang's content before switching.
   const latestBlocksRef = useRef(liveBlocks);
   const latestCodeRef   = useRef(codeText);
+  
+  // Store block info to restore selection after language switch
+  const blockToRestoreRef = useRef<{ path: number[], type: string } | null>(null);
+  const [pendingRestore, setPendingRestore] = useState(false);
 
   // Keep default-lang state in sync while the user is actually editing it.
   const saveBlocks = activeLang === defaultLang ? liveBlocks : defaultLangBlocks;
@@ -254,6 +258,7 @@ export default function EditorPage({
         ? (tr.html ?? blocksToShortcodes(restoredBlocks))
         : (blocksToShortcodes(tmplBlocks) || tmplCode);
     }
+    
     setCodeText(restoredCode);
     setVisualBlocks(restoredBlocks);
 
@@ -262,9 +267,41 @@ export default function EditorPage({
     latestBlocksRef.current = restoredBlocks;
     latestCodeRef.current   = restoredCode;
 
+    // Store block position/type info to restore selection after VisualEditor remounts
+    if (selectedBlock?.id) {
+      // Find the path (position) of the selected block in current language
+      // Use liveBlocks instead of currentBlocks since currentBlocks might be stale
+      const findBlockPath = (blocks: EditorBlock[], targetId: string, path: number[] = []): { path: number[], type: string } | null => {
+        for (let i = 0; i < blocks.length; i++) {
+          const block = blocks[i];
+          if (block.id === targetId) {
+            return { path: [...path, i], type: block.type };
+          }
+          
+          // Check nested blocks in columns
+          if (block.data?.cols && Array.isArray(block.data.cols)) {
+            for (let colIdx = 0; colIdx < block.data.cols.length; colIdx++) {
+              const col = block.data.cols[colIdx];
+              if (col.blocks && Array.isArray(col.blocks)) {
+                const found = findBlockPath(col.blocks, targetId, [...path, i, colIdx]);
+                if (found) return found;
+              }
+            }
+          }
+        }
+        return null;
+      };
+
+      blockToRestoreRef.current = findBlockPath(liveBlocks, selectedBlock.id);
+      setPendingRestore(true);
+    } else {
+      blockToRestoreRef.current = null;
+      setPendingRestore(false);
+    }
+
     setActiveLangRaw(next);
     setSelectedBlock(null);
-  }, [activeLang, defaultLang, translations, defaultLangBlocks, defaultLangCode, setCodeText, setVisualBlocks, setSelectedBlock]);
+  }, [activeLang, defaultLang, translations, defaultLangBlocks, defaultLangCode, setCodeText, setVisualBlocks, selectedBlock, setSelectedBlock]);
 
   // Keep translations map in sync as we type (for the active non-default lang)
   // This runs on every block change so the save always has fresh data.
@@ -282,6 +319,56 @@ export default function EditorPage({
       }));
     }
   }, [activeLang, defaultLang, setCodeText, setVisualBlocks]);
+
+  // Restore block selection after language switch and VisualEditor remount
+  useEffect(() => {
+    if (!pendingRestore) return;
+    
+    const blockInfo = blockToRestoreRef.current;
+    if (!blockInfo) {
+      setPendingRestore(false);
+      return;
+    }
+    
+    // Small delay to ensure VisualEditor has fully mounted
+    const timeoutId = setTimeout(() => {
+      // Find block at same path in the current blocks
+      const getBlockAtPath = (blocks: EditorBlock[], path: number[]): EditorBlock | null => {
+        if (path.length === 0) return null;
+        
+        const [idx, ...rest] = path;
+        if (idx >= blocks.length) return null;
+        
+        const block = blocks[idx];
+        
+        if (rest.length === 0) return block;
+        
+        // Navigate into columns
+        const [colIdx, ...innerPath] = rest;
+        if (block.data?.cols && Array.isArray(block.data.cols) && colIdx < block.data.cols.length) {
+          const col = block.data.cols[colIdx];
+          if (col.blocks && Array.isArray(col.blocks)) {
+            return getBlockAtPath(col.blocks, innerPath);
+          }
+        }
+        
+        return null;
+      };
+
+      const newBlock = getBlockAtPath(liveBlocks, blockInfo.path);
+      // Only select if it's the same block type at the same position
+      if (newBlock && newBlock.type === blockInfo.type) {
+        setSelectedBlock({ id: newBlock.id, name: newBlock.type, data: newBlock.data });
+        setPanelTab("block");
+      }
+      
+      // Clear the ref and flag
+      blockToRestoreRef.current = null;
+      setPendingRestore(false);
+    }, 150);
+    
+    return () => clearTimeout(timeoutId);
+  }, [pendingRestore, liveBlocks, setSelectedBlock, setPanelTab]);
 
   const showLangSwitcher = languages.length > 1;
 
