@@ -1,6 +1,7 @@
 "use client";
 
 import type { BlockLayoutProps } from "@/lib/block-types";
+import { useBlockT } from "@/components/editor/BlockLocaleContext";
 
 // ── Placeholder ───────────────────────────────────────────────────────────────
 
@@ -20,8 +21,9 @@ function AudioPlaceholder({ label }: { label: string }) {
 // ── Hosted <audio> ────────────────────────────────────────────────────────────
 
 function HostedAudio({ data }: { data: Record<string, unknown> }) {
+  const t = useBlockT("audio");
   const src = String(data.src ?? "").trim();
-  if (!src) return <AudioPlaceholder label="Add an audio file URL in the panel" />;
+  if (!src) return <AudioPlaceholder label={t("placeholder.hosted", "Add an audio file URL in the panel")} />;
 
   const borderRadius = String(data.borderRadius ?? "").trim() || undefined;
 
@@ -43,8 +45,9 @@ function HostedAudio({ data }: { data: Record<string, unknown> }) {
 // ── SoundCloud embed ──────────────────────────────────────────────────────────
 
 function SoundCloudEmbed({ data }: { data: Record<string, unknown> }) {
+  const t = useBlockT("audio");
   const rawUrl = String(data.url ?? "").trim();
-  if (!rawUrl) return <AudioPlaceholder label="Enter a SoundCloud URL in the panel" />;
+  if (!rawUrl) return <AudioPlaceholder label={t("placeholder.soundcloud", "Enter a SoundCloud URL in the panel")} />;
 
   const params = new URLSearchParams({
     url:           rawUrl,
@@ -62,7 +65,7 @@ function SoundCloudEmbed({ data }: { data: Record<string, unknown> }) {
 
   const src    = `https://w.soundcloud.com/player/?${params.toString()}`;
   const height = data.visual === true ? 300 : 166;
-  const title  = String(data.title ?? "") || "SoundCloud player";
+  const title  = String(data.title ?? "") || t("player.title", "SoundCloud player");
 
   return (
     <iframe

@@ -18,19 +18,24 @@ import "@/blocks/index"; // side-effect: populates plugin-registry blockMap used
 import { publicBlockMap } from "@/blocks/layout-registry";
 import { tokenise, buildBlocks } from "@/lib/shortcodes";
 import { getBlockWrapperProps } from "@/lib/block-advanced-css";
+import { BlockLocaleProvider } from "@/components/editor/BlockLocaleContext";
 import type { EditorBlock } from "@/lib/pages-db";
 
 interface Props {
   html: string;
   disabledBlocks?: string[];
+  /** Active locale for fixed text rendered inside block layouts. */
+  locale?: string;
 }
 
 function RenderBlocks({
   blocks,
   disabledBlocks,
+  locale,
 }: {
   blocks: EditorBlock[];
   disabledBlocks: string[];
+  locale?: string;
 }): ReactNode {
   return (
     <div
@@ -59,10 +64,11 @@ function RenderBlocks({
             <def.Layout
               data={block.data as Record<string, unknown>}
               blockId={block.id}
+              locale={locale}
               renderBlocks={
                 def.isContainer
                   ? (children) => (
-                      <RenderBlocks blocks={children} disabledBlocks={disabledBlocks} />
+                      <RenderBlocks blocks={children} disabledBlocks={disabledBlocks} locale={locale} />
                     )
                   : undefined
               }
@@ -74,8 +80,13 @@ function RenderBlocks({
   );
 }
 
-export default function HTMLRenderer({ html, disabledBlocks = [] }: Props) {
+export default function HTMLRenderer({ html, disabledBlocks = [], locale }: Props) {
   const blocks = buildBlocks(tokenise(html), 0).blocks;
-  return <RenderBlocks blocks={blocks} disabledBlocks={disabledBlocks} />;
+  const content = <RenderBlocks blocks={blocks} disabledBlocks={disabledBlocks} locale={locale} />;
+  return locale ? (
+    <BlockLocaleProvider locale={locale}>{content}</BlockLocaleProvider>
+  ) : (
+    content
+  );
 }
 

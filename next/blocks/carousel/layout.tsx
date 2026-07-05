@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import type React from "react";
 import "./styles.css";
 import type { BlockLayoutProps } from "@/lib/block-types";
+import { useBlockT } from "@/components/editor/BlockLocaleContext";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -70,6 +71,7 @@ function Slide({
   isActive: boolean;
   isFade: boolean;
 }) {
+  const t = useBlockT("carousel");
   const src      = sanitizeImageUrl(slide.src);
   const linkHref = sanitizeUrl(slide.link);
   const target   = slide.linkTarget || "_self";
@@ -79,7 +81,7 @@ function Slide({
     // eslint-disable-next-line @next/next/no-img-element
     <img src={src} alt={slide.alt || ""} loading="lazy" draggable={false} />
   ) : (
-    <div className="coralya-carousel-slide-placeholder" role="img" aria-label="No image set">
+    <div className="coralya-carousel-slide-placeholder" role="img" aria-label={t("slide.noImage", "No image set")}>
       {/* Mountain-scene placeholder SVG */}
       <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
         <path fill="currentColor" d="M8 48l14-20 10 13 8-10 16 17H8z" opacity=".3" />
@@ -119,6 +121,7 @@ function Slide({
 // ── Block layout ──────────────────────────────────────────────────────────────
 
 export default function CarouselLayout({ data, blockId }: BlockLayoutProps) {
+  const t            = useBlockT("carousel");
   const slides       = safeSlides(data.items);
   const effect       = (data.effect as string) === "fade" ? "fade" : "slide";
   const perView      = effect === "fade"
@@ -167,7 +170,7 @@ export default function CarouselLayout({ data, blockId }: BlockLayoutProps) {
         style={{ "--car-radius": `${borderRadius}px` } as React.CSSProperties}
       >
         <div className="coralya-carousel-viewport coralya-carousel-viewport--empty">
-          No slides added yet.
+          {t("empty", "No slides added yet.")}
         </div>
       </div>
     );
@@ -222,7 +225,7 @@ export default function CarouselLayout({ data, blockId }: BlockLayoutProps) {
               type="button"
               className="coralya-carousel-arrow coralya-carousel-arrow--prev"
               onClick={prev}
-              aria-label="Previous slide"
+              aria-label={t("prevSlide", "Previous slide")}
               disabled={isAtStart}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -233,7 +236,7 @@ export default function CarouselLayout({ data, blockId }: BlockLayoutProps) {
               type="button"
               className="coralya-carousel-arrow coralya-carousel-arrow--next"
               onClick={next}
-              aria-label="Next slide"
+              aria-label={t("nextSlide", "Next slide")}
               disabled={isAtEnd}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -247,7 +250,7 @@ export default function CarouselLayout({ data, blockId }: BlockLayoutProps) {
 
       {/* ── Dot navigation ────────────────────────────────────────────── */}
       {showDots && count > 1 && (
-        <div className="coralya-carousel-dots" role="tablist" aria-label="Slide navigation">
+        <div className="coralya-carousel-dots" role="tablist" aria-label={t("dots", "Slide navigation")}>
           {slides.map((slide, i) => (
             <button
               key={slide.id}

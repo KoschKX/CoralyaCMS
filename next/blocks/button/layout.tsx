@@ -1,4 +1,7 @@
+"use client";
+
 import type React from "react";
+import { useBlockT } from "@/components/editor/BlockLocaleContext";
 import "./styles.css";
 import type { BlockLayoutProps } from "@/lib/block-types";
 
@@ -35,7 +38,8 @@ function wrapperClass(align: string): string {
 }
 
 export default function ButtonLayout({ data, blockId }: BlockLayoutProps) {
-  const text         = (data.text         as string) || "Button";
+  const t = useBlockT("button");
+  const text         = t((data.text as string) || "Click here", (data.text as string) || "Click here");
   const url          = sanitizeUrl(data.url);
   const target       = (data.target       as string) === "_blank" ? "_blank" : "_self";
   const type         = (["flat", "outline", "transparent", "3d", "link"] as const)

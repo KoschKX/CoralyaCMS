@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { BlockLayoutProps } from "@/lib/block-types";
+import { useBlockT } from "@/components/editor/BlockLocaleContext";
 import type { InstagramPost } from "@/app/api/instagram/media/route";
 
 // Placeholder gradients shown while loading or when no token is configured
@@ -40,6 +41,7 @@ function CarouselIcon() {
 }
 
 export default function InstagramLayout({ data, blockId }: BlockLayoutProps) {
+  const t = useBlockT("instagram");
   const limit        = Math.max(1, Number(data.limit)   || 9);
   const columns      = Math.max(1, Number(data.columns) || 3);
   const colGap       = data.columnSpacing ? `${data.columnSpacing}px` : "8px";
@@ -201,7 +203,7 @@ export default function InstagramLayout({ data, blockId }: BlockLayoutProps) {
                 borderColor:     loadMoreBtnBgColor || undefined,
               }}
             >
-              {(data.loadMoreText as string) || "Load More"}
+              {t((data.loadMoreText as string) || "Load More", (data.loadMoreText as string) || "Load More")}
             </button>
           )}
 
@@ -222,7 +224,7 @@ export default function InstagramLayout({ data, blockId }: BlockLayoutProps) {
                 <circle cx="12" cy="12" r="4"/>
                 <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
               </svg>
-              {(data.followButtonText as string) || "Follow Us On Instagram"}
+              {t((data.followButtonText as string) || "Follow Us On Instagram", (data.followButtonText as string) || "Follow Us On Instagram")}
             </a>
           )}
         </div>

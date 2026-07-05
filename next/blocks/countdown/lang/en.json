@@ -1,0 +1,9 @@
+{
+  "label": "Countdown",
+  "unit.weeks": "Weeks",
+  "unit.days": "Days",
+  "unit.hours": "Hours",
+  "unit.minutes": "Minutes",
+  "unit.seconds": "Seconds",
+  "expired": "Event has ended"
+}

@@ -24,8 +24,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function Home() {
   const settings = getSettings();
-  const { disabledBlocks, layout } = settings;
+  const { disabledBlocks, layout, languages } = settings;
   const { tablet: tabletBp, mobile: mobileBp } = layout.breakpoints;
+  const renderLocale = languages[0] ?? "en";
 
   // Serve the page with slug "" or "home" as the front page, if published
   const homePage = getPublishedPageBySlug("") ?? getPublishedPageBySlug("home");
@@ -51,8 +52,8 @@ export default function Home() {
         <ResponsiveStyleInjector blocks={homePage.blocks} tabletBp={tabletBp} mobileBp={mobileBp} />
         <h1 className="mb-10 text-4xl font-bold text-zinc-900">{homePage.title}</h1>
         {homePage.html
-          ? <HTMLRenderer html={homePage.html} disabledBlocks={disabledBlocks} />
-          : <BlockRenderer blocks={homePage.blocks} disabledBlocks={disabledBlocks} />
+          ? <HTMLRenderer html={homePage.html} disabledBlocks={disabledBlocks} locale={renderLocale} />
+          : <BlockRenderer blocks={homePage.blocks} disabledBlocks={disabledBlocks} locale={renderLocale} />
         }
         <PluginPageInjections slug={homePage.slug || ""} />
       </main>

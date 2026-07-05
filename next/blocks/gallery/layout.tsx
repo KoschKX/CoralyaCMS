@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { BlockLayoutProps } from "@/lib/block-types";
+import { useBlockT } from "@/components/editor/BlockLocaleContext";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -92,6 +93,7 @@ function Lightbox({
   const image   = images[index];
   const hasPrev = index > 0;
   const hasNext = index < images.length - 1;
+  const t       = useBlockT("gallery");
 
   const handleKey = useCallback(
     (e: KeyboardEvent) => {
@@ -114,7 +116,7 @@ function Lightbox({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Image lightbox"
+      aria-label={t("lightbox.dialog", "Image lightbox")}
       onClick={onClose}
       style={{
         position:       "fixed",
@@ -141,7 +143,7 @@ function Lightbox({
         {/* Close button */}
         <button
           type="button"
-          aria-label="Close lightbox"
+          aria-label={t("lightbox.close", "Close lightbox")}
           onClick={onClose}
           style={{
             position:   "absolute",
@@ -178,7 +180,7 @@ function Lightbox({
             width: 400, height: 280, background: "#1c1c1e",
             display: "flex", alignItems: "center", justifyContent: "center", color: "#555",
           }}>
-            No image
+            {t("lightbox.noImage", "No image")}
           </div>
         )}
 
@@ -200,7 +202,7 @@ function Lightbox({
       {hasPrev && (
         <button
           type="button"
-          aria-label="Previous image"
+          aria-label={t("lightbox.prev", "Previous image")}
           onClick={(e) => { e.stopPropagation(); onNavigate(index - 1); }}
           style={{
             position:       "fixed",
@@ -229,7 +231,7 @@ function Lightbox({
       {hasNext && (
         <button
           type="button"
-          aria-label="Next image"
+          aria-label={t("lightbox.next", "Next image")}
           onClick={(e) => { e.stopPropagation(); onNavigate(index + 1); }}
           style={{
             position:       "fixed",

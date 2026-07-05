@@ -20,9 +20,9 @@ import { usePageMeta } from "@/app/admin/editor/hooks/usePageMeta";
 import { useEditorPageState } from "@/app/admin/editor/hooks/useEditorPageState";
 import { useDirtyTracking } from "@/app/admin/editor/hooks/useDirtyTracking";
 import dynamic from "next/dynamic";
+import { Suspense } from "react";
 const CodeEditor = dynamic(() => import("@/components/CodeEditor"), {
   ssr: false,
-  loading: () => <div className="h-[60vh] animate-pulse rounded-lg bg-zinc-100" />,
 });
 import type { VisualEditorProps } from "@/components/VisualEditor";
 
@@ -30,7 +30,6 @@ const VisualEditor = dynamic<VisualEditorProps>(
   () => import("@/components/VisualEditor"),
   {
     ssr: false,
-    loading: () => <div className="min-h-[400px] animate-pulse rounded-lg bg-zinc-100" />,
   },
 );
 
@@ -241,16 +240,18 @@ export default function PostEditorPage({
                       forContainer
                       forcedViewport={panelOpen && viewport !== "desktop" ? viewport : undefined}
                     />
-                    <VisualEditor
-                      initialBlocks={liveBlocks}
-                      onChange={(newCode, newBlocks) => { setCodeText(newCode); setVisualBlocks(newBlocks); }}
-                      onSelectBlock={handleSelectBlock}
-                      selectedBlockId={selectedBlock?.id ?? null}
-                      registerUpdateHandler={registerUpdateHandler}
-                      registerAddBlockHandler={registerAddBlockHandler}
-                      onColSelect={handleColSelect}
-                      disabledBlocks={disabledBlocks}
-                    />
+                    <Suspense fallback={<div style={{ minHeight: "200px" }} />}>
+                      <VisualEditor
+                        initialBlocks={liveBlocks}
+                        onChange={(newCode, newBlocks) => { setCodeText(newCode); setVisualBlocks(newBlocks); }}
+                        onSelectBlock={handleSelectBlock}
+                        selectedBlockId={selectedBlock?.id ?? null}
+                        registerUpdateHandler={registerUpdateHandler}
+                        registerAddBlockHandler={registerAddBlockHandler}
+                        onColSelect={handleColSelect}
+                        disabledBlocks={disabledBlocks}
+                      />
+                    </Suspense>
                   </ViewportContext.Provider>
                 </>
               )}

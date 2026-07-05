@@ -4,10 +4,17 @@ import { publicBlockMap } from "@/blocks/layout-registry";
 import { parseShortcode } from "@/lib/shortcodes";
 import { getBlockWrapperProps } from "@/lib/block-advanced-css";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { BlockLocaleProvider } from "@/components/editor/BlockLocaleContext";
 
 interface Props {
   blocks: EditorBlock[];
   disabledBlocks?: string[];
+  /**
+   * Active locale for the block chrome rendered inside layouts (e.g. the
+   * countdown unit labels). Only the top-level call needs to pass it; nested
+   * container renders inherit it via context.
+   */
+  locale?: string;
 }
 
 interface ResolvedBlock {
@@ -83,13 +90,13 @@ function UnavailablePlaceholder({ type, reason }: { type: string; reason: "disab
   );
 }
 
-function BlockRenderer({ blocks, disabledBlocks = [] }: Props) {
+function BlockRenderer({ blocks, disabledBlocks = [], locale }: Props) {
   const resolved = useMemo(
     () => resolveBlocks(blocks, disabledBlocks),
     [blocks, disabledBlocks],
   );
 
-  return (
+  const content = (
     <div className="cms-block-list">
       {resolved.map((entry) => {
           if (entry.unavailable) {
@@ -114,9 +121,10 @@ function BlockRenderer({ blocks, disabledBlocks = [] }: Props) {
                 <def.Layout
                   data={entry.resolvedData}
                   blockId={entry.id}
+                  locale={locale}
                   renderBlocks={
                     def.isContainer
-                      ? (children) => <BlockRenderer blocks={children} disabledBlocks={disabledBlocks} />
+                      ? (children) => <BlockRenderer blocks={children} disabledBlocks={disabledBlocks} locale={locale} />
                       : undefined
                   }
                 />
@@ -125,6 +133,12 @@ function BlockRenderer({ blocks, disabledBlocks = [] }: Props) {
           );
         })}
     </div>
+  );
+
+  return locale ? (
+    <BlockLocaleProvider locale={locale}>{content}</BlockLocaleProvider>
+  ) : (
+    content
   );
 }
 

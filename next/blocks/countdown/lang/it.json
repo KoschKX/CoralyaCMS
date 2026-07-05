@@ -1,0 +1,9 @@
+{
+  "label": "Conto alla rovescia",
+  "unit.weeks": "Settimane",
+  "unit.days": "Giorni",
+  "unit.hours": "Ore",
+  "unit.minutes": "Minuti",
+  "unit.seconds": "Secondi",
+  "expired": "L'evento è terminato"
+}

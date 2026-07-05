@@ -2,6 +2,7 @@
 
 import "./styles.css";
 import { useState } from "react";
+import { useBlockT } from "@/components/editor/BlockLocaleContext";
 import Prism from "prismjs";
 // ── Language grammars (side-effect imports register into Prism.languages) ─────
 import "prismjs/components/prism-javascript";
@@ -88,6 +89,7 @@ function highlight(code: string, language: string): string {
 // ── Copy button ───────────────────────────────────────────────────────────────
 
 function CopyButton({ code, label }: { code: string; label: string }) {
+  const t = useBlockT("syntax-highlighter");
   const [copied, setCopied] = useState(false);
 
   function handleCopy() {
@@ -102,9 +104,9 @@ function CopyButton({ code, label }: { code: string; label: string }) {
       type="button"
       onClick={handleCopy}
       className="coralya-sh__copy"
-      aria-label="Copy code to clipboard"
+      aria-label={t("copy.aria", "Copy code to clipboard")}
     >
-      {copied ? "Copied!" : label || "Copy"}
+      {copied ? t("copy.copied", "Copied!") : label || t("copy.label", "Copy")}
     </button>
   );
 }
@@ -118,7 +120,7 @@ export default function SyntaxHighlighterLayout({ data }: BlockLayoutProps) {
   const lineNumbers = data.lineNumbers !== false;
   const lineWrap    = data.lineWrap === true;
   const copyButton  = data.copyButton !== false;
-  const copyText    = (data.copyText    as string) || "Copy";
+  const copyText    = (data.copyText    as string) || "";
   const fontSize    = (data.fontSize    as string) || undefined;
   const bgColor     = sanitizeColor(data.bgColor);
   const borderStyle = (data.borderStyle as string) || "none";

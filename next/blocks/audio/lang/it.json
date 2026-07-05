@@ -1,0 +1,6 @@
+{
+  "label": "Audio",
+  "placeholder.hosted": "Aggiungi l'URL del file audio nel pannello",
+  "placeholder.soundcloud": "Inserisci un URL SoundCloud nel pannello",
+  "player.title": "Lettore SoundCloud"
+}

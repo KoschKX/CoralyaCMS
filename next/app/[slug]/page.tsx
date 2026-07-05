@@ -68,6 +68,14 @@ export default async function SlugPage({ params, searchParams }: Props) {
   const displayBlocks = translation?.blocks ?? page.blocks;
   const displayHtml   = translation?.html   ?? page.html;
 
+  // Locale used for fixed text rendered inside block layouts. This follows the
+  // *requested* language whenever it's a configured site language, even if this
+  // page has no content translation for it — so block chrome (e.g. countdown
+  // units, counter default labels) still localises while the body content
+  // falls back to the default language.
+  const renderLocale =
+    rawLang && languages.includes(rawLang) ? rawLang : (languages[0] ?? "en");
+
   // Build responsive CSS with the correct block set
   const blocksForCSS = displayHtml
     ? buildBlocks(tokenise(displayHtml), 0).blocks
@@ -128,8 +136,8 @@ export default async function SlugPage({ params, searchParams }: Props) {
       <ResponsiveStyleInjector blocks={blocksForCSS} tabletBp={tabletBp} mobileBp={mobileBp} />
       <h1 className="mb-10 text-4xl font-bold text-zinc-900">{page.title}</h1>
       {displayHtml
-        ? <HTMLRenderer html={displayHtml} disabledBlocks={disabledBlocks} />
-        : <BlockRenderer blocks={displayBlocks} disabledBlocks={disabledBlocks} />
+        ? <HTMLRenderer html={displayHtml} disabledBlocks={disabledBlocks} locale={renderLocale} />
+        : <BlockRenderer blocks={displayBlocks} disabledBlocks={disabledBlocks} locale={renderLocale} />
       }
       <PluginPageInjections slug={slug} />
     </main>

@@ -16,6 +16,7 @@ import BlockPanel from "@/app/admin/editor/BlockPanel";
 import InjectCodePanel from "@/app/admin/editor/InjectCodePanel";
 import { BlocksPanel } from "@/components/editor/BlocksPanel";
 import { EditorNavDrawer } from "@/components/editor/EditorNavDrawer";
+import { BlockLocaleProvider } from "@/components/editor/BlockLocaleContext";
 import { useSavePage } from "@/app/admin/editor/hooks/useSavePage";
 import { useResponsiveBlock } from "@/app/admin/editor/hooks/useResponsiveBlock";
 import { useCanvasWidth } from "@/app/admin/editor/hooks/useCanvasWidth";
@@ -25,9 +26,9 @@ import { useEditorPageState } from "@/app/admin/editor/hooks/useEditorPageState"
 import { useDirtyTracking } from "@/app/admin/editor/hooks/useDirtyTracking";
 import { blocksToShortcodes, shortcodesToBlocks } from "@/lib/shortcodes";
 import dynamic from "next/dynamic";
+import { Suspense } from "react";
 const CodeEditor = dynamic(() => import("@/components/CodeEditor"), {
   ssr: false,
-  loading: () => <div className="h-[60vh] animate-pulse rounded-lg bg-zinc-100" />,
 });
 import type { VisualEditorProps } from "@/components/VisualEditor";
 
@@ -35,7 +36,6 @@ const VisualEditor = dynamic<VisualEditorProps>(
   () => import("@/components/VisualEditor"),
   {
     ssr: false,
-    loading: () => <div className="min-h-[400px] animate-pulse rounded-lg bg-zinc-100" />,
   },
 );
 
@@ -286,6 +286,7 @@ export default function EditorPage({
   const showLangSwitcher = languages.length > 1;
 
   return (
+    <BlockLocaleProvider locale={activeLang}>
     <EditorViewportContext.Provider value={editorViewportContextValue}>
     <div className="flex h-full flex-col overflow-hidden">
       <EditorToolbar
@@ -333,34 +334,18 @@ export default function EditorPage({
                   : "100%",
               } : { maxWidth: "100%" }}
             >
-            <div
-              className="text-zinc-900 bg-white rounded-lg shadow-sm mx-auto"
-              style={{
-                minHeight: "calc(100vh - 48px)",
-                maxWidth: "var(--content-max-width, 48rem)",
-                padding: "2.5rem var(--content-padding-x, 1.5rem)",
-                background: pageBgColor || "#fff",
-                containerType: "inline-size",
-              }}
-            >
-              {mainMode === "inject" ? (
-                <InjectCodePanel
-                  fields={injectFields}
-                  onChange={setInjectFields}
-                  onClose={() => setMainMode("visual")}
-                />
-              ) : mainMode === "code" ? (
-                <>
-                  <CodeEditor value={codeText} onValueChange={setCodeText} minHeight="60vh" />
-                  <div className="overflow-hidden rounded-b-lg border border-t-0 border-zinc-700 bg-zinc-800 px-4 py-2">
-                    <p className="text-[10px] text-zinc-500">
-                      Shortcodes or raw HTML. Columns:{" "}
-                      <span className="font-mono text-zinc-300">[columns][column width=&quot;50%&quot;]&hellip;[/column][/columns]</span>
-                    </p>
-                  </div>
-                </>
-              ) : (
-                <>
+            {mainMode === "visual" ? (
+              <Suspense fallback={<div style={{ minHeight: "50vh" }} />}>
+                <div
+                  className="text-zinc-900 bg-white rounded-lg shadow-sm mx-auto"
+                  style={{
+                    minHeight: "calc(100vh - 48px)",
+                    maxWidth: "var(--content-max-width, 48rem)",
+                    padding: "2.5rem var(--content-padding-x, 1.5rem)",
+                    background: pageBgColor || "#fff",
+                    containerType: "inline-size",
+                  }}
+                >
                   <input
                     type="text"
                     placeholder="Page title"
@@ -398,9 +383,38 @@ export default function EditorPage({
                       defaultLang={defaultLang}
                     />
                   </ViewportContext.Provider>
+                </div>
+              </Suspense>
+            ) : (
+              <div
+                className="text-zinc-900 bg-white rounded-lg shadow-sm mx-auto"
+                style={{
+                  minHeight: "calc(100vh - 48px)",
+                  maxWidth: "var(--content-max-width, 48rem)",
+                  padding: "2.5rem var(--content-padding-x, 1.5rem)",
+                  background: pageBgColor || "#fff",
+                  containerType: "inline-size",
+                }}
+              >
+              {mainMode === "inject" ? (
+                <InjectCodePanel
+                  fields={injectFields}
+                  onChange={setInjectFields}
+                  onClose={() => setMainMode("visual")}
+                />
+              ) : (
+                <>
+                  <CodeEditor value={codeText} onValueChange={setCodeText} minHeight="60vh" />
+                  <div className="overflow-hidden rounded-b-lg border border-t-0 border-zinc-700 bg-zinc-800 px-4 py-2">
+                    <p className="text-[10px] text-zinc-500">
+                      Shortcodes or raw HTML. Columns:{" "}
+                      <span className="font-mono text-zinc-300">[columns][column width=&quot;50%&quot;]&hellip;[/column][/columns]</span>
+                    </p>
+                  </div>
                 </>
               )}
             </div>
+            )}
             </div>
           </div>
         </div>
@@ -453,6 +467,7 @@ export default function EditorPage({
       </div>
     </div>
     </EditorViewportContext.Provider>
+    </BlockLocaleProvider>
   );
 }
 

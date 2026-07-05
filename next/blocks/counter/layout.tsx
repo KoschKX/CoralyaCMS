@@ -1,6 +1,9 @@
+"use client";
+
 import type React from "react";
 import "./styles.css";
 import type { BlockLayoutProps } from "@/lib/block-types";
+import { useBlockT } from "@/components/editor/BlockLocaleContext";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -123,13 +126,19 @@ function CircleItem({
 // ── Block layout ──────────────────────────────────────────────────────────────
 
 export default function CounterLayout({ data, blockId }: BlockLayoutProps) {
+  const t           = useBlockT("counter");
   const style       = (data.style as string) === "circle" ? "circle" : "box";
   const columns     = Math.min(6, Math.max(1, Number(data.columns) || 4));
   const color       = sanitizeColor(data.color);
   const borderColor = sanitizeColor(data.borderColor);
   const filledColor = sanitizeColor(data.filledColor);
   const unfilledColor = sanitizeColor(data.unfilledColor);
-  const items       = safeItems(data.items);
+  // Translate each label keyed by its English default. Labels the user has
+  // customised won't match a key and are passed through unchanged.
+  const items       = safeItems(data.items).map((it) => ({
+    ...it,
+    label: t(it.label, it.label),
+  }));
 
   const gridStyle = { "--cnt-cols": columns } as React.CSSProperties;
 

@@ -42,6 +42,7 @@ export default async function PostPage({ params }: Props) {
 
   const { disabledBlocks, layout } = getSettings();
   const { tablet: tabletBp, mobile: mobileBp } = layout.breakpoints;
+  const renderLocale = getSettings().languages[0] ?? "en";
 
   const blocksForCSS = post.html
     ? buildBlocks(tokenise(post.html), 0).blocks
@@ -100,8 +101,8 @@ export default async function PostPage({ params }: Props) {
       )}
 
       {post.html
-        ? <HTMLRenderer html={post.html} disabledBlocks={disabledBlocks} />
-        : <BlockRenderer blocks={post.blocks} disabledBlocks={disabledBlocks} />
+        ? <HTMLRenderer html={post.html} disabledBlocks={disabledBlocks} locale={renderLocale} />
+        : <BlockRenderer blocks={post.blocks} disabledBlocks={disabledBlocks} locale={renderLocale} />
       }
 
       {tags.length > 0 && (

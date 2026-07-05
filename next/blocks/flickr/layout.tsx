@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { BlockLayoutProps } from "@/lib/block-types";
+import { useBlockT } from "@/components/editor/BlockLocaleContext";
 import type { FlickrPhoto } from "@/app/api/flickr/photos/route";
 
 // Placeholder gradients shown while loading or when API key/user ID not yet set
@@ -26,6 +27,7 @@ const MASONRY_RATIOS = [
 ];
 
 export default function FlickrLayout({ data, blockId }: BlockLayoutProps) {
+  const t = useBlockT("flickr");
   const limit        = Math.max(1, Number(data.limit)   || 12);
   const columns      = Math.max(1, Number(data.columns) || 4);
   const colGap       = data.columnSpacing ? `${data.columnSpacing}px` : "6px";
@@ -207,7 +209,7 @@ export default function FlickrLayout({ data, blockId }: BlockLayoutProps) {
                 borderColor:     loadMoreBtnBgColor || undefined,
               }}
             >
-              {(data.loadMoreText as string) || "Load More"}
+              {t((data.loadMoreText as string) || "Load More", (data.loadMoreText as string) || "Load More")}
             </button>
           )}
 
@@ -228,7 +230,7 @@ export default function FlickrLayout({ data, blockId }: BlockLayoutProps) {
                 <circle cx="7.5"  cy="12" r="5" fill="currentColor" opacity="0.55"/>
                 <circle cx="16.5" cy="12" r="5" fill="currentColor"/>
               </svg>
-              {(data.viewButtonText as string) || "View on Flickr"}
+              {t((data.viewButtonText as string) || "View on Flickr", (data.viewButtonText as string) || "View on Flickr")}
             </a>
           )}
         </div>

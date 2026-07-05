@@ -1,5 +1,6 @@
 import "./styles.css";
 import type { BlockLayoutProps } from "@/lib/block-types";
+import { tBlock } from "@/lib/i18n/block-messages";
 
 /**
  * Only allow http and https image URLs to prevent javascript: / data: injections.
@@ -25,7 +26,7 @@ function alignToClass(align: unknown): string {
   return "";
 }
 
-export default function ImageLayout({ data, blockId }: BlockLayoutProps) {
+export default function ImageLayout({ data, blockId, locale }: BlockLayoutProps) {
   const src = sanitizeImageUrl(data.src);
   const alt = typeof data.alt === "string" ? data.alt : "";
   const caption = typeof data.caption === "string" ? data.caption : "";
@@ -38,7 +39,7 @@ export default function ImageLayout({ data, blockId }: BlockLayoutProps) {
         className={`block-image block-${blockId} w-full`}
       >
         <div className="flex h-40 w-full items-center justify-center rounded-lg bg-zinc-100">
-          <span className="text-sm text-zinc-400">No image</span>
+          <span className="text-sm text-zinc-400">{tBlock("image", locale ?? "en", "layout.noImage", "No image")}</span>
         </div>
       </figure>
     );

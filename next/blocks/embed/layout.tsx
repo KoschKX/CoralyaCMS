@@ -1,5 +1,6 @@
 import "./styles.css";
 import type { BlockLayoutProps } from "@/lib/block-types";
+import { tBlock } from "@/lib/i18n/block-messages";
 
 /**
  * Strip <script> tags (and their content) from raw embed HTML.
@@ -10,7 +11,7 @@ function sanitize(html: string): string {
   return html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script\s*>/gi, "");
 }
 
-export default function EmbedLayout({ data, blockId }: BlockLayoutProps & { blockId?: string }) {
+export default function EmbedLayout({ data, blockId, locale }: BlockLayoutProps & { blockId?: string }) {
   // Support both new `code` field and legacy `embed` URL field
   const raw = String(data.code ?? data.embed ?? "").trim();
 
@@ -26,7 +27,7 @@ export default function EmbedLayout({ data, blockId }: BlockLayoutProps & { bloc
         data-block-id={blockId}
         className="block-embed w-full overflow-hidden rounded-lg bg-zinc-100 flex items-center justify-center"
         style={{ minHeight: "120px" }}
-        aria-label="Empty embed"
+        aria-label={tBlock("embed", locale ?? "en", "empty", "Empty embed")}
       />
     );
   }

@@ -4,6 +4,7 @@ import "./styles.css";
 import { useState, useEffect, useRef } from "react";
 import type React from "react";
 import type { BlockLayoutProps } from "@/lib/block-types";
+import { useBlockT } from "@/components/editor/BlockLocaleContext";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -41,10 +42,10 @@ export function safeItems(raw: unknown): TestimonialItem[] {
 
 // ── Star rating ───────────────────────────────────────────────────────────────
 
-function Stars({ rating }: { rating: number }) {
+function Stars({ rating, t }: { rating: number; t: (key: string, fallback: string) => string }) {
   if (!rating) return null;
   return (
-    <div className="flex gap-0.5" aria-label={`${rating} out of 5 stars`}>
+    <div className="flex gap-0.5" aria-label={`${rating} ${t("aria.outOf5", "out of 5 stars")}`}>
       {Array.from({ length: 5 }).map((_, i) => (
         <svg
           key={i}
@@ -129,7 +130,7 @@ function Byline({ item }: { item: TestimonialItem }) {
 
 // ── Classic card ──────────────────────────────────────────────────────────────
 
-function ClassicCard({ item, speechBubble }: { item: TestimonialItem; speechBubble: boolean }) {
+function ClassicCard({ item, speechBubble, t }: { item: TestimonialItem; speechBubble: boolean; t: (key: string, fallback: string) => string }) {
   const bubbleClass = speechBubble ? "has-bubble" : "no-bubble";
   return (
     <div className={`coralya-testimonial coralya-testimonial--classic ${bubbleClass}`}>
@@ -140,7 +141,7 @@ function ClassicCard({ item, speechBubble }: { item: TestimonialItem; speechBubb
             aria-hidden="true"
           />
         )}
-        {item.rating > 0 && <Stars rating={item.rating} />}
+        {item.rating > 0 && <Stars rating={item.rating} t={t} />}
         <p className="coralya-testimonial__text">{item.quote || "\u00a0"}</p>
       </div>
       <div className="coralya-testimonial__author">
@@ -153,7 +154,7 @@ function ClassicCard({ item, speechBubble }: { item: TestimonialItem; speechBubb
 
 // ── Clean card ────────────────────────────────────────────────────────────────
 
-function CleanCard({ item }: { item: TestimonialItem }) {
+function CleanCard({ item, t }: { item: TestimonialItem; t: (key: string, fallback: string) => string }) {
   const pos = item.avatar !== "none" ? (item.avatarPosition || "above") : "none";
   const cardClass = pos !== "none" ? `avatar-${pos}` : "";
 
@@ -165,7 +166,7 @@ function CleanCard({ item }: { item: TestimonialItem }) {
           aria-hidden="true"
         />
       )}
-      {item.rating > 0 && <Stars rating={item.rating} />}
+      {item.rating > 0 && <Stars rating={item.rating} t={t} />}
       <blockquote className="coralya-testimonial__text" style={{ margin: 0 }}>
         {item.quote || "\u00a0"}
       </blockquote>
@@ -188,6 +189,7 @@ function CleanCard({ item }: { item: TestimonialItem }) {
 // ── Main layout ───────────────────────────────────────────────────────────────
 
 export default function TestimonialsLayout({ data }: BlockLayoutProps) {
+  const t = useBlockT("testimonials");
   const rawItems     = safeItems(data.items);
   const design       = (data.design as string) || "classic";
   const navigation   = data.navigation === true || data.navigation === "yes";
@@ -243,8 +245,8 @@ export default function TestimonialsLayout({ data }: BlockLayoutProps) {
 
   function renderCard(item: TestimonialItem) {
     return design === "clean"
-      ? <CleanCard key={item.id} item={item} />
-      : <ClassicCard key={item.id} item={item} speechBubble={speechBubble} />;
+      ? <CleanCard key={item.id} item={item} t={t} />
+      : <ClassicCard key={item.id} item={item} speechBubble={speechBubble} t={t} />;
   }
 
   if (navigation) {
@@ -261,14 +263,14 @@ export default function TestimonialsLayout({ data }: BlockLayoutProps) {
           ))}
         </div>
         {items.length > 1 && (
-          <div className="coralya-testimonials__nav" role="tablist" aria-label="Testimonial navigation">
+          <div className="coralya-testimonials__nav" role="tablist" aria-label={t("aria.navigation", "Testimonial navigation")}>
             {items.map((item, i) => (
               <button
                 key={item.id}
                 type="button"
                 role="tab"
                 aria-selected={i === active}
-                aria-label={`Testimonial ${i + 1}`}
+                aria-label={t("aria.testimonialN", "Testimonial") + " " + (i + 1)}
                 className={`coralya-testimonials__dot${i === active ? " coralya-testimonials__dot--active" : ""}`}
                 onClick={() => {
                   setActive(i);

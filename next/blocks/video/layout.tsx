@@ -1,6 +1,7 @@
 "use client";
 
 import type { BlockLayoutProps } from "@/lib/block-types";
+import { useBlockT } from "@/components/editor/BlockLocaleContext";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -32,6 +33,7 @@ const ASPECT_PAD: Record<string, string> = {
 // ── Sub-renderers ─────────────────────────────────────────────────────────────
 
 function YoutubeEmbed({ data }: { data: Record<string, unknown> }) {
+  const t    = useBlockT("video");
   const id   = extractYouTubeId(String(data.url ?? ""));
   const pt   = ASPECT_PAD[data.aspectRatio as string] ?? ASPECT_PAD["16:9"];
   const host = data.privacy ? "https://www.youtube-nocookie.com" : "https://www.youtube.com";
@@ -45,9 +47,9 @@ function YoutubeEmbed({ data }: { data: Record<string, unknown> }) {
   if (data.endTime)                params.set("end",   String(data.endTime));
 
   const src   = id ? `${host}/embed/${id}?${params.toString()}` : "";
-  const title = String(data.title || "YouTube video player");
+  const title = String(data.title || t("youtube.title", "YouTube video player"));
 
-  if (!id) return <EmbedPlaceholder label="Enter a YouTube URL in the panel" />;
+  if (!id) return <EmbedPlaceholder label={t("youtube.placeholder", "Enter a YouTube URL in the panel")} />;
   return (
     <div style={{ position: "relative", paddingTop: pt, overflow: "hidden", borderRadius: "0.25rem" }}>
       <iframe
@@ -62,6 +64,7 @@ function YoutubeEmbed({ data }: { data: Record<string, unknown> }) {
 }
 
 function VimeoEmbed({ data }: { data: Record<string, unknown> }) {
+  const t  = useBlockT("video");
   const id = extractVimeoId(String(data.url ?? ""));
   const pt = ASPECT_PAD[data.aspectRatio as string] ?? ASPECT_PAD["16:9"];
 
@@ -72,9 +75,9 @@ function VimeoEmbed({ data }: { data: Record<string, unknown> }) {
   if (data.controls === false) params.set("controls", "0");
 
   const src   = id ? `https://player.vimeo.com/video/${id}?${params.toString()}` : "";
-  const title = String(data.title || "Vimeo video player");
+  const title = String(data.title || t("vimeo.title", "Vimeo video player"));
 
-  if (!id) return <EmbedPlaceholder label="Enter a Vimeo URL in the panel" />;
+  if (!id) return <EmbedPlaceholder label={t("vimeo.placeholder", "Enter a Vimeo URL in the panel")} />;
   return (
     <div style={{ position: "relative", paddingTop: pt, overflow: "hidden", borderRadius: "0.25rem" }}>
       <iframe

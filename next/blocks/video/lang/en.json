@@ -1,0 +1,7 @@
+{
+  "label": "Video",
+  "youtube.title": "YouTube video player",
+  "youtube.placeholder": "Enter a YouTube URL in the panel",
+  "vimeo.title": "Vimeo video player",
+  "vimeo.placeholder": "Enter a Vimeo URL in the panel"
+}

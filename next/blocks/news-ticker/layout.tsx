@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { BlockLayoutProps } from "@/lib/block-types";
+import { useBlockT } from "@/components/editor/BlockLocaleContext";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -47,6 +48,7 @@ function MarqueeTicker({ data, items, cssVars }: {
   const firstSetRef  = useRef<HTMLSpanElement>(null);
   const [setMinWidth, setSetMinWidth] = useState<number | null>(null);
   const [duration,    setDuration]    = useState(20);
+  const t = useBlockT("news-ticker");
 
   useEffect(() => {
     const measure = () => {
@@ -71,7 +73,7 @@ function MarqueeTicker({ data, items, cssVars }: {
         className="awb-ticker-track"
         style={{ animationDuration: `${duration}s` }}
         aria-live="off"
-        aria-label="News ticker"
+        aria-label={t("aria", "News ticker")}
       >
         {/* Two copies for seamless loop; each padded to >= container width */}
         {[0, 1].map((pass) => (

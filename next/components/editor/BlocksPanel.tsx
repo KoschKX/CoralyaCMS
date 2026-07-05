@@ -5,6 +5,8 @@ import { blockRegistry } from "@/blocks/index";
 import { applyBlockPickerBlocks } from "@/filters/block-picker";
 import { BlockEditorContext } from "@/components/editor/BlockEditorContext";
 import { BlockIcon } from "@/components/BlockIcon";
+import { useBlockLocale } from "@/components/editor/BlockLocaleContext";
+import { getBlockLabel } from "@/lib/i18n/block-messages";
 
 // ── Category definitions (Gutenberg-style ordering) ────────────────────────────
 const CATEGORIES: { id: string; label: string; icon: React.ReactNode }[] = [
@@ -78,6 +80,7 @@ interface BlocksPanelProps {
 export function BlocksPanel({ onAdd }: BlocksPanelProps) {
   const ctx = useContext(BlockEditorContext);
   const disabledBlocks = ctx?.disabledBlocks ?? [];
+  const locale = useBlockLocale();
 
   const [search, setSearch] = useState("");
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
@@ -97,10 +100,11 @@ export function BlocksPanel({ onAdd }: BlocksPanelProps) {
     if (!query) return null;
     return visibleBlocks.filter(
       (def) =>
+        getBlockLabel(def, locale).toLowerCase().includes(query) ||
         def.label.toLowerCase().includes(query) ||
         def.name.toLowerCase().includes(query),
     );
-  }, [query, visibleBlocks]);
+  }, [query, visibleBlocks, locale]);
 
   // Group blocks by category
   const grouped = useMemo(() => {
@@ -226,6 +230,8 @@ function BlockTile({
   def: (typeof blockRegistry)[number];
   onAdd: (type: string) => void;
 }) {
+  const locale = useBlockLocale();
+  const label = getBlockLabel(def, locale);
   return (
     <button
       draggable
@@ -235,12 +241,12 @@ function BlockTile({
       }}
       onClick={() => onAdd(def.name)}
       className="flex flex-col items-center gap-1.5 rounded-md p-2 text-center transition hover:bg-zinc-100 focus:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 cursor-grab active:cursor-grabbing"
-      title={`Insert ${def.label}`}
+      title={`Insert ${label}`}
     >
       <span className="flex h-10 w-10 items-center justify-center rounded-md border border-zinc-300 bg-white text-zinc-600">
-        <BlockIcon name={def.name} label={def.label} size={20} />
+        <BlockIcon name={def.name} label={label} size={20} />
       </span>
-      <span className="w-full line-clamp-2 text-[11px] leading-tight text-zinc-700">{def.label}</span>
+      <span className="w-full line-clamp-2 text-[11px] leading-tight text-zinc-700">{label}</span>
     </button>
   );
 }

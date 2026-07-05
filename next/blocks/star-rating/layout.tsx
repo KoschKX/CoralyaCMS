@@ -3,6 +3,7 @@
 import "./styles.css";
 import type { BlockLayoutProps } from "@/lib/block-types";
 import type React from "react";
+import { useBlockT } from "@/components/editor/BlockLocaleContext";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -89,6 +90,7 @@ function Star({ fill, activeColor, inactiveColor, size }: StarProps) {
 // ── Layout ────────────────────────────────────────────────────────────────────
 
 export default function StarRatingLayout({ data }: BlockLayoutProps) {
+  const t = useBlockT("star-rating");
   const rating       = Math.max(0, Number(data.rating) || 0);
   const maxRating    = Math.max(1, Math.min(10, Math.round(Number(data.maxRating) || 5)));
   const hideEmpty    = data.hideEmpty === true;
@@ -124,7 +126,7 @@ export default function StarRatingLayout({ data }: BlockLayoutProps) {
     <div
       className="coralya-star-rating"
       role="img"
-      aria-label={`Rating: ${formatRating(clamped, rounding)} out of ${maxRating}`}
+      aria-label={`${t("aria.ratingPrefix", "Rating")}: ${formatRating(clamped, rounding)} ${t("aria.outOf", "out of")} ${maxRating}`}
       style={{
         display: "flex",
         alignItems: "center",

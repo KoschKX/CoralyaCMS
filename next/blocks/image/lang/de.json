@@ -1,0 +1,23 @@
+{
+  "label": "Bild",
+  "panel.imageSection": "Bild",
+  "panel.urlAria": "Bild-URL",
+  "panel.urlPlaceholder": "https://…",
+  "panel.browseTitle": "Mediathek durchsuchen",
+  "panel.browse": "Durchsuchen",
+  "panel.remove": "Bild entfernen",
+  "panel.altSection": "Alternativtext",
+  "panel.altPlaceholder": "Bild beschreiben…",
+  "panel.captionSection": "Bildunterschrift",
+  "panel.captionPlaceholder": "Optionale Bildunterschrift…",
+  "panel.alignment": "Ausrichtung",
+  "editable.change": "Bild ändern",
+  "editable.add": "Bild hinzufügen",
+  "editable.mediaLibrary": "Mediathek",
+  "editable.enterUrl": "URL eingeben",
+  "editable.enterUrlHeading": "Bild-URL eingeben",
+  "editable.urlExample": "https://example.com/bild.jpg",
+  "editable.urlError": "Nur https:// und http://-URLs sind erlaubt.",
+  "editable.back": "← Zurück",
+  "layout.noImage": "Kein Bild"
+}

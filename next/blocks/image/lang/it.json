@@ -1,0 +1,23 @@
+{
+  "label": "Immagine",
+  "panel.imageSection": "Immagine",
+  "panel.urlAria": "URL immagine",
+  "panel.urlPlaceholder": "https://…",
+  "panel.browseTitle": "Sfoglia la libreria media",
+  "panel.browse": "Sfoglia",
+  "panel.remove": "Rimuovi immagine",
+  "panel.altSection": "Testo alternativo",
+  "panel.altPlaceholder": "Descrivi l'immagine…",
+  "panel.captionSection": "Didascalia",
+  "panel.captionPlaceholder": "Didascalia facoltativa…",
+  "panel.alignment": "Allineamento",
+  "editable.change": "Cambia immagine",
+  "editable.add": "Aggiungi un'immagine",
+  "editable.mediaLibrary": "Libreria media",
+  "editable.enterUrl": "Inserisci URL",
+  "editable.enterUrlHeading": "Inserisci l'URL dell'immagine",
+  "editable.urlExample": "https://example.com/immagine.jpg",
+  "editable.urlError": "Sono consentiti solo URL https:// e http://.",
+  "editable.back": "← Indietro",
+  "layout.noImage": "Nessuna immagine"
+}

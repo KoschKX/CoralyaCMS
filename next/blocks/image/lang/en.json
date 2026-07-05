@@ -1,0 +1,23 @@
+{
+  "label": "Image",
+  "panel.imageSection": "Image",
+  "panel.urlAria": "Image URL",
+  "panel.urlPlaceholder": "https://…",
+  "panel.browseTitle": "Browse media library",
+  "panel.browse": "Browse",
+  "panel.remove": "Remove image",
+  "panel.altSection": "Alt text",
+  "panel.altPlaceholder": "Describe the image…",
+  "panel.captionSection": "Caption",
+  "panel.captionPlaceholder": "Optional caption…",
+  "panel.alignment": "Alignment",
+  "editable.change": "Change image",
+  "editable.add": "Add an image",
+  "editable.mediaLibrary": "Media Library",
+  "editable.enterUrl": "Enter URL",
+  "editable.enterUrlHeading": "Enter image URL",
+  "editable.urlExample": "https://example.com/image.jpg",
+  "editable.urlError": "Only https:// and http:// URLs are allowed.",
+  "editable.back": "← Back",
+  "layout.noImage": "No image"
+}

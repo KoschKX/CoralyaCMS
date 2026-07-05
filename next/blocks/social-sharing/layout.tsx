@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import type { BlockLayoutProps } from "@/lib/block-types";
+import { useBlockT } from "@/components/editor/BlockLocaleContext";
 import { NETWORK_META } from "./icons";
 import type { NetworkKey, CustomNetworkDef } from "./icons";
 import "./styles.css";
@@ -212,6 +213,7 @@ function CustomShareButton({
   iconColor: string;
   boxColor: string;
 }) {
+  const t = useBlockT("social-sharing");
   const resolvedIconColor =
     colorType === "brand"
       ? iconsBoxed
@@ -253,7 +255,7 @@ function CustomShareButton({
       className={`sshare-icon${iconsBoxed ? " sshare-icon--boxed" : ""}`}
       style={buttonStyle}
       title={custom.label}
-      aria-label={`Share on ${custom.label}`}
+      aria-label={t("aria.shareOn", "Share on") + " " + custom.label}
     >
       <CustomIcon
         custom={custom}
@@ -296,9 +298,11 @@ function ShareButton({
   onCopyLink: () => void;
   copied: boolean;
 }) {
+  const t = useBlockT("social-sharing");
   const meta = NETWORK_META[network];
   const isCopyLink = network === "copy_link";
   const isEmail = network === "email";
+  const title = isCopyLink && copied ? t("copied", "Copied!") : meta.label;
 
   const resolvedIconColor =
     colorType === "brand"
@@ -328,8 +332,6 @@ function ShareButton({
     }
   }
 
-  const title = isCopyLink && copied ? "Copied!" : meta.label;
-
   if (isCopyLink) {
     return (
       <button
@@ -357,7 +359,7 @@ function ShareButton({
       className={`sshare-icon${iconsBoxed ? " sshare-icon--boxed" : ""}`}
       style={buttonStyle}
       title={meta.label}
-      aria-label={`Share on ${meta.label}`}
+      aria-label={t("aria.shareOn", "Share on") + " " + meta.label}
     >
       <NetworkIcon network={network} size={iconSize} />
     </a>
@@ -370,7 +372,8 @@ export default function SocialSharingLayout({
   data,
   blockId,
 }: BlockLayoutProps) {
-  const tagline = (data.tagline as string) || "";
+  const t = useBlockT("social-sharing");
+  const tagline = t((data.tagline as string) || "Share this:", (data.tagline as string) || "Share this:");
   const taglineTag = (["h1","h2","h3","h4","h5","h6"] as const).includes(
     data.taglineTag as never,
   )

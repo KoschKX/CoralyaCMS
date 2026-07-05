@@ -1,0 +1,6 @@
+{
+  "label": "Audio",
+  "placeholder.hosted": "Add an audio file URL in the panel",
+  "placeholder.soundcloud": "Enter a SoundCloud URL in the panel",
+  "player.title": "SoundCloud player"
+}

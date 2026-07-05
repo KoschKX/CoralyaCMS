@@ -4,6 +4,7 @@ import type React from "react";
 import { useState, useEffect, useRef } from "react";
 import "./styles.css";
 import type { BlockLayoutProps } from "@/lib/block-types";
+import { useBlockT } from "@/components/editor/BlockLocaleContext";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -88,6 +89,7 @@ function DigitBox({
 // ── Layout ────────────────────────────────────────────────────────────────────
 
 export default function CountdownLayout({ data }: BlockLayoutProps) {
+  const t = useBlockT("countdown");
   const targetDate    = parseTarget(data.targetDate);
   const showWeeks     = Boolean(data.showWeeks);
   const labelPosition = ((data.labelPosition as string) || "below") as "above" | "below";
@@ -97,7 +99,7 @@ export default function CountdownLayout({ data }: BlockLayoutProps) {
   const linkText      = (data.linkText   as string) || "";
   const linkUrl       = (data.linkUrl    as string) || "";
   const linkTarget    = (data.linkTarget as string) || "_self";
-  const expiredText   = (data.expiredText as string) || "Event has ended";
+  const expiredText   = (data.expiredText as string) || t("expired", "Event has ended");
 
   // null = not yet hydrated (avoid SSR / client mismatch for a real-time value)
   const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
@@ -142,11 +144,11 @@ export default function CountdownLayout({ data }: BlockLayoutProps) {
 
   // Units to display
   const units: { value: number; label: string }[] = [
-    ...(showWeeks ? [{ value: timeLeft?.weeks ?? 0, label: "Weeks" }] : []),
-    { value: timeLeft?.days    ?? 0, label: showWeeks ? "Days"  : "Days"    },
-    { value: timeLeft?.hours   ?? 0, label: "Hours"   },
-    { value: timeLeft?.minutes ?? 0, label: "Minutes" },
-    { value: timeLeft?.seconds ?? 0, label: "Seconds" },
+    ...(showWeeks ? [{ value: timeLeft?.weeks ?? 0, label: t("unit.weeks", "Weeks") }] : []),
+    { value: timeLeft?.days    ?? 0, label: t("unit.days", "Days") },
+    { value: timeLeft?.hours   ?? 0, label: t("unit.hours", "Hours") },
+    { value: timeLeft?.minutes ?? 0, label: t("unit.minutes", "Minutes") },
+    { value: timeLeft?.seconds ?? 0, label: t("unit.seconds", "Seconds") },
   ];
 
   const alignClass =

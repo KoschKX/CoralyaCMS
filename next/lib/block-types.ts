@@ -10,6 +10,12 @@ export interface BlockLayoutProps {
   renderBlocks?: (blocks: EditorBlock[]) => ReactNode;
   /** Unique block id for responsive and targeting */
   blockId: string;
+  /**
+   * Active locale for fixed text a block renders in its output. Client-side
+   * layouts can instead read it via the `useBlockT` hook; server-component
+   * layouts (which cannot use hooks) receive it through this prop.
+   */
+  locale?: string;
 }
 
 export interface PanelControlProps {

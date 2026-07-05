@@ -5,6 +5,8 @@ import { blockRegistry } from "@/blocks/index";
 import { applyBlockPickerBlocks } from "@/filters/block-picker";
 import { BlockEditorContext } from "@/components/editor/BlockEditorContext";
 import { BlockIcon } from "@/components/BlockIcon";
+import { useBlockLocale } from "@/components/editor/BlockLocaleContext";
+import { getBlockLabel } from "@/lib/i18n/block-messages";
 
 // ── Category order (matches BlocksPanel) ───────────────────────────────────────
 const CATEGORIES = [
@@ -24,6 +26,7 @@ export function BlockPicker({
 }) {
   const ctx = useContext(BlockEditorContext);
   const disabledBlocks = ctx?.disabledBlocks ?? [];
+  const locale = useBlockLocale();
   const filtered = applyBlockPickerBlocks(blockRegistry);
   const allBlocks = disabledBlocks.length
     ? filtered.filter((def) => !disabledBlocks.includes(def.name))
@@ -57,8 +60,8 @@ export function BlockPicker({
   const visibleBlocks = useMemo(() => {
     if (!search.trim()) return allBlocks;
     const q = search.toLowerCase();
-    return allBlocks.filter((d) => d.label.toLowerCase().includes(q) || d.name.toLowerCase().includes(q));
-  }, [search, allBlocks]);
+    return allBlocks.filter((d) => getBlockLabel(d, locale).toLowerCase().includes(q) || d.label.toLowerCase().includes(q) || d.name.toLowerCase().includes(q));
+  }, [search, allBlocks, locale]);
 
   // Group by category — only computed when not searching (groups are hidden during search)
   const groups = useMemo(() => {
@@ -154,15 +157,17 @@ export function BlockPicker({
 }
 
 function BlockTile({ def, onSelect }: { def: { name: string; label: string }; onSelect: (type: string) => void }) {
+  const locale = useBlockLocale();
+  const label = getBlockLabel(def, locale);
   return (
     <button
       onClick={() => onSelect(def.name)}
       className="flex flex-col items-center gap-1.5 rounded-md p-2 text-center transition hover:bg-zinc-100 focus:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
     >
       <span className="flex h-10 w-10 items-center justify-center rounded-md border border-zinc-300 bg-white text-zinc-600">
-        <BlockIcon name={def.name} label={def.label} size={20} />
+        <BlockIcon name={def.name} label={label} size={20} />
       </span>
-      <span className="w-full line-clamp-2 text-[11px] leading-tight text-zinc-700">{def.label}</span>
+      <span className="w-full line-clamp-2 text-[11px] leading-tight text-zinc-700">{label}</span>
     </button>
   );
 }
